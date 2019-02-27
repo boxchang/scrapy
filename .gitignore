@@ -1,0 +1,17 @@
+.gitignore_dir
+.idea
+.idea/*
+*.py[co]
+__pycache__
+*__pycache__
+*.sqlite3
+**/migrations/*
+!**/migrations/__init__.py
+*venv
+**/uploads/*
+*set*.bat
+test-ray.py
+migrations
+migrations/*
+*.log
+config.py
