@@ -20,6 +20,9 @@ class Web104(scrapy.Spider):
     allowed_domain = ['www.104.com.tw']
     batchNo = time.strftime("%Y%m%d%H%M%S", time.localtime())
 
+    db = database()
+    conn = db.create_connection()
+
     # 2007000000  資訊軟體系統類    6002000000  大陸地區
     # 2001000000  經營/人資類
     # 2001002000  人力資源類人員
@@ -114,10 +117,7 @@ class Web104(scrapy.Spider):
         # db = database()
         # conn = db.create_sqlite_connection(file)
 
-        db = database()
-        conn = db.create_connection()
-
-        self.cur = conn.cursor()
+        self.cur = self.conn.cursor()
         self.cur.execute("SELECT * FROM web104 where jobNo = '" + jobNo + "'")
 
         rows = self.cur.fetchall()
