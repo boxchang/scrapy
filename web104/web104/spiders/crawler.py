@@ -64,8 +64,8 @@ class Web104(scrapy.Spider):
             item['jobAddrNoDesc'] = job['jobAddrNoDesc']
             item['jobLink'] = job['link']['job'][2:]
             job_url = 'http://'+job['link']['job'][2:]
-            print(job_url)
-            logging.info('job_url:'+job_url)
+            # print(job_url)
+            # logging.info('job_url:'+job_url)
 
             if self.validate(item['jobNo']):
                 yield scrapy.Request(job_url, meta={'item': item}, callback=self.parse_detail)
