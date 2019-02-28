@@ -28,8 +28,8 @@ class Web104(scrapy.Spider):
     # 2001002000  人力資源類人員
 
     start_urls = [
-        'https://www.104.com.tw/jobs/search/list?ro=0&jobcat=2007000000&isnew=3&area=6003000000%2C6002000000&order=11&asc=0&sctp=M&scmin=50000&scstrict=1&scneg=0&page=1&mode=s&jobsource=2018indexpoc',
-        'https://www.104.com.tw/jobs/search/list?ro=0&jobcat=2007000000&isnew=3&area=6001016000%2C6001002000%2C6001001000%2C6001008000%2C6001006000&order=11&asc=0&sctp=M&scmin=50000&scstrict=1&scneg=0&page=1&mode=s&jobsource=2018indexpoc',
+        'https://www.104.com.tw/jobs/search/list?ro=0&jobcat=2007000000&isnew=0&area=6003000000%2C6002000000&order=11&asc=0&sctp=M&scmin=50000&scstrict=1&scneg=0&page=1&mode=s&jobsource=2018indexpoc',
+        'https://www.104.com.tw/jobs/search/list?ro=0&jobcat=2007000000&isnew=0&area=6001016000%2C6001002000%2C6001001000%2C6001008000%2C6001006000&order=11&asc=0&sctp=M&scmin=50000&scstrict=1&scneg=0&page=1&mode=s&jobsource=2018indexpoc',
     ]
     # start_urls = [
     #     'https://www.104.com.tw']
