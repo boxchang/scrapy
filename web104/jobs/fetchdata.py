@@ -65,23 +65,17 @@ def main():
     # create a database connection
     db = database()
     conn = db.create_connection()
-    with conn:
-        # print("1. Query task by priority:")
-        # select_task_by_priority(conn, 1)
-        #
-        # print("2. Query all tasks")
-        # select_all_tasks(conn)
 
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM web104 where is_read is null ")
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM web104 where is_read is null ")
 
-        rows = cur.fetchall()
+    rows = cur.fetchall()
 
-        for row in rows:
-            job = JobModel(row)
-            if job.validate():
-                message = job.custName + ' --- '+ job.jobName + '\n\r' + job.addr + '\n\r' + job.jobLink
-                callBoxLine(message)
+    for row in rows:
+        job = JobModel(row)
+        if job.validate():
+            message = job.custName + ' --- '+ job.jobName + '\n\r' + job.addr + '\n\r' + job.jobLink
+            callBoxLine(message)
 
 
         cur.execute("UPDATE web104 SET is_read = 'Y' where is_read is null ")
