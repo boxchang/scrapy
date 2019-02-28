@@ -62,7 +62,7 @@ DOWNLOAD_DELAY = 5
 #    'scrapy.extensions.telnet.TelnetConsole': None,
 #}
 
-LOG_FILE = 'web104_CrawlSpiders.log'
+LOG_FILE = 'logs/web104_CrawlSpiders.log'
 LOG_LEVEL = 'INFO'
 
 

@@ -33,9 +33,9 @@ class Web104Pipeline(object):
 
     def process_item(self, item, spider):
         col = ','.join(item.keys())
-        #placeholders = ','.join(len(item) * '?')
+        # placeholders = ','.join(len(item) * '?')
         placeholders = ("%s," * len(item))[:-1]
         sql = 'insert into web104({}) values({})'
-        print(sql.format(col, placeholders), tuple(item.values()))
+        # print(sql.format(col, placeholders), tuple(item.values()))
         self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
         return item

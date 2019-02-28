@@ -41,6 +41,7 @@ class Web104(scrapy.Spider):
     # 使用了rules，這段就省略了
     def start_requests(self):
         for url in self.start_urls:
+            page = 1 # 變數初始化
             res = requests.get(url)
             data = res.json()
             totalPage = data['data']['totalPage']  # 取得總分頁數量
@@ -66,12 +67,9 @@ class Web104(scrapy.Spider):
             print(job_url)
             logging.info('job_url:'+job_url)
 
-            # if self.validate(item['jobNo']):
-            #     yield scrapy.Request(job_url, meta={'item': item}, callback=self.parse_detail)
+            if self.validate(item['jobNo']):
+                yield scrapy.Request(job_url, meta={'item': item}, callback=self.parse_detail)
 
-            yield scrapy.Request(job_url, meta={'item': item}, callback=self.parse_detail)
-            #items.append(item)
-         #return items
 
     def parse_detail(self, response):
         item = response.meta['item']
@@ -119,7 +117,7 @@ class Web104(scrapy.Spider):
 
             with conn:
                 self.cur = conn.cursor()
-                self.cur.execute("SELECT * FROM web104 where jobNo = '"+jobNo+"'")
+                self.cur.execute("SELECT * FROM web104 where jobNo = '" + jobNo + "'")
 
                 rows = self.cur.fetchall()
 
