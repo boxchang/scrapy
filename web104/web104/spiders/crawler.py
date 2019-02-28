@@ -52,10 +52,10 @@ class Web104(scrapy.Spider):
             # 取得每個分頁內容
             if totalPage > 1:
                 for page in range(1, int(totalPage)+1):
-                    url = url.replace('page=1', 'page='+str(page))
-                    yield scrapy.Request(url, callback=self.parse, dont_filter=False)
+                    tmp_url = url.replace('page=1', 'page='+str(page))
+                    yield scrapy.Request(tmp_url, callback=self.parse, dont_filter=False)
             else:
-                yield scrapy.Request(url, callback=self.parse, dont_filter=False)
+                yield scrapy.Request(tmp_url, callback=self.parse, dont_filter=False)
 
     def parse(self, response):
         jobs = json.loads(response.body_as_unicode())
