@@ -25,7 +25,8 @@ class Web104(scrapy.Spider):
     # 2001002000  人力資源類人員
 
     start_urls = [
-        'https://www.104.com.tw/jobs/search/list?ro=0&jobcat=2007000000&isnew=3&area=6002000000&order=1&asc=0&page=1&mode=s&jobsource=2018indexpoc',
+        'https://www.104.com.tw/jobs/search/list?ro=0&jobcat=2007000000&area=6003000000%2C6002000000&order=11&asc=0&page=1&mode=s&jobsource=2018indexpoc&isnew=3&sctp=M&scmin=50000&scstrict=1&scneg=0',
+        'https://www.104.com.tw/jobs/search/list?ro=0&jobcat=2007000000&area=6001016000%2C6001018000%2C6001011000%2C6001012000%2C6001016000&order=11&asc=0&page=1&mode=s&jobsource=2018indexpoc&isnew=3&sctp=M&scmin=50000&scstrict=1&scneg=0',
     ]
     # start_urls = [
     #     'https://www.104.com.tw']
@@ -91,6 +92,10 @@ class Web104(scrapy.Spider):
         # 其他
         tag = res.select('.content')[1].select('dd')[7]
         item['other'] = tag.text
+
+        # 福利
+        tag = res.select('.content')[2]
+        item['benefit'] = tag.text
 
         # 更新日期
         tag = res.select('time')[0]

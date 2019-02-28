@@ -17,7 +17,7 @@ class Web104Pipeline(object):
         self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
         self.cur.execute('create table if not exists web104(custName varchar(100), jobNo varchar(50), '
                          'jobName varchar(100), description text, history varchar(100), tool text, other text, '
-                         'jobAddrNoDesc varchar(50), addr text,update_date varchar(50), jobLink varchar(100), '
+                         'jobAddrNoDesc varchar(50), benefit text, addr text,update_date varchar(50), jobLink varchar(100), '
                          'is_read varchar(1), ts TimeStamp DEFAULT CURRENT_TIMESTAMP, batchNo varchar(14))')
 
         # self.conn = sqlite3.connect('web104.sqlite')

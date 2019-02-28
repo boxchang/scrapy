@@ -18,6 +18,7 @@ class Web104Item(scrapy.Item):
     other = scrapy.Field()
     jobAddrNoDesc = scrapy.Field()
     addr = scrapy.Field()
+    benefit = scrapy.Field()
     update_date = scrapy.Field()
     jobLink = scrapy.Field()
     batchNo = scrapy.Field()
