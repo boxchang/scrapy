@@ -1,3 +1,4 @@
+# coding: utf-8
 class ModelFilter:
     keywords = ('big data', 'TOEIC', 'IELTS', 'MES', 'Kubenetes', 'Django') # 關鍵字
     companies = ('Tata',)
