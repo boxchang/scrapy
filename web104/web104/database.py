@@ -2,7 +2,7 @@ import sqlite3
 from sqlite3 import Error
 import MySQLdb
 
-from web104.config import DATABASE_PORT, DATABASE_PASSWD, DATABASE_HOST, DATABASE_USER, DATABASE_DB
+#from web104.config import DATABASE_PORT, DATABASE_PASSWD, DATABASE_HOST, DATABASE_USER, DATABASE_DB
 
 
 class database:
@@ -25,11 +25,11 @@ class database:
 
     def create_connection(self):
         try:
-            conn = MySQLdb.connect(host=DATABASE_HOST,  # your host, usually localhost
-                                   user=DATABASE_USER,  # your username
-                                   passwd=DATABASE_PASSWD,  # your password
-                                   db=DATABASE_DB,
-                                   port=DATABASE_PORT, use_unicode=True, charset="utf8")  # name of the data base
+            conn = MySQLdb.connect(host="111.185.227.34",  # your host, usually localhost
+                                   user="web104",  # your username
+                                   passwd="123456",  # your password
+                                   db="web104",
+                                   port=3307, use_unicode=True, charset="utf8")  # name of the data base
 
             return conn
         except Error as e:
