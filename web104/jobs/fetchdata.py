@@ -1,5 +1,6 @@
 #!/usr/bin/python
-
+import sys
+sys.path.append("..")
 import sqlite3
 from sqlite3 import Error
 
