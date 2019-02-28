@@ -117,16 +117,15 @@ class Web104(scrapy.Spider):
         db = database()
         conn = db.create_connection()
 
-        with conn:
-            self.cur = conn.cursor()
-            self.cur.execute("SELECT * FROM web104 where jobNo = '" + jobNo + "'")
+        self.cur = conn.cursor()
+        self.cur.execute("SELECT * FROM web104 where jobNo = '" + jobNo + "'")
 
-            rows = self.cur.fetchall()
+        rows = self.cur.fetchall()
 
-            if len(rows) > 0:
-                return False
-            else:
-                return True
+        if len(rows) > 0:
+            return False
+        else:
+            return True
 
 
 
