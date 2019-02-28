@@ -79,8 +79,8 @@ def main():
         for row in rows:
             job = JobModel(row)
             if job.validate():
-                message = job.custName + '  --- '+ job.jobName + '\n\r' + job.jobLink
-                #callBoxLine(message)
+                message = job.custName + ' --- '+ job.jobName + '\n\r' + job.addr + '\n\r' + job.jobLink
+                callBoxLine(message)
 
 
         cur.execute("UPDATE web104 SET is_read = 'Y' where is_read is null ")
