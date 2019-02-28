@@ -47,8 +47,11 @@ class Web104(scrapy.Spider):
             totalPage = data['data']['totalPage']  # 取得總分頁數量
 
             # 取得每個分頁內容
-            for page in range(1, int(totalPage)):
-                url = url.replace('page=1', 'page='+str(page))
+            if totalPage > 1:
+                for page in range(1, int(totalPage)):
+                    url = url.replace('page=1', 'page='+str(page))
+                    yield scrapy.Request(url, callback=self.parse, dont_filter=False)
+            else:
                 yield scrapy.Request(url, callback=self.parse, dont_filter=False)
 
     def parse(self, response):
