@@ -109,26 +109,24 @@ class Web104(scrapy.Spider):
 
 
     def validate(self, jobNo):
-        try:
-            # file = "D:\\0)SourceCode\\scrapy\\web104\\web104.sqlite"
-            # # create a database connection
-            # db = database()
-            # conn = db.create_sqlite_connection(file)
+        # file = "D:\\0)SourceCode\\scrapy\\web104\\web104.sqlite"
+        # # create a database connection
+        # db = database()
+        # conn = db.create_sqlite_connection(file)
 
-            db = database()
-            conn = db.create_connection()
+        db = database()
+        conn = db.create_connection()
 
-            with conn:
-                self.cur = conn.cursor()
-                self.cur.execute("SELECT * FROM web104 where jobNo = '" + jobNo + "'")
+        with conn:
+            self.cur = conn.cursor()
+            self.cur.execute("SELECT * FROM web104 where jobNo = '" + jobNo + "'")
 
-                rows = self.cur.fetchall()
+            rows = self.cur.fetchall()
 
-                if len(rows) > 0:
-                    return False
-                else:
-                    return True
-        except:
-            print("DB error")
+            if len(rows) > 0:
+                return False
+            else:
+                return True
+
 
 
