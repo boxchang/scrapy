@@ -78,7 +78,7 @@ def main():
             callBoxLine(message)
 
 
-        cur.execute("UPDATE web104 SET is_read = 'Y' where is_read is null ")
+        cur.execute("UPDATE web104 SET is_read = 'Y' where is_read is null or is_read='' ")
 
 if __name__ == '__main__':
     main()
