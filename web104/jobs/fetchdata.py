@@ -67,7 +67,7 @@ def main():
     conn = db.create_connection()
 
     cur = conn.cursor()
-    cur.execute("SELECT * FROM web104 where is_read is null ")
+    cur.execute("SELECT * FROM web104 where is_read is null or is_read='' ")
 
     rows = cur.fetchall()
 
