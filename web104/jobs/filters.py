@@ -3,6 +3,7 @@ class ModelFilter:
     keywords = ('big data', 'TOEIC', 'IELTS', 'MES', 'Kubenetes', 'Django') # 關鍵字
     companies = ('Tata',)
     years = 0 # 年資
+    excludes = ('Contract',)
 
     def data_filter(self, data):
         result = False
@@ -18,5 +19,10 @@ class ModelFilter:
         for company in self.companies:
             if str(data.custName).upper().__contains__(company.upper()):
                 result = True
+
+        # 排除法
+        for exclude in self.excludes:
+            if str(data.custName).upper().__contains__(exclude.upper()):
+                result = False
 
         return result
