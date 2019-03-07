@@ -55,6 +55,7 @@ class Web104(scrapy.Spider):
                     tmp_url = url.replace('page=1', 'page='+str(page))
                     yield scrapy.Request(tmp_url, callback=self.parse, dont_filter=False)
             else:
+                tmp_url = url.replace('page=1', 'page=' + str(page))
                 yield scrapy.Request(tmp_url, callback=self.parse, dont_filter=False)
 
     def parse(self, response):
