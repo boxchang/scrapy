@@ -75,10 +75,13 @@ def main():
         job = JobModel(row)
         if job.validate():
             message = job.custName + ' --- '+ job.jobName + '\n\r' + job.addr + '\n\r' + job.jobLink
-            callBoxLine(message)
+            #callBoxLine(message)
 
-
-        cur.execute("UPDATE web104 SET is_read = 'Y' where is_read is null or is_read='' ")
+    try:
+        cur.execute("UPDATE web104 SET is_read = 'Y' where is_read is null or is_read=''")
+        conn.commit()
+    except Exception as e:
+        print(e)
 
 if __name__ == '__main__':
     main()
