@@ -3,7 +3,7 @@
 
 cd /src/scrapy/stock
 
-scrapy crawl stock
+scrapy crawl holder
 
 cd /src/scrapy/stock/stock
 
