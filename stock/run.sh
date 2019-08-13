@@ -5,7 +5,7 @@ cd /src/scrapy/stock
 
 scrapy crawl holder
 
-cd /src/scrapy/stock/stock
+cd /src/scrapy/stock/jobs
 
 python policy.py
 
