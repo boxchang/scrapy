@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*
-
+#!/usr/bin/python
+import sys
+sys.path.append("..")
 
 # 檢查例如狀況
 # select stock_no ,count(*) from stockholder group by stock_no having count(*) <> 17
