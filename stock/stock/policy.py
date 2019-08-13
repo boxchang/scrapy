@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*
-from stock.database import database
 
 
 # 檢查例如狀況
 # select stock_no ,count(*) from stockholder group by stock_no having count(*) <> 17
+from stock.database import database
+
 
 class Policy(object):
     CREATE_LIST_TABLE = ('create table if not exists {}(owner varchar(10), stock_no varchar(10), '
