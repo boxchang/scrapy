@@ -41,7 +41,7 @@ class Robert(Policy):
     }
 
     def execute(self):
-        super().open_conn()
+        super(Robert, self).open_conn()
 
         self.cur = self.conn.cursor()
         self.cur.execute("SELECT data_date FROM stockholder limit 1")
@@ -88,13 +88,13 @@ class Robert(Policy):
             db.execute_sql(insert_sql)
 
     def create_list_table(self):
-        sql = super().CREATE_LIST_TABLE
+        sql = super(Robert, self).CREATE_LIST_TABLE
         sql = sql.format(self.CONFIG['stock_table'])
         db = database()
         db.execute_sql(sql)
 
     def create_sum_table(self):
-        sql = super().CREATE_SUM_TABLE
+        sql = super(Robert, self).CREATE_SUM_TABLE
         db = database()
         db.execute_sql(sql)
 
