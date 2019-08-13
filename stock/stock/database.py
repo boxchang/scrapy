@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*
 import sqlite3
 from sqlite3 import Error
 import MySQLdb
