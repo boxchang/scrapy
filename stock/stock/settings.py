@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'stock.spiders'
 #USER_AGENT = 'stock (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -66,7 +66,11 @@ ROBOTSTXT_OBEY = True
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'stock.pipelines.StockPipeline': 300,
+   'stock.pipelines.PricePipeline': 200,
 }
+# ITEM_PIPELINES = {
+#    'stock.pipelines.StockPipeline': 300,
+# }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
