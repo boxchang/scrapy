@@ -30,13 +30,14 @@ class PricePipeline(object):
 
 
     def process_item(self, item, spider):
-        col = ','.join(item.keys())
-        # placeholders = ','.join(len(item) * '?')
-        placeholders = ("%s," * len(item))[:-1]
-        sql = 'insert into stockprice({}) values({})'
-        print(sql.format(col, placeholders), tuple(item.values()))
-        self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
-        return item
+        if spider.name == 'price':
+            col = ','.join(item.keys())
+            # placeholders = ','.join(len(item) * '?')
+            placeholders = ("%s," * len(item))[:-1]
+            sql = 'insert into stockprice({}) values({})'
+            print(sql.format(col, placeholders), tuple(item.values()))
+            self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
+            return item
 
 
 class StockPipeline(object):
@@ -59,10 +60,11 @@ class StockPipeline(object):
 
 
     def process_item(self, item, spider):
-        col = ','.join(item.keys())
-        # placeholders = ','.join(len(item) * '?')
-        placeholders = ("%s," * len(item))[:-1]
-        sql = 'insert into stockholder({}) values({})'
-        print(sql.format(col, placeholders), tuple(item.values()))
-        self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
-        return item
+        if spider.name == 'holder':
+            col = ','.join(item.keys())
+            # placeholders = ','.join(len(item) * '?')
+            placeholders = ("%s," * len(item))[:-1]
+            sql = 'insert into stockholder({}) values({})'
+            print(sql.format(col, placeholders), tuple(item.values()))
+            self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
+            return item
