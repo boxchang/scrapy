@@ -2,14 +2,12 @@
 #!/usr/bin/python
 import sys
 
-from stock.line import lineNotifyMessage
-
 sys.path.append("..")
 
 # 檢查例如狀況
 # select stock_no ,count(*) from stockholder group by stock_no having count(*) <> 17
 from stock.database import database
-
+from stock.line import lineNotifyMessage
 
 class Public(object):
     CREATE_HOLDERDATE_TABLE = ('create table if not exists stockholder_date(data_date varchar(10), flag varchar(1), '
