@@ -102,6 +102,7 @@ class Public(object):
         sql = self.CREATE_SUM_TABLE
         db = database()
         db.execute_sql(sql)
+        print(sql)
 
     # 將Holder Date資料塞到stockerholder_date
     def save_stockholder_date(self, data_date):
@@ -140,7 +141,7 @@ class Public(object):
     
     def validate(self, data_date):
         self.cur = self.conn.cursor()
-        sql = "SELECT * FROM stockholder_sum where data_date = str_to_date('{data_date}', '%Y-%m-%d') "
+        sql = "SELECT * FROM stockholder_sum where data_date = '{data_date}' "
         sql = sql.format(data_date = data_date)
         self.cur.execute(sql)
 
