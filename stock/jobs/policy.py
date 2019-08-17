@@ -18,7 +18,7 @@ class Public(object):
                          'stock_num bigint, holder_num bigint, created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
     CREATE_SUM_COUNT_TABLE = (
         'create table if not exists stockholder_sum_count(stock_no varchar(10), increase int DEFAULT 0, decrease int DEFAULT 0, '
-        ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP), updated_date TimeStamp ')
+        ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp) ')
 
     def execute(self):
         self.open_conn()
@@ -58,17 +58,21 @@ class Public(object):
 
         current_date = data_date  # 本次日期
 
+        self.conn = db.create_connection()
+        self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
+
         sql = "select * from stockholder_date where data_date < '{data_date}' order by data_date desc limit 1"
         sql = sql.format(data_date = data_date)
         self.cur.execute(sql)
         rows = self.cur.fetchall()
         if rows:
             last_date = rows[0][0]  # 上次日期
-            sql = "select c.stock_no,c.percent current,l.percent last from " \
+            sql = "select c.stock_no,c.percent co,l.percent lo from " \
                   " (select * from stockholder_sum where data_date = '{current_date}') c, " \
                   " (select * from stockholder_sum where data_date = '{last_date}') l, " \
                   " stockprice s where c.stock_no = l.stock_no and c.stock_no = s.stock_no"
             sql = sql.format(current_date=current_date, last_date=last_date)
+
             self.cur.execute(sql)
 
             rows = self.cur.fetchall()
@@ -167,7 +171,7 @@ class Robert(Public):
         self.conn = db.create_connection()
         sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,c.stock_eprice from robert_stock_list a, stockholder_sum_count b, stockprice c " \
               "where a.stock_no = c.stock_no and a.stock_no = b.stock_no " \
-              " and (increase > 3 or decrease > 3) "
+              " and (increase > 2 or decrease > 2) "
 
         self.cur = self.conn.cursor()
         self.cur.execute(sql)
