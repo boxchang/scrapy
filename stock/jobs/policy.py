@@ -32,9 +32,9 @@ class Public(object):
             self.create_stockholderdate_table()
 
             if self.validate(data_date):  # JOB每天都會跑，但只有讀到新資料時才會寫入
-                self.stockholder_sum(data_date)
-                self.save_stockholder_date(data_date)
-                self.stockholder_sum_count(data_date)
+                self.stockholder_sum(data_date)  #  進行400張以上的大戶比例統計，抓到另一張表
+                self.save_stockholder_date(data_date)  #  加入本次統計的日期
+                self.stockholder_sum_count(data_date)  #  進行比對，把上次大戶的比例跟這次比例相比，將結果計算在另一張表
 
 
 
