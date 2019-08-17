@@ -31,10 +31,10 @@ class Public(object):
             self.create_sum_table()
             self.create_stockholderdate_table()
 
-            self.stockholder_sum_count(data_date)
             if self.validate(data_date):  # JOB每天都會跑，但只有讀到新資料時才會寫入
                 self.stockholder_sum(data_date)
                 self.save_stockholder_date(data_date)
+                self.stockholder_sum_count(data_date)
 
 
 
