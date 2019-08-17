@@ -21,8 +21,7 @@ class PricePipeline(object):
                          ' stock_lprice int, stock_eprice int, stock_status varchar(10), stock_gap int, '
                          ' stock_last_buy int, stock_last_bnum bigint, stock_last_sell int, stock_last_snum bigint, stock_value int,'
                          'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
-        self.cur.execute('delete from stockprice')
-        self.conn.commit()
+
 
     def close_spider(self, spider):
         self.conn.commit()

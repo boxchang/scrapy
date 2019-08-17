@@ -9,6 +9,13 @@ from stock.items import StockItem
 
 class Holder(scrapy.Spider):
     name = 'holder'
+
+    custom_settings = {
+        'ITEM_PIPELINES': {
+            'stock.pipelines.StockPipeline': 200
+        }
+    }
+
     start_urls = ['https://smart.tdcc.com.tw/opendata/getOD.ashx?id=1-5']
     # def start_requests(self):
     #     pass
@@ -17,7 +24,8 @@ class Holder(scrapy.Spider):
 
     def copy2Hist(self):
         db = database()
-        sql = "insert into stockholder_hist (select * from stockholder)"
+        sql = "insert into stockholder_hist " \
+              " (select * from stockholder a where not exists (select * from stockholder_hist b where a.stock_no = b.stock_no and a.created_date = b.created_date))"
         db.execute_sql(sql)
 
     def clearTable(self):

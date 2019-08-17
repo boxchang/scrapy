@@ -18,23 +18,24 @@ class Public(object):
                          'stock_num bigint, holder_num bigint, created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
     CREATE_SUM_COUNT_TABLE = (
         'create table if not exists stockholder_sum_count(stock_no varchar(10), increase int DEFAULT 0, decrease int DEFAULT 0, '
-        ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
+        ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP), updated_date TimeStamp ')
 
     def execute(self):
         self.open_conn()
 
         self.cur = self.conn.cursor()
         self.cur.execute("SELECT data_date FROM stockholder limit 1")
-        data_date = self.cur.fetchall()[0][0]
+        if self.cur.rowcount > 0:
+            data_date = self.cur.fetchall()[0][0]
 
-        self.create_sum_table()
-        self.create_stockholderdate_table()
+            self.create_sum_table()
+            self.create_stockholderdate_table()
 
 
-        if self.validate(data_date):  # JOB每天都會跑，但只有讀到新資料時才會寫入
-            self.stockholder_sum(data_date)
-            self.save_stockholder_date(data_date)
-            self.stockholder_sum_count(data_date)
+            if self.validate(data_date):  # JOB每天都會跑，但只有讀到新資料時才會寫入
+                self.stockholder_sum(data_date)
+                self.save_stockholder_date(data_date)
+                self.stockholder_sum_count(data_date)
 
 
 
@@ -74,11 +75,11 @@ class Public(object):
 
             for row in rows:
                 if int(row[1]) > int(row[2]):
-                    sql = "update stockholder_sum_count set increase=increase+1,decrease = 0 where stock_no = '{stock_no}'"
+                    sql = "update stockholder_sum_count set increase=increase+1,decrease = 0, updated_date = now() where stock_no = '{stock_no}'"
                     sql =sql.format(stock_no=row[0])
                     db.execute_sql(sql)
                 else:
-                    sql = "update stockholder_sum_count set increase=0,decrease = decrease+1 where stock_no = '{stock_no}'"
+                    sql = "update stockholder_sum_count set increase=0,decrease = decrease+1, updated_date = now() where stock_no = '{stock_no}'"
                     sql = sql.format(stock_no=row[0])
                     db.execute_sql(sql)
 

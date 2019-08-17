@@ -64,13 +64,11 @@ ROBOTSTXT_OBEY = False
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-   'stock.pipelines.StockPipeline': 300,
-   'stock.pipelines.PricePipeline': 200,
-}
 # ITEM_PIPELINES = {
-#    'stock.pipelines.StockPipeline': 300,
+#    'stock.pipelines.StockPipeline': 200,
+#    'stock.pipelines.PricePipeline': 300,
 # }
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
