@@ -40,7 +40,7 @@ class StockCodeSpider(scrapy.Spider):
                 #yield dict(zip(columns, [dtype, code, name, *row[1: -1]]))
                 print([code, name])
                 item = StockCodeItem()
-                item['stock_no'] = code  # 證券代號
+                item['stock_no'] = code.zfill(6)  # 證券代號
                 item['stock_name'] = name  # 證券名稱
                 item['stock_isin'] = data[1]  # 國際證券辨識號碼(ISIN Code)
                 item['stock_createdate'] = data[2]  # 上市日
