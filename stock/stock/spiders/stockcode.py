@@ -26,6 +26,7 @@ class StockCodeSpider(scrapy.Spider):
 
 
     def parse(self, response):
+        print("call parse()")
         soup = BeautifulSoup(response.text, 'html.parser')
         table = soup.find("table", {"class": "h4"})
         c = 0
@@ -34,7 +35,7 @@ class StockCodeSpider(scrapy.Spider):
             if data[0].find('\u3000') > 0:
                 code, name = data[0].split('\u3000')
                 #yield dict(zip(columns, [dtype, code, name, *row[1: -1]]))
-                #print([code, name, *data[1: -1]])
+                print([code, name])
                 item = StockCodeItem()
                 item['stock_no'] = code  # 證券代號
                 item['stock_name'] = name  # 證券名稱
