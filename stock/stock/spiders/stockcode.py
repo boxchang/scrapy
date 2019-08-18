@@ -28,8 +28,10 @@ class StockCodeSpider(scrapy.Spider):
     def parse(self, response):
         print("call parse()")
         soup = BeautifulSoup(response.text, 'html.parser')
+        print("call BeautifulSoup()")
         table = soup.find("table", {"class": "h4"})
         c = 0
+        print("call soup.find()")
         for row in table.find_all("tr"):
             data = [col.text for col in row.find_all('td')]
             if data[0].find('\u3000') > 0:
