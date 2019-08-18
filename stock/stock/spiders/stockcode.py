@@ -34,7 +34,7 @@ class StockCodeSpider(scrapy.Spider):
         print("call soup.find()")
         for row in table.find_all("tr"):
             data = [col.text for col in row.find_all('td')]
-            print(data)
+            #print(data)
             if data[0].find('\u3000') > 0:
                 code, name = data[0].split('\u3000')
                 #yield dict(zip(columns, [dtype, code, name, *row[1: -1]]))
