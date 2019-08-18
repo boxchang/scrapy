@@ -39,3 +39,11 @@ class StockPriceItem(scrapy.Item):
     stock_value = scrapy.Field()      # 本益比
 
 
+class StockCodeItem(scrapy.Item):
+    stock_no = scrapy.Field()    # 證券代號
+    stock_name = scrapy.Field()  # 證券名稱
+    stock_isin = scrapy.Field()   # 國際證券辨識號碼(ISIN Code)
+    stock_createdate = scrapy.Field()   # 上市日
+    stock_type = scrapy.Field()  # 市場別
+    stock_industry = scrapy.Field()  # 產業別
+    stock_cficode = scrapy.Field()  # CFICode

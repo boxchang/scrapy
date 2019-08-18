@@ -50,7 +50,6 @@ class StockPipeline(object):
         self.cur.execute('create table if not exists stockholder_hist(stock_no varchar(10), level int, '
                          'stock_num bigint, holder_num bigint, percent float, data_date date, '
                          'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
-        self.conn.commit()
 
     def close_spider(self, spider):
         self.conn.commit()
@@ -64,6 +63,34 @@ class StockPipeline(object):
             # placeholders = ','.join(len(item) * '?')
             placeholders = ("%s," * len(item))[:-1]
             sql = 'insert into stockholder({}) values({})'
+            print(sql.format(col, placeholders), tuple(item.values()))
+            self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
+            return item
+
+
+class StockCodePipeline(object):
+    def open_spider(self, spider):
+        db = database()
+        self.conn = db.create_connection()
+        self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
+        self.cur.execute('create table if not exists stockcode(stock_no varchar(10), stock_name varchar(60), '
+                         'stock_isin varchar(14), stock_createdate varchar(10), stock_type varchar(10),'
+                         'stock_industry varchar(14), stock_cficode varchar(10),'
+                         'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
+        sql = "delete from stockcode"
+        db.execute_sql(sql)
+
+    def close_spider(self, spider):
+        self.conn.commit()
+        self.conn.close()
+
+
+    def process_item(self, item, spider):
+        if spider.name == 'stock_code':
+            col = ','.join(item.keys())
+            # placeholders = ','.join(len(item) * '?')
+            placeholders = ("%s," * len(item))[:-1]
+            sql = 'insert into stockcode({}) values({})'
             print(sql.format(col, placeholders), tuple(item.values()))
             self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
             return item

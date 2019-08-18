@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*
 import scrapy
 import pandas as pd
-import io
 
 from stock.database import database
 from stock.items import StockItem
