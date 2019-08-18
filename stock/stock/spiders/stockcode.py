@@ -15,7 +15,7 @@ class StockCodeSpider(scrapy.Spider):
     name = 'stock_code'
 
     custom_settings = {
-        'DOWNLOAD_DELAY': 1,
+        'DOWNLOAD_DELAY': 30,
         'CONCURRENT_REQUESTS': 1,
         'ITEM_PIPELINES': {
             'stock.pipelines.StockCodePipeline': 100
