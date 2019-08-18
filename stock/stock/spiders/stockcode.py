@@ -17,9 +17,6 @@ class StockCodeSpider(scrapy.Spider):
     custom_settings = {
         'DOWNLOAD_DELAY': 1,
         'CONCURRENT_REQUESTS': 1,
-        'MONGODB_COLLECTION': name,
-        'MONGODB_ITEM_CACHE': 1000,
-        'MONGODB_DROP': True,
         'ITEM_PIPELINES': {
             'stock.pipelines.StockCodePipeline': 100
         }
