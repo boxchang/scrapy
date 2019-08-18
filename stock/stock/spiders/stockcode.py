@@ -37,7 +37,7 @@ class StockCodeSpider(scrapy.Spider):
             if data[0].find('\u3000') > 0:
                 code, name = data[0].split('\u3000')
                 #yield dict(zip(columns, [dtype, code, name, *row[1: -1]]))
-                print([code, name, *data[1: -1]])
+                #print([code, name, *data[1: -1]])
                 item = StockCodeItem()
                 item['stock_no'] = code  # 證券代號
                 item['stock_name'] = name  # 證券名稱
