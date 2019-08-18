@@ -49,13 +49,3 @@ class StockCodeSpider(scrapy.Spider):
                 yield item
 
             c+=1
-
-
-
-        for tr in response.dom('.h4 tr:eq(0)').next_all().items():
-            if tr('b'):
-                dtype = tr.text()
-            else:
-                row = [td.text() for td in tr('td').items()]
-                code, name = row[0].split('\u3000')
-                yield dict(zip(columns, [dtype, code, name, *row[1: -1]]))
