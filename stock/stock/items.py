@@ -47,3 +47,14 @@ class StockCodeItem(scrapy.Item):
     stock_type = scrapy.Field()  # 市場別
     stock_industry = scrapy.Field()  # 產業別
     stock_cficode = scrapy.Field()  # CFICode
+
+
+class MoneyReportItem(scrapy.Item):
+    myear = scrapy.Field()
+    season = scrapy.Field()
+    stock_no = scrapy.Field()    # 公司代號
+    revenue = scrapy.Field()  # 營業收入
+    grossprofit = scrapy.Field()   # 毛利率(%)
+    operprofit = scrapy.Field()   # 營業利益率(%)
+    netprofit = scrapy.Field()  # 稅前純益率(%)
+    aftertaxprofit = scrapy.Field()  # 稅後純益率(%)

@@ -6,6 +6,32 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 from stock.database import database
 
+class MoneyReportPipeline(object):
+    def open_spider(self, spider):
+        db = database()
+        self.conn = db.create_connection()
+        self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
+        self.cur.execute('create table if not exists moneyreport(myear varchar(4), season varchar(2), stock_no varchar(10), revenue bigint, '
+                         ' grossprofit float, operprofit float, netprofit float, aftertaxprofit float, '
+                         'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
+
+
+    def close_spider(self, spider):
+        self.conn.commit()
+        self.conn.close()
+
+
+    def process_item(self, item, spider):
+        if spider.name == 'money_report':
+            col = ','.join(item.keys())
+            # placeholders = ','.join(len(item) * '?')
+            placeholders = ("%s," * len(item))[:-1]
+            sql = 'insert into moneyreport({}) values({})'
+            print(sql.format(col, placeholders), tuple(item.values()))
+            self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
+            return item
+
+
 class PricePipeline(object):
     def open_spider(self, spider):
         db = database()
