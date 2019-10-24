@@ -185,10 +185,11 @@ class Robert(Public):
         token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
         for row in rows:
             if int(row[2]) > 0:
-                msg = "Stock No :{stock_no}({stock_name}) Price:{stock_price} 出現連續向上"
+                msg = "Stock No :{stock_no}({stock_name}) Price:{stock_price} 出現連續向上{times}次"
+                msg = msg.format(stock_no=row[0], stock_name=row[1], stock_price=row[4], times=row[2])
             else:
-                msg = "Stock No :{stock_no}({stock_name}) Price:{stock_price} 出現連續向下"
-            msg = msg.format(stock_no=row[0], stock_name=row[1], stock_price=row[4])
+                msg = "Stock No :{stock_no}({stock_name}) Price:{stock_price} 出現連續向下{times}次"
+                msg = msg.format(stock_no=row[0], stock_name=row[1], stock_price=row[4], times=row[3])
             lineNotifyMessage(token, msg)
 
     def execute(self):
