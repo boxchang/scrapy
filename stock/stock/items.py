@@ -7,6 +7,21 @@
 
 import scrapy
 
+class LegalPersonItem(scrapy.Item):
+    stock_no = scrapy.Field()
+    stock_name = scrapy.Field()
+    china_buy = scrapy.Field()
+    china_sell = scrapy.Field()
+    china_sum = scrapy.Field()
+    foreign_buy = scrapy.Field()
+    foreign_sell = scrapy.Field()
+    foreign_sum = scrapy.Field()
+    invest_buy = scrapy.Field()
+    invest_sell = scrapy.Field()
+    invest_sum = scrapy.Field()
+    com_sum = scrapy.Field()
+    legalperson = scrapy.Field()
+
 
 class StockItem(scrapy.Item):
     # define the fields for your item here like:

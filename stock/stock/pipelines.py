@@ -6,6 +6,30 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 from stock.database import database
 
+class LegalPersonPipeline(object):
+    def open_spider(self, spider):
+        db = database()
+        self.conn = db.create_connection()
+        self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
+        self.cur.execute('CREATE TABLE if not exists legalperson (stock_no varchar(10) NOT NULL,stock_name varchar(60) NOT NULL,china_buy double NULL,china_sell double NULL,china_sum double NULL, foreign_buy double NULL,foreign_sell double NULL,foreign_sum double NULL,invest_buy double NULL,invest_sell double NULL,invest_sum double NULL,com_sum double NULL,legalperson double NULL,created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
+
+
+    def close_spider(self, spider):
+        self.conn.commit()
+        self.conn.close()
+
+
+    def process_item(self, item, spider):
+        if spider.name == 'legalperson':
+            col = ','.join(item.keys())
+            # placeholders = ','.join(len(item) * '?')
+            placeholders = ("%s," * len(item))[:-1]
+            sql = 'insert into legalperson({}) values({})'
+            print(sql.format(col, placeholders), tuple(item.values()))
+            self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
+            return item
+
+
 class MoneyReportPipeline(object):
     def open_spider(self, spider):
         db = database()
@@ -38,15 +62,15 @@ class PricePipeline(object):
         self.conn = db.create_connection()
         self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
         self.cur.execute('create table if not exists stockprice(stock_no varchar(10), stock_name varchar(100), '
-                         ' stock_buy bigint, stock_num bigint, stock_amount bigint, stock_sprice int, stock_hprice int, '
-                         ' stock_lprice int, stock_eprice int, stock_status varchar(10), stock_gap int, '
-                         ' stock_last_buy int, stock_last_bnum bigint, stock_last_sell int, stock_last_snum bigint, stock_value int,'
+                         ' stock_buy bigint, stock_num bigint, stock_amount float, stock_sprice float, stock_hprice float, '
+                         ' stock_lprice float, stock_eprice float, stock_status varchar(10), stock_gap float, '
+                         ' stock_last_buy float, stock_last_bnum bigint, stock_last_sell float, stock_last_snum bigint, stock_value int,'
                          'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
-        self.cur.execute('create table if not exists stockprice_hist(stock_no varchar(10), stock_name varchar(100), '
-                         ' stock_buy bigint, stock_num bigint, stock_amount bigint, stock_sprice int, stock_hprice int, '
-                         ' stock_lprice int, stock_eprice int, stock_status varchar(10), stock_gap int, '
-                         ' stock_last_buy int, stock_last_bnum bigint, stock_last_sell int, stock_last_snum bigint, stock_value int,'
-                         'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
+        # self.cur.execute('create table if not exists stockprice_hist(stock_no varchar(10), stock_name varchar(100), '
+        #                  ' stock_buy bigint, stock_num bigint, stock_amount float, stock_sprice float, stock_hprice float, '
+        #                  ' stock_lprice float, stock_eprice float, stock_status varchar(10), stock_gap float, '
+        #                  ' stock_last_buy float, stock_last_bnum bigint, stock_last_sell float, stock_last_snum bigint, stock_value int,'
+        #                  'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
 
 
     def close_spider(self, spider):
