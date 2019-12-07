@@ -27,14 +27,14 @@ class LegalPerson(object):
 
     def delete_legalperson_price(self):
         db = database()
-        sql = "delete from legalperson_price where batch_no = Date_format(now(),'%Y%m%m')"
+        sql = "delete from legalperson_price where batch_no = Date_format(now(),'%Y%m%d')"
         db.execute_sql(sql)
 
 
     def combine_legalperson_price(self):
         db = database()
         sql = "insert into legalperson_price (" \
-              "select Date_format(now(),'%Y%m%m') nowdate,a.stock_no,a.stock_name,a.china_buy,a.china_sell,a.china_sum," \
+              "select Date_format(now(),'%Y%m%d') nowdate,a.stock_no,a.stock_name,a.china_buy,a.china_sell,a.china_sum," \
               "a.foreign_buy,a.foreign_sell,a.foreign_sum,a.invest_buy,a.invest_sell,a.invest_sum,a.com_sum,a.legalperson,b.stock_last_buy,now()  " \
               "from legalperson a, stockprice b, robert_stock_list c " \
               "where a.stock_no = b.stock_no and a.stock_no = c.stock_no)"
