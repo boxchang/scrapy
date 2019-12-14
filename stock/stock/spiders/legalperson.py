@@ -55,7 +55,7 @@ class LegalPerson(scrapy.Spider):
                         item['legalperson'] = float(clean(str(row['三大法人買賣超股數'])))
                         yield item
             except:
-                return None
+                pass
 
 
 
