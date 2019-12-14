@@ -35,26 +35,28 @@ class LegalPerson(scrapy.Spider):
             # 製作三大法人的DataFrame
             try:
                 df = pd.read_csv(StringIO(response.text), header=1).dropna(how='all', axis=1).dropna(how='any')
+
+                for index, row in df.iterrows():
+                    if len(clean(row['證券代號'])) == 4:
+                        item = LegalPersonItem()
+                        item['data_date'] = self.data_date
+                        item['stock_no'] = clean(row['證券代號']).zfill(6)
+                        item['stock_name'] = clean(row['證券名稱'])
+                        item['china_buy'] = float(clean(str(row['外陸資買進股數(不含外資自營商)'])))
+                        item['china_sell'] = float(clean(str(row['外陸資賣出股數(不含外資自營商)'])))
+                        item['china_sum'] = float(clean(str(row['外陸資買賣超股數(不含外資自營商)'])))
+                        item['foreign_buy'] = float(clean(str(row['外資自營商買進股數'])))
+                        item['foreign_sell'] = float(clean(str(row['外資自營商賣出股數'])))
+                        item['foreign_sum'] = float(clean(str(row['外資自營商買賣超股數'])))
+                        item['invest_buy'] = float(clean(str(row['投信買進股數'])))
+                        item['invest_sell'] = float(clean(str(row['投信賣出股數'])))
+                        item['invest_sum'] = float(clean(str(row['投信買賣超股數'])))
+                        item['com_sum'] = float(clean(str(row['自營商買賣超股數'])))
+                        item['legalperson'] = float(clean(str(row['三大法人買賣超股數'])))
+                        yield item
             except:
                 return None
 
-            for index, row in df.iterrows():
-                if len(clean(row['證券代號'])) == 4:
-                    item = LegalPersonItem()
-                    item['data_date'] = self.data_date
-                    item['stock_no'] = clean(row['證券代號']).zfill(6)
-                    item['stock_name'] = clean(row['證券名稱'])
-                    item['china_buy'] = float(clean(str(row['外陸資買進股數(不含外資自營商)'])))
-                    item['china_sell'] = float(clean(str(row['外陸資賣出股數(不含外資自營商)'])))
-                    item['china_sum'] = float(clean(str(row['外陸資買賣超股數(不含外資自營商)'])))
-                    item['foreign_buy'] = float(clean(str(row['外資自營商買進股數'])))
-                    item['foreign_sell'] = float(clean(str(row['外資自營商賣出股數'])))
-                    item['foreign_sum'] = float(clean(str(row['外資自營商買賣超股數'])))
-                    item['invest_buy'] = float(clean(str(row['投信買進股數'])))
-                    item['invest_sell'] = float(clean(str(row['投信賣出股數'])))
-                    item['invest_sum'] = float(clean(str(row['投信買賣超股數'])))
-                    item['com_sum'] = float(clean(str(row['自營商買賣超股數'])))
-                    item['legalperson'] = float(clean(str(row['三大法人買賣超股數'])))
-                    yield item
+
 
 
