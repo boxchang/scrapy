@@ -22,9 +22,9 @@ class LegalPerson(scrapy.Spider):
         }
     }
 
-    #date = datetime.date.today().strftime('%Y%m%d')
-    date = "20191120"
-    start_urls = ['http://www.tse.com.tw/fund/T86?response=csv&date='+date+'&selectType=ALLBUT0999']
+    data_date = datetime.date.today().strftime('%Y%m%d')
+    #date = "20191120"
+    start_urls = ['http://www.tse.com.tw/fund/T86?response=csv&date='+data_date+'&selectType=ALLBUT0999']
 
     def parse(self, response):
         db = database()
@@ -41,6 +41,7 @@ class LegalPerson(scrapy.Spider):
             for index, row in df.iterrows():
                 if len(clean(row['證券代號'])) == 4:
                     item = LegalPersonItem()
+                    item['data_date'] = self.data_date
                     item['stock_no'] = clean(row['證券代號']).zfill(6)
                     item['stock_name'] = clean(row['證券名稱'])
                     item['china_buy'] = float(clean(str(row['外陸資買進股數(不含外資自營商)'])))
