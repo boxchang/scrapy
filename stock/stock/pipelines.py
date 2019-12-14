@@ -11,10 +11,8 @@ class LegalPersonPipeline(object):
         db = database()
         self.conn = db.create_connection()
         self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
-        #self.cur.execute('CREATE TABLE if not exists legalperson (data_date varchar(10) NOT NULL,stock_no varchar(10) NOT NULL,stock_name varchar(60) NOT NULL,china_buy double NULL,china_sell double NULL,china_sum double NULL, foreign_buy double NULL,foreign_sell double NULL,foreign_sum double NULL,invest_buy double NULL,invest_sell double NULL,invest_sum double NULL,com_sum double NULL,legalperson double NULL,created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
+        self.cur.execute('CREATE TABLE if not exists legalperson (stock_no varchar(10) NOT NULL,stock_name varchar(60) NOT NULL,china_buy double NULL,china_sell double NULL,china_sum double NULL, foreign_buy double NULL,foreign_sell double NULL,foreign_sum double NULL,invest_buy double NULL,invest_sell double NULL,invest_sum double NULL,com_sum double NULL,legalperson double NULL,created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
 
-        self.cur.execute(
-        'CREATE TABLE if not exists legalperson (stock_no varchar(10) NOT NULL,stock_name varchar(60) NOT NULL,china_buy double NULL,china_sell double NULL,china_sum double NULL, foreign_buy double NULL,foreign_sell double NULL,foreign_sum double NULL,invest_buy double NULL,invest_sell double NULL,invest_sum double NULL,com_sum double NULL,legalperson double NULL,created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
 
     def close_spider(self, spider):
         self.conn.commit()

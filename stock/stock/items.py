@@ -8,7 +8,6 @@
 import scrapy
 
 class LegalPersonItem(scrapy.Item):
-    #data_date = scrapy.Field()
     stock_no = scrapy.Field()
     stock_name = scrapy.Field()
     china_buy = scrapy.Field()
