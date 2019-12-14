@@ -23,7 +23,7 @@ class LegalPerson(scrapy.Spider):
     }
 
     data_date = datetime.date.today().strftime('%Y%m%d')
-    #date = "20191120"
+    #data_date = "20191120"
     start_urls = ['http://www.tse.com.tw/fund/T86?response=csv&date='+data_date+'&selectType=ALLBUT0999']
 
     def parse(self, response):
