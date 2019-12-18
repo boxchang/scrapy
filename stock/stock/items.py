@@ -23,6 +23,14 @@ class LegalPersonItem(scrapy.Item):
     com_sum = scrapy.Field()
     legalperson = scrapy.Field()
 
+class FinancingItem(scrapy.Item):
+    data_date = scrapy.Field()
+    stock_no = scrapy.Field()  # 證券代號
+    stock_name = scrapy.Field()  # 證券名稱
+    today_borrow_money = scrapy.Field()  # 融資今日餘額
+    today_borrow_stock = scrapy.Field()  # 融券今日餘額
+
+
 
 class StockItem(scrapy.Item):
     # define the fields for your item here like:

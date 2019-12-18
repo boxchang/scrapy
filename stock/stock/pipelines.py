@@ -6,6 +6,29 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 from stock.database import database
 
+class FinancingPipeline(object):
+    def open_spider(self, spider):
+        db = database()
+        self.conn = db.create_connection()
+        self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
+        self.cur.execute('CREATE TABLE if not exists financing (data_date varchar(10) NOT NULL,stock_no varchar(10) NOT NULL,stock_name varchar(60) NOT NULL,today_borrow_money double NULL,today_borrow_stock double NULL)')
+
+
+    def close_spider(self, spider):
+        self.conn.commit()
+        self.conn.close()
+
+
+    def process_item(self, item, spider):
+        if spider.name == 'financing':
+            col = ','.join(item.keys())
+            placeholders = ("%s," * len(item))[:-1]
+            sql = 'insert into financing({}) values({})'
+            print(sql.format(col, placeholders), tuple(item.values()))
+            self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
+            return item
+
+
 class LegalPersonPipeline(object):
 
 
