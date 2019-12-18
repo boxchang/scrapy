@@ -37,7 +37,7 @@ class LegalPerson(object):
               "select Date_format(now(),'%Y%m%d') nowdate,a.stock_no,a.stock_name,a.china_buy,a.china_sell,a.china_sum," \
               "a.foreign_buy,a.foreign_sell,a.foreign_sum,a.invest_buy,a.invest_sell,a.invest_sum,a.com_sum,a.legalperson,b.stock_last_buy,now(),d.stock_num,round((legalperson/d.stock_num),2) percent  " \
               "from legalperson a, stockprice b, robert_stock_list c, stockholder d " \
-              "where a.stock_no = b.stock_no and a.stock_no = c.stock_no and b.batch_no = a.data_date and d.level=17 and d.stock_no = a.stock_no and data_date=Date_format(now(),'%Y%m%d'))"
+              "where a.stock_no = b.stock_no and a.stock_no = c.stock_no and b.batch_no = a.data_date and d.level=17 and d.stock_no = a.stock_no and a.data_date=Date_format(now(),'%Y%m%d'))"
         db.execute_sql(sql)
 
 
