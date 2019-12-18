@@ -18,7 +18,7 @@ class MoneyReportSpider(scrapy.Spider):
     }
 
     year = 108
-    season = 2
+    season = 3
 
     def start_requests(self):
         url = 'https://mops.twse.com.tw/mops/web/ajax_t163sb06'

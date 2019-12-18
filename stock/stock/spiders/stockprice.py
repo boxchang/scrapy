@@ -22,14 +22,14 @@ class StockPrice(scrapy.Spider):
         }
     }
 
-    date = datetime.date.today().strftime('%Y%m%d')
-    #date = "20190815"
-    start_urls = ['https://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='+date+'&type=ALL']
+    data_date = datetime.date.today().strftime('%Y%m%d')
+    #data_date = "20191217"
+    start_urls = ['https://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='+data_date+'&type=ALL']
 
     def parse(self, response):
         if response.text != '':  # 有資料才跑，不然會遇到假日全都沒資料
             db = database()
-            sql = "delete from stockprice"
+            sql = "delete from stockprice where batch_no = '" + self.data_date + "'"
             db.execute_sql(sql)
 
 
@@ -39,6 +39,7 @@ class StockPrice(scrapy.Spider):
             for index, row in df.iterrows():
                 if len(clean(row['證券代號'])) == 4:
                     item = StockPriceItem()
+                    item['batch_no'] = self.data_date
                     item['stock_no'] = clean(row['證券代號']).zfill(6)
                     item['stock_name'] = clean(row['證券名稱'])
                     item['stock_buy'] = clean(row['成交股數'])

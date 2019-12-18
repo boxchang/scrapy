@@ -18,7 +18,7 @@ class Public(object):
                          'stock_num bigint, holder_num bigint, created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
     CREATE_SUM_COUNT_TABLE = (
         'create table if not exists stockholder_sum_count(stock_no varchar(10), increase int DEFAULT 0, decrease int DEFAULT 0, '
-        ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp) ')
+        ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp, de_gap_count float NULL, in_gap_count float NULL) ')
 
     def execute(self):
         self.open_conn()
@@ -46,15 +46,11 @@ class Public(object):
         db.execute_sql(sql)
 
         sql = "insert into stockholder_sum_count(stock_no) " \
-              " (select distinct stock_no from stockprice a where " \
-              " not exists (select * from stockholder_sum_count b where a.stock_no = b.stock_no ))"
+              " (select stock_no from stockcode)"
         db.execute_sql(sql)
 
     # 判斷連續上升或下降
     def stockholder_sum_count(self, data_date):
-        current_price = 0
-        last_price = 0
-
         db = database()
         # 取得股票清單
         self.prepare_stock_list_count()
@@ -64,6 +60,7 @@ class Public(object):
         self.conn = db.create_connection()
         self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
 
+        #取得上一次最後日期
         sql = "select * from stockholder_date where data_date < '{data_date}' order by data_date desc limit 1"
         sql = sql.format(data_date = data_date)
         self.cur.execute(sql)
@@ -73,7 +70,7 @@ class Public(object):
             sql = "select c.stock_no,c.percent co,l.percent lo from " \
                   " (select * from stockholder_sum where data_date = '{current_date}') c, " \
                   " (select * from stockholder_sum where data_date = '{last_date}') l, " \
-                  " stockprice s where c.stock_no = l.stock_no and c.stock_no = s.stock_no"
+                  " where c.stock_no = l.stock_no "
             sql = sql.format(current_date=current_date, last_date=last_date)
 
             self.cur.execute(sql)
@@ -81,15 +78,17 @@ class Public(object):
             rows = self.cur.fetchall()
 
             for row in rows:
-                current_price = float(row[1])
-                last_price = float(row[2])
-                if current_price > last_price:
-                    sql = "update stockholder_sum_count set increase=increase+1,decrease = 0, updated_date = now() where stock_no = '{stock_no}'"
-                    sql = sql.format(stock_no=row[0])
+                current_percent = float(row[1])
+                last_percent = float(row[2])
+                if current_percent > last_percent:
+                    gap = current_percent - last_percent
+                    sql = "update stockholder_sum_count set increase=increase+1, decrease = 0, de_gap_count=0, in_gap_count=in_gap_count+{gap}, updated_date = now() where stock_no = '{stock_no}'"
+                    sql = sql.format(stock_no=row[0],gap=gap)
                     db.execute_sql(sql)
                 else:
-                    sql = "update stockholder_sum_count set increase=0,decrease = decrease+1, updated_date = now() where stock_no = '{stock_no}'"
-                    sql = sql.format(stock_no=row[0])
+                    gap = last_percent - current_percent
+                    sql = "update stockholder_sum_count set increase=0, in_gap_count=0, decrease = decrease+1, de_gap_count=de_gap_count+{gap}, updated_date = now() where stock_no = '{stock_no}'"
+                    sql = sql.format(stock_no=row[0], gap=gap)
                     db.execute_sql(sql)
 
         # 完成後更新狀態
@@ -174,7 +173,7 @@ class Robert(Public):
     def foundout(self):
         db = database()
         self.conn = db.create_connection()
-        sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,c.stock_eprice from robert_stock_list a, stockholder_sum_count b, stockprice c " \
+        sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,b.in_gap_count,b.de_gap_count from robert_stock_list a, stockholder_sum_count b, stockcode c " \
               "where a.stock_no = c.stock_no and a.stock_no = b.stock_no " \
               " and (increase > 2 or decrease > 2) "
 
@@ -185,11 +184,11 @@ class Robert(Public):
         token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
         for row in rows:
             if int(row[2]) > 0:
-                msg = "Stock No :{stock_no}({stock_name}) Price:{stock_price} 出現連續向上{times}次"
-                msg = msg.format(stock_no=row[0], stock_name=row[1], stock_price=row[4], times=row[2])
+                msg = "Stock No :{stock_no}({stock_name}) Count Gap:{in_gap_count}% 出現連續向上{times}次"
+                msg = msg.format(stock_no=row[0], stock_name=row[1], in_gap_count=row[4], times=row[2])
             else:
-                msg = "Stock No :{stock_no}({stock_name}) Price:{stock_price} 出現連續向下{times}次"
-                msg = msg.format(stock_no=row[0], stock_name=row[1], stock_price=row[4], times=row[3])
+                msg = "Stock No :{stock_no}({stock_name}) Count Gap:-{de_gap_count}% 出現連續向下{times}次"
+                msg = msg.format(stock_no=row[0], stock_name=row[1], de_gap_count=row[5], times=row[3])
             lineNotifyMessage(token, msg)
 
     def execute(self):

@@ -7,6 +7,8 @@
 from stock.database import database
 
 class LegalPersonPipeline(object):
+
+
     def open_spider(self, spider):
         db = database()
         self.conn = db.create_connection()
@@ -61,7 +63,7 @@ class PricePipeline(object):
         db = database()
         self.conn = db.create_connection()
         self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
-        self.cur.execute('create table if not exists stockprice(stock_no varchar(10), stock_name varchar(100), '
+        self.cur.execute('create table if not exists stockprice(batch_no varchar(10) NOT NULL,stock_no varchar(10), stock_name varchar(100), '
                          ' stock_buy bigint, stock_num bigint, stock_amount float, stock_sprice float, stock_hprice float, '
                          ' stock_lprice float, stock_eprice float, stock_status varchar(10), stock_gap float, '
                          ' stock_last_buy float, stock_last_bnum bigint, stock_last_sell float, stock_last_snum bigint, stock_value int,'

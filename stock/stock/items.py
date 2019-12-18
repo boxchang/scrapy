@@ -37,6 +37,7 @@ class StockItem(scrapy.Item):
 
 
 class StockPriceItem(scrapy.Item):
+    batch_no = scrapy.Field()
     stock_no = scrapy.Field()    # 證券代號
     stock_name = scrapy.Field()  # 證券名稱
     stock_buy = scrapy.Field()   # 成交股數

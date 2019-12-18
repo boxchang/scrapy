@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*
 import datetime
+import sys
 
 import scrapy
 import pandas as pd
@@ -23,15 +24,17 @@ class LegalPerson(scrapy.Spider):
     }
 
     data_date = datetime.date.today().strftime('%Y%m%d')
-    #date = "20191120"
+    #data_date = "20191213"
+
     start_urls = ['http://www.tse.com.tw/fund/T86?response=csv&date='+data_date+'&selectType=ALLBUT0999']
 
     def parse(self, response):
-        db = database()
-        sql = "delete from legalperson"
-        db.execute_sql(sql)
 
         if response.text != '':  # 有資料才跑，不然會遇到假日全都沒資料
+            db = database()
+            sql = "delete from legalperson"
+            db.execute_sql(sql)
+
             # 製作三大法人的DataFrame
             try:
                 df = pd.read_csv(StringIO(response.text), header=1).dropna(how='all', axis=1).dropna(how='any')
