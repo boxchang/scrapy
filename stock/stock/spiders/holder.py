@@ -44,23 +44,21 @@ class Holder(scrapy.Spider):
         # print(data[:17])
         check_data = data['資料日期'][:1][0]
         print(check_data)
-        try:
-            if self.validate(check_data):
-                self.copy2Hist()  # 跑前，將資料搬到歷史區
-                self.clearTable()  # 清除目前的要運算的表
-                # csv = data[data['資料日期'] == 15][:1]
-                for index, row in data.iterrows():
-                    item = StockItem()
-                    item['stock_no'] = row['證券代號'].zfill(6)
-                    item['stock_num'] = row['股數']
-                    item['level'] = row['持股分級']
-                    item['holder_num'] = row['人數']
-                    item['percent'] = row['占集保庫存數比例%']
-                    item['data_date'] = row['資料日期']
-                    yield item
 
-        except:
-            error_log("holder.py parse error")
+        if self.validate(check_data):
+            self.copy2Hist()  # 跑前，將資料搬到歷史區
+            self.clearTable()  # 清除目前的要運算的表
+            # csv = data[data['資料日期'] == 15][:1]
+            for index, row in data.iterrows():
+                item = StockItem()
+                item['stock_no'] = row['證券代號'].zfill(6)
+                item['stock_num'] = row['股數']
+                item['level'] = row['持股分級']
+                item['holder_num'] = row['人數']
+                item['percent'] = row['占集保庫存數比例%']
+                item['data_date'] = row['資料日期']
+                yield item
+
 
 
     def validate(self, data_date):
