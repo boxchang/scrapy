@@ -18,7 +18,7 @@ class Public(object):
                          'stock_num bigint, holder_num bigint, created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
     CREATE_SUM_COUNT_TABLE = (
         'create table if not exists stockholder_sum_count(stock_no varchar(10), increase int DEFAULT 0, decrease int DEFAULT 0, '
-        ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp, de_gap_count float NULL, in_gap_count float NULL) ')
+        ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp, de_gap_count float NULL DEFAULT 0 , in_gap_count float NULL DEFAULT 0) ')
 
     def execute(self):
         self.open_conn()
@@ -53,7 +53,7 @@ class Public(object):
     def stockholder_sum_count(self, data_date):
         db = database()
         # 取得股票清單
-        self.prepare_stock_list_count()
+        # self.prepare_stock_list_count()
 
         current_date = data_date  # 本次日期
 
@@ -82,12 +82,12 @@ class Public(object):
                 last_percent = float(row[2])
                 if current_percent > last_percent:
                     gap = current_percent - last_percent
-                    sql = "update stockholder_sum_count set increase=increase+1, decrease = 0, de_gap_count=0, in_gap_count=in_gap_count+{gap}, updated_date = now() where stock_no = '{stock_no}'"
+                    sql = "update stockholder_sum_count set increase=increase+1, decrease = 0, de_gap_count=0, in_gap_count=IFNULL(in_gap_count,0)+{gap}, updated_date = now() where stock_no = '{stock_no}'"
                     sql = sql.format(stock_no=row[0],gap=gap)
                     db.execute_sql(sql)
                 else:
                     gap = last_percent - current_percent
-                    sql = "update stockholder_sum_count set increase=0, in_gap_count=0, decrease = decrease+1, de_gap_count=de_gap_count+{gap}, updated_date = now() where stock_no = '{stock_no}'"
+                    sql = "update stockholder_sum_count set increase=0, in_gap_count=0, decrease = decrease+1, de_gap_count=IFNULL(de_gap_count,0)+{gap}, updated_date = now() where stock_no = '{stock_no}'"
                     sql = sql.format(stock_no=row[0], gap=gap)
                     db.execute_sql(sql)
 
@@ -149,12 +149,14 @@ class Public(object):
         self.conn = db.create_connection()
     
     def validate(self, data_date):
-        self.cur = self.conn.cursor()
+        db = database()
+        conn = db.create_connection()
+        cur = conn.cursor()
         sql = "SELECT * FROM stockholder_sum where data_date = '{data_date}' "
         sql = sql.format(data_date = data_date)
-        self.cur.execute(sql)
+        cur.execute(sql)
 
-        rows = self.cur.fetchall()
+        rows = cur.fetchall()
 
         if len(rows) > 0:
             return False
@@ -175,7 +177,7 @@ class Robert(Public):
         self.conn = db.create_connection()
         sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,b.in_gap_count,b.de_gap_count from robert_stock_list a, stockholder_sum_count b, stockcode c " \
               "where a.stock_no = c.stock_no and a.stock_no = b.stock_no " \
-              " and (increase > 2 or decrease > 2) "
+              " and (increase > 2 or decrease > 2) and (in_gap_count>3.5 or de_gap_count>3.5) "
 
         self.cur = self.conn.cursor()
         self.cur.execute(sql)

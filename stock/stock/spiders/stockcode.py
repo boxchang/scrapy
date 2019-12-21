@@ -35,18 +35,20 @@ class StockCodeSpider(scrapy.Spider):
         for row in table.find_all("tr"):
             data = [col.text for col in row.find_all('td')]
             #print(data)
+
             if data[0].find('\u3000') > 0:
-                code, name = data[0].split('\u3000')
-                #yield dict(zip(columns, [dtype, code, name, *row[1: -1]]))
-                print([code, name])
-                item = StockCodeItem()
-                item['stock_no'] = code.zfill(6)  # 證券代號
-                item['stock_name'] = name  # 證券名稱
-                item['stock_isin'] = data[1]  # 國際證券辨識號碼(ISIN Code)
-                item['stock_createdate'] = data[2]  # 上市日
-                item['stock_type'] = data[3]  # 市場別
-                item['stock_industry'] = data[4]  # 產業別
-                item['stock_cficode'] = data[5]  # CFICode
-                yield item
+                if data[5] == "ESVUFR":
+                    code, name = data[0].split('\u3000')
+                    #yield dict(zip(columns, [dtype, code, name, *row[1: -1]]))
+                    print([code, name])
+                    item = StockCodeItem()
+                    item['stock_no'] = code.zfill(6)  # 證券代號
+                    item['stock_name'] = name  # 證券名稱
+                    item['stock_isin'] = data[1]  # 國際證券辨識號碼(ISIN Code)
+                    item['stock_createdate'] = data[2]  # 上市日
+                    item['stock_type'] = data[3]  # 市場別
+                    item['stock_industry'] = data[4]  # 產業別
+                    item['stock_cficode'] = data[5]  # CFICode
+                    yield item
 
             c+=1
