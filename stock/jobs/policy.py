@@ -69,7 +69,7 @@ class Public(object):
             last_date = rows[0][0]  # 上次日期
             sql = "select c.stock_no,c.percent co,l.percent lo from " \
                   " (select * from stockholder_sum where data_date = '{current_date}') c, " \
-                  " (select * from stockholder_sum where data_date = '{last_date}') l, " \
+                  " (select * from stockholder_sum where data_date = '{last_date}') l " \
                   " where c.stock_no = l.stock_no "
             sql = sql.format(current_date=current_date, last_date=last_date)
 
