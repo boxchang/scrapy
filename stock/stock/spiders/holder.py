@@ -6,8 +6,6 @@ from stock.database import database
 from stock.items import StockItem
 
 #週資料
-from stock.function import error_log
-
 
 class Holder(scrapy.Spider):
     name = 'holder'
