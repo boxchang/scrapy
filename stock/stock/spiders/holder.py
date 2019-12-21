@@ -21,6 +21,8 @@ class Holder(scrapy.Spider):
     start_urls = ['https://smart.tdcc.com.tw/opendata/getOD.ashx?id=1-5']
     # def start_requests(self):
     #     pass
+    db = database()
+    conn = db.create_connection()
 
     #Hist只是歷史數據的紀錄，實際會把每次大戶的比例紀錄在stockholder_sum減少資料庫的容量
     def copy2Hist(self):
