@@ -46,14 +46,14 @@ class Public(object):
         db.execute_sql(sql)
 
         sql = "insert into stockholder_sum_count(stock_no) " \
-              " (select stock_no from stockcode)"
+              " (select stock_no from stockcode a where not exists (select * from stockholder_sum_count b where a.stock_no = b.stock_no))"
         db.execute_sql(sql)
 
     # 判斷連續上升或下降
     def stockholder_sum_count(self, data_date):
         db = database()
         # 取得股票清單
-        # self.prepare_stock_list_count()
+        self.prepare_stock_list_count()
 
         current_date = data_date  # 本次日期
 
