@@ -39,7 +39,7 @@ class LegalPersonDaily(object):
         db = database()
         self.conn = db.create_connection()
         sql = "select a.stock_no, c.stock_name,a.in_gap_count,increase,round(b.today_borrow_stock/b.today_borrow_money*100,2) financing from legalperson_daily a, financing b, stockcode c where (a.in_gap_count > 1.5) " \
-              "and b.today_borrow_stock/b.today_borrow_money*100 <10 and a.stock_no = b.stock_no and a.stock_no = c.stock_no"
+              "and b.today_borrow_stock/b.today_borrow_money*100 <20 and a.stock_no = b.stock_no and a.stock_no = c.stock_no"
 
         self.cur = self.conn.cursor()
         self.cur.execute(sql)
@@ -47,7 +47,7 @@ class LegalPersonDaily(object):
 
         token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
         for row in rows:
-            msg = "【Daily Monitor】\nStock No :{stock_no}({stock_name})\n當日買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於10% : {financing}%"
+            msg = "【Daily Monitor】\nStock No :{stock_no}({stock_name})\n當日買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%"
             msg = msg.format(stock_no=row[0], stock_name=row[1], in_gap_count=row[2], increase=row[3], financing=row[4])
 
             lineNotifyMessage(token, msg)
