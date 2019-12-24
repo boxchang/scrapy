@@ -24,7 +24,7 @@ class LegalPersonDaily(object):
         self.create_legalpersonDate_table()
 
         data_date = datetime.date.today().strftime('%Y%m%d')
-        data_date = '20191223'
+        #data_date = '20191223'
 
         self.open_conn()
         self.cur = self.conn.cursor()
