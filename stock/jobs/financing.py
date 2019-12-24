@@ -18,7 +18,7 @@ class Financing(object):
         self.open_conn()
 
         self.cur = self.conn.cursor()
-        self.cur.execute("select stock_no,stock_name,round(a.today_borrow_stock/a.today_borrow_money,2)*100 percent,data_date,today_borrow_stock,today_borrow_money from financing a where round(a.today_borrow_stock/a.today_borrow_money,2)*100 >= 80")
+        self.cur.execute("select stock_no,stock_name,round(a.today_borrow_stock/a.today_borrow_money*100,2) percent,data_date,today_borrow_stock,today_borrow_money from financing a where round(a.today_borrow_stock/a.today_borrow_money,2)*100 >= 80")
         if self.cur.rowcount > 0:
             rows = self.cur.fetchall()
             token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"

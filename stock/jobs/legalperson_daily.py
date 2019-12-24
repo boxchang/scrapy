@@ -4,9 +4,10 @@ import sys
 sys.path.append("..")
 import datetime
 from stock.database import database
+from stock.line import lineNotifyMessage
 
 #日排程
-#在跑完legalperson_price之後才跑
+#在跑完financing 及 legalperson_price之後才跑
 class LegalPersonDaily(object):
     LEGALPERSON_DAILY_TABLE = ('CREATE TABLE if not exists legalperson_daily (stock_no varchar(10) NOT NULL, '
                                'increase int DEFAULT 0, decrease int DEFAULT 0, created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp, de_gap_count float NULL DEFAULT 0 , in_gap_count float NULL DEFAULT 0)')
@@ -29,9 +30,27 @@ class LegalPersonDaily(object):
         self.cur = self.conn.cursor()
         self.cur.execute("SELECT batch_no FROM legalperson_price where batch_no ='"+data_date+"'")
         if self.cur.rowcount > 0:
-            self.save_legalperson_date(data_date)
             if self.validate(data_date):  #還沒跑過才執行
+                self.save_legalperson_date(data_date)
                 self.count_legalperson_price(data_date)
+            self.alarm_legalperson_monitor()
+
+    def alarm_legalperson_monitor(self):
+        db = database()
+        self.conn = db.create_connection()
+        sql = "select a.stock_no, c.stock_name,a.in_gap_count,increase,round(b.today_borrow_stock/b.today_borrow_money*100,2) financing from legalperson_daily a, financing b, stockcode c where (a.in_gap_count > 1.5) " \
+              "and b.today_borrow_stock/b.today_borrow_money*100 <20 and a.stock_no = b.stock_no and a.stock_no = c.stock_no"
+
+        self.cur = self.conn.cursor()
+        self.cur.execute(sql)
+        rows = self.cur.fetchall()
+
+        token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
+        for row in rows:
+            msg = "【Daily Monitor】\nStock No :{stock_no}({stock_name})\n當日買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於10% : {financing}%"
+            msg = msg.format(stock_no=row[0], stock_name=row[1], in_gap_count=row[2], increase=row[3], financing=row[4])
+
+            lineNotifyMessage(token, msg)
 
     def create_legalpersonDate_table(self):
         sql = self.CREATE_LEGALPERSON_DATE_TABLE
@@ -115,16 +134,16 @@ class LegalPersonDaily(object):
         db = database()
         conn = db.create_connection()
         cur = conn.cursor()
-        sql = "SELECT * FROM legalperson_date where data_date = '{data_date}' and flag is null"
+        sql = "SELECT * FROM legalperson_date where data_date = '{data_date}' and flag ='Y'"
         sql = sql.format(data_date=data_date)
         cur.execute(sql)
 
         rows = self.cur.fetchall()
 
         if len(rows) > 0:
-            return True
-        else:
             return False
+        else:
+            return True
 
 legal_daily = LegalPersonDaily()
 legal_daily.execute()
