@@ -4,11 +4,13 @@ import sys
 
 sys.path.append("..")
 
-# 檢查例如狀況
+# 檢查例外狀況
 # select stock_no ,count(*) from stockholder group by stock_no having count(*) <> 17
 from stock.database import database
 from stock.line import lineNotifyMessage
 
+
+#週排程
 class Public(object):
     CREATE_HOLDERDATE_TABLE = ('create table if not exists stockholder_date(data_date varchar(10), flag varchar(1), '
                          'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
@@ -177,7 +179,7 @@ class Robert(Public):
         self.conn = db.create_connection()
         sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,b.in_gap_count,b.de_gap_count from robert_stock_list a, stockholder_sum_count b, stockcode c " \
               "where a.stock_no = c.stock_no and a.stock_no = b.stock_no " \
-              " and (increase > 2 or decrease > 2) and (in_gap_count>3.5 or de_gap_count>3.5) "
+              " and (increase > 2 or decrease > 2) and (in_gap_count>3 or de_gap_count>3) "
 
         self.cur = self.conn.cursor()
         self.cur.execute(sql)

@@ -6,6 +6,9 @@ sys.path.append("..")
 from stock.database import database
 from stock.line import lineNotifyMessage
 
+
+#日排程
+#跑所有的股票資料
 class Financing(object):
     def open_conn(self):
         db = database()
