@@ -39,7 +39,7 @@ class LegalPersonDaily(object):
         db = database()
         self.conn = db.create_connection()
         sql = "select a.stock_no, c.stock_name,a.in_gap_count,increase,round(b.today_borrow_stock/b.today_borrow_money*100,2) financing from legalperson_daily a, financing b, stockcode c where (a.in_gap_count > 1.5) " \
-              "and b.today_borrow_stock/b.today_borrow_money*100 <20 and a.stock_no = b.stock_no and a.stock_no = c.stock_no"
+              "and b.today_borrow_stock/b.today_borrow_money*100 <10 and a.stock_no = b.stock_no and a.stock_no = c.stock_no"
 
         self.cur = self.conn.cursor()
         self.cur.execute(sql)
