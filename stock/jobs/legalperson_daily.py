@@ -24,7 +24,7 @@ class LegalPersonDaily(object):
         self.create_legalpersonDate_table()
 
         data_date = datetime.date.today().strftime('%Y%m%d')
-        #data_date = '20191223'
+        #data_date = '20191224'
 
         self.open_conn()
         self.cur = self.conn.cursor()
@@ -138,7 +138,7 @@ class LegalPersonDaily(object):
         sql = sql.format(data_date=data_date)
         cur.execute(sql)
 
-        rows = self.cur.fetchall()
+        rows = cur.fetchall()
 
         if len(rows) > 0:
             return False
