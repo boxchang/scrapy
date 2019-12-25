@@ -3,8 +3,6 @@
 import sys
 import datetime
 
-from stock.settings import token
-
 sys.path.append("..")
 from stock.database import database
 from stock.line import lineNotifyMessage
@@ -19,6 +17,8 @@ class Monitor(object):
         db = database()
         self.conn = db.create_connection()
         self.cur = self.conn.cursor()
+
+        token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
 
         msg = "【Daily Monitor】"
         if self.validate(data_date):

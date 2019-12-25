@@ -91,5 +91,3 @@ ROBOTSTXT_OBEY = False
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 USER_AGENT = 'MOZilla/5.0(x11; Linux x86_64; rv:7.0.1)Gecko/20100101 Firefox/7.7'
-
-token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
