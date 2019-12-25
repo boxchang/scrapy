@@ -6,6 +6,30 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 from stock.database import database
 
+
+class TaiexPipeline(object):
+    def open_spider(self, spider):
+        db = database()
+        self.conn = db.create_connection()
+        self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
+        self.cur.execute('CREATE TABLE if not exists taiex (data_date varchar(10) NOT NULL,open_index double NOT NULL,high_index double NOT NULL,low_index double NOT NULL,close_index double NOT NULL,created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
+
+
+    def close_spider(self, spider):
+        self.conn.commit()
+        self.conn.close()
+
+
+    def process_item(self, item, spider):
+        if spider.name == 'taiex':
+            col = ','.join(item.keys())
+            placeholders = ("%s," * len(item))[:-1]
+            sql = 'insert into taiex({}) values({})'
+            print(sql.format(col, placeholders), tuple(item.values()))
+            self.cur.execute(sql.format(col, placeholders), tuple(item.values()))
+            return item
+
+
 class FinancingPipeline(object):
     def open_spider(self, spider):
         db = database()

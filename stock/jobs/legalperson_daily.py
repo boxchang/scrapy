@@ -47,7 +47,7 @@ class LegalPersonDaily(object):
 
         token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
         for row in rows:
-            msg = "【Daily Monitor】\nStock No :{stock_no}({stock_name})\n當日買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%"
+            msg = "【Daily Monitor】\nStock No :{stock_no}({stock_name})\n累計買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%"
             msg = msg.format(stock_no=row[0], stock_name=row[1], in_gap_count=row[2], increase=row[3], financing=row[4])
 
             lineNotifyMessage(token, msg)

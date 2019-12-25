@@ -7,6 +7,15 @@
 
 import scrapy
 
+class TaiexItem(scrapy.Item):
+    data_date = scrapy.Field()
+    open_index = scrapy.Field()
+    high_index = scrapy.Field()
+    low_index = scrapy.Field()
+    close_index = scrapy.Field()
+
+
+
 class LegalPersonItem(scrapy.Item):
     data_date = scrapy.Field()
     stock_no = scrapy.Field()
