@@ -88,28 +88,23 @@ class LegalPersonDaily(object):
         rows = self.cur.fetchall()
         if rows:
             last_date = rows[0][0]  # 上次日期
-            sql = "select c.stock_no,c.percent co,l.percent lo from " \
-                  " (select * from legalperson_price where batch_no = '{current_date}') c, " \
-                  " (select * from legalperson_price where batch_no = '{last_date}') l " \
-                  " where c.stock_no = l.stock_no "
-            sql = sql.format(current_date=current_date, last_date=last_date)
+            sql = "select stock_no,percent legalperson_price where batch_no = '{current_date}' "
+
+            sql = sql.format(current_date=current_date)
 
             self.cur.execute(sql)
 
             rows = self.cur.fetchall()
 
             for row in rows:
-                current_percent = float(row[1])
-                last_percent = float(row[2])
-                if current_percent > last_percent:
-                    gap = current_percent - last_percent
-                    sql = "update legalperson_daily set increase=increase+1, decrease = 0, de_gap_count=0, in_gap_count=IFNULL(in_gap_count,0)+{gap}, updated_date = now() where stock_no = '{stock_no}'"
-                    sql = sql.format(stock_no=row[0], gap=gap)
+                percent = float(row[1])
+                if percent > 0:
+                    sql = "update legalperson_daily set increase=increase+1, decrease = 0, de_gap_count=0, in_gap_count=IFNULL(in_gap_count,0)+{percent}, updated_date = now() where stock_no = '{stock_no}'"
+                    sql = sql.format(stock_no=row[0], percent=percent)
                     db.execute_sql(sql)
                 else:
-                    gap = last_percent - current_percent
-                    sql = "update legalperson_daily set increase=0, in_gap_count=0, decrease = decrease+1, de_gap_count=IFNULL(de_gap_count,0)+{gap}, updated_date = now() where stock_no = '{stock_no}'"
-                    sql = sql.format(stock_no=row[0], gap=gap)
+                    sql = "update legalperson_daily set increase=0, in_gap_count=0, decrease = decrease+1, de_gap_count=IFNULL(de_gap_count,0)+{percent}, updated_date = now() where stock_no = '{stock_no}'"
+                    sql = sql.format(stock_no=row[0], percent=percent)
                     db.execute_sql(sql)
 
         # 完成後更新狀態
