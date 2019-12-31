@@ -199,13 +199,70 @@ class Robert(Public):
 
         token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
         for row in rows:
+            stock_no = row[0]
+            stock_name = row[1]
+            in_gap_count = row[4]
+            de_gap_count = row[5]
             if int(row[2]) > 0:
+                times = row[2]
                 msg = "Stock No :{stock_no}({stock_name}) Count Gap:{in_gap_count}% 出現連續向上{times}次"
-                msg = msg.format(stock_no=row[0], stock_name=row[1], in_gap_count=row[4], times=row[2])
+                msg = msg.format(stock_no=stock_no, stock_name=stock_name, in_gap_count=in_gap_count, times=times)
+
+                self.update_stock_flag(stock_no, in_gap_count)  #用大戶持股比例推算未來漲幅
             else:
+                times = row[3]
                 msg = "Stock No :{stock_no}({stock_name}) Count Gap:-{de_gap_count}% 出現連續向下{times}次"
-                msg = msg.format(stock_no=row[0], stock_name=row[1], de_gap_count=row[5], times=row[3])
+                msg = msg.format(stock_no=row[0], stock_name=row[1], de_gap_count=de_gap_count, times=times)
+
+                self.close_stock_flag()   #關掉旗標日
             lineNotifyMessage(token, msg)
+
+
+    def update_stock_flag(self,stock_no,in_gap_count):
+        times = 0
+        if in_gap_count <=1 :
+            times = 15
+        elif in_gap_count > 1 and in_gap_count <= 3:
+            times = 9
+        elif in_gap_count > 3 and in_gap_count <= 5:
+            times = 8
+        elif in_gap_count > 5 and in_gap_count <= 10:
+            times = 6
+        elif in_gap_count > 10 and in_gap_count <= 20:
+            times = 5
+        elif in_gap_count > 20:
+            times = 4
+
+
+        percent = in_gap_count * times
+        percent50 = percent+5
+        percent80 = percent-5
+        percent90 = percent-10
+
+        db = database()
+        conn = db.create_connection()
+        cur = conn.cursor()
+        sql = "SELECT stock_lprice FROM stockflag where stock_no ='{stock_no}' and enable is null"
+        sql = sql.format(stock_no=stock_no)
+        cur.execute(sql)
+
+        if cur.rowcount > 0:
+            rows = self.cur.fetchall()
+            stock_lprice = rows[0][0]
+            percent_price70 = stock_lprice*(1+percent)
+            percent_price50 = stock_lprice * (1 + percent50)
+            percent_price80 = stock_lprice * (1 + percent80)
+            percent_price90 = stock_lprice * (1 + percent90)
+
+            sql = "update stockflag set price90 ={percent_price90},price80={percent_price80},price70={percent_price70},price50={percent_price50} where stock_no ='{stock_no}' and enable is null"
+            sql = sql.format(percent_price90=percent_price90,percent_price80=percent_price80,percent_price70=percent_price70,percent_price50=percent_price50,stock_no=stock_no)
+            db.execute_sql(sql)
+
+    def close_stock_flag(self,stock_no):
+        db = database()
+        sql = "update stockflag set enable = 'N' where stock_no = '{stock_no}' and enable is null"
+        sql = sql.format(stock_no=stock_no)
+        db.execute_sql(sql)
 
     def execute(self):
         self.create_list_table()

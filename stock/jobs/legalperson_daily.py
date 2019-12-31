@@ -15,7 +15,7 @@ class LegalPersonDaily(object):
     CREATE_LEGALPERSON_DATE_TABLE = ('create table if not exists legalperson_date(data_date varchar(10), flag varchar(1), '
                                'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
 
-    CREATE_STOCK_FLAG_TABLE = ('CREATE TABLE if not exists stockflag (data_date VARCHAR(10) NOT NULL,stock_no VARCHAR(10) NOT NULL,stock_name VARCHAR(60) NOT NULL,stock_lprice FLOAT NOT NULL,close_index FLOAT NOT NULL,actual_price FLOAT NOT NULL,price90 FLOAT NOT NULL,price80 FLOAT NOT NULL,price70 FLOAT NOT NULL,price50 FLOAT NOT NULL,created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp)')
+    CREATE_STOCK_FLAG_TABLE = ('CREATE TABLE if not exists stockflag (data_date VARCHAR(10) NOT NULL,stock_no VARCHAR(10) NOT NULL,stock_name VARCHAR(60) NOT NULL,stock_lprice FLOAT NOT NULL,close_index FLOAT NOT NULL,actual_price FLOAT NOT NULL,price90 FLOAT NOT NULL,price80 FLOAT NOT NULL,price70 FLOAT NOT NULL,price50 FLOAT NOT NULL,enable VARCHAR(1), created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp)')
 
     data_date = datetime.date.today().strftime('%Y%m%d')
 
@@ -31,7 +31,7 @@ class LegalPersonDaily(object):
 
         self.open_conn()
         self.cur = self.conn.cursor()
-        self.cur.execute("SELECT batch_no FROM legalperson_price where batch_no ='"+data_date+"'")
+        self.cur.execute("SELECT batch_no FROM legalperson_price where batch_no ='"+self.data_date+"'")
         if self.cur.rowcount > 0:
             if self.validate(self.data_date):  #還沒跑過才執行
                 self.save_legalperson_date(self.data_date)
@@ -56,8 +56,15 @@ class LegalPersonDaily(object):
 
             lineNotifyMessage(token, msg)
 
-            #紀錄旗標日
-            self.saveFlagDate(self.data_date,stock_no)
+            #紀錄旗標日, 若已存在就不紀錄
+            conn = db.create_connection()
+            cur = conn.cursor()
+            sql = "SELECT batch_no FROM stockflag where stock_no ='{stock_no}' and enable is null"
+            sql = sql.format(stock_no=stock_no)
+            cur.execute(sql)
+
+            if cur.rowcount == 0:
+                self.saveFlagDate(self.data_date,stock_no)
 
     def saveFlagDate(self,data_date,stock_no):
         self.create_stock_flag_table()
