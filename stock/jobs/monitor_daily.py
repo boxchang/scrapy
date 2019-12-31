@@ -49,6 +49,12 @@ class Monitor(object):
                 msg += msg_tmp.format(data_date = data_date)
                 bResult = True
 
+            self.cur.execute("SELECT * FROM legalperson_date where flag is null")
+            if self.cur.rowcount > 0:
+                msg_tmp = "\nlegalperson_daily沒有跑完，影響legalperson_daily沒有累加資料"
+                msg += msg_tmp.format(data_date=data_date)
+                bResult = True
+
             if bResult:
                 lineNotifyMessage(token, msg)
 

@@ -15,6 +15,12 @@ class LegalPersonDaily(object):
     CREATE_LEGALPERSON_DATE_TABLE = ('create table if not exists legalperson_date(data_date varchar(10), flag varchar(1), '
                                'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
 
+    CREATE_STOCK_FLAG_TABLE = ('CREATE TABLE if not exists stockflag (data_date VARCHAR(10) NOT NULL,stock_no VARCHAR(10) NOT NULL,stock_name VARCHAR(60) NOT NULL,stock_lprice FLOAT NOT NULL,close_index FLOAT NOT NULL,actual_price FLOAT NOT NULL,price90 FLOAT NOT NULL,price80 FLOAT NOT NULL,price70 FLOAT NOT NULL,price50 FLOAT NOT NULL,created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp)')
+
+    data_date = datetime.date.today().strftime('%Y%m%d')
+
+    # data_date = '20191230'
+
     def open_conn(self):
         db = database()
         self.conn = db.create_connection()
@@ -23,16 +29,13 @@ class LegalPersonDaily(object):
         self.create_legalpersonDaily_table()
         self.create_legalpersonDate_table()
 
-        data_date = datetime.date.today().strftime('%Y%m%d')
-        #data_date = '20191224'
-
         self.open_conn()
         self.cur = self.conn.cursor()
         self.cur.execute("SELECT batch_no FROM legalperson_price where batch_no ='"+data_date+"'")
         if self.cur.rowcount > 0:
-            if self.validate(data_date):  #還沒跑過才執行
-                self.save_legalperson_date(data_date)
-                self.count_legalperson_price(data_date)
+            if self.validate(self.data_date):  #還沒跑過才執行
+                self.save_legalperson_date(self.data_date)
+                self.count_legalperson_price(self.data_date)
             self.alarm_legalperson_monitor()
 
     def alarm_legalperson_monitor(self):
@@ -47,10 +50,29 @@ class LegalPersonDaily(object):
 
         token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
         for row in rows:
+            stock_no = row[0]
             msg = "【Daily Monitor】\nStock No :{stock_no}({stock_name})\n累計買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%"
-            msg = msg.format(stock_no=row[0], stock_name=row[1], in_gap_count=row[2], increase=row[3], financing=row[4])
+            msg = msg.format(stock_no=stock_no, stock_name=row[1], in_gap_count=row[2], increase=row[3], financing=row[4])
 
             lineNotifyMessage(token, msg)
+
+            #紀錄旗標日
+            self.saveFlagDate(self.data_date,stock_no)
+
+    def saveFlagDate(self,data_date,stock_no):
+        self.create_stock_flag_table()
+        db = database()
+        sql = "insert into stockflag(data_date,stock_no,stock_name,stock_lprice,close_index) " \
+              " (select batch_no,stock_no,stock_name,stock_lprice,close_index from stockprice a, taiex b where a.stock_no = '{stock_no}' and batch_no = '{data_date}' and a.batch_no = b.data_date)"
+        sql = sql.format(stock_no=stock_no, data_date=data_date)
+        db.execute_sql(sql)
+
+
+    def create_stock_flag_table(self):
+        sql = self.CREATE_STOCK_FLAG_TABLE
+        db = database()
+        db.execute_sql(sql)
+
 
     def create_legalpersonDate_table(self):
         sql = self.CREATE_LEGALPERSON_DATE_TABLE
@@ -81,31 +103,25 @@ class LegalPersonDaily(object):
         self.conn = db.create_connection()
         self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
 
-        # 取得上一次最後日期
-        sql = "select * from legalperson_date where data_date < '{data_date}' order by data_date desc limit 1"
-        sql = sql.format(data_date=data_date)
+
+        sql = "select stock_no,percent from legalperson_price where batch_no = '{current_date}' "
+
+        sql = sql.format(current_date=current_date)
+
         self.cur.execute(sql)
+
         rows = self.cur.fetchall()
-        if rows:
-            last_date = rows[0][0]  # 上次日期
-            sql = "select stock_no,percent legalperson_price where batch_no = '{current_date}' "
 
-            sql = sql.format(current_date=current_date)
-
-            self.cur.execute(sql)
-
-            rows = self.cur.fetchall()
-
-            for row in rows:
-                percent = float(row[1])
-                if percent > 0:
-                    sql = "update legalperson_daily set increase=increase+1, decrease = 0, de_gap_count=0, in_gap_count=IFNULL(in_gap_count,0)+{percent}, updated_date = now() where stock_no = '{stock_no}'"
-                    sql = sql.format(stock_no=row[0], percent=percent)
-                    db.execute_sql(sql)
-                else:
-                    sql = "update legalperson_daily set increase=0, in_gap_count=0, decrease = decrease+1, de_gap_count=IFNULL(de_gap_count,0)+{percent}, updated_date = now() where stock_no = '{stock_no}'"
-                    sql = sql.format(stock_no=row[0], percent=percent)
-                    db.execute_sql(sql)
+        for row in rows:
+            percent = float(row[1])
+            if percent > 0:
+                sql = "update legalperson_daily set increase=increase+1, decrease = 0, de_gap_count=0, in_gap_count=IFNULL(in_gap_count,0)+{percent}, updated_date = now() where stock_no = '{stock_no}'"
+                sql = sql.format(stock_no=row[0], percent=percent)
+                db.execute_sql(sql)
+            else:
+                sql = "update legalperson_daily set increase=0, in_gap_count=0, decrease = decrease+1, de_gap_count=IFNULL(de_gap_count,0)+{percent}, updated_date = now() where stock_no = '{stock_no}'"
+                sql = sql.format(stock_no=row[0], percent=percent)
+                db.execute_sql(sql)
 
         # 完成後更新狀態
         sql = "update legalperson_date set flag = 'Y' where data_date='{data_date}'"

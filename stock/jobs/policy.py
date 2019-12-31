@@ -17,10 +17,10 @@ class Public(object):
     CREATE_LIST_TABLE = ('create table if not exists {}(stock_no varchar(10), '
                          'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
     CREATE_SUM_TABLE = ('create table if not exists stockholder_sum(data_date varchar(20), stock_no varchar(10), percent float,'
-                         'stock_num bigint, holder_num bigint, created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
+                         'stock_num bigint, holder_num bigint, created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, stock_num_total bigint)')
     CREATE_SUM_COUNT_TABLE = (
         'create table if not exists stockholder_sum_count(stock_no varchar(10), increase int DEFAULT 0, decrease int DEFAULT 0, '
-        ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp, de_gap_count float NULL DEFAULT 0 , in_gap_count float NULL DEFAULT 0) ')
+        ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp, de_gap_count float NULL DEFAULT 0 , in_gap_count float NULL DEFAULT 0,stock_num_gap FLOAT NULL DEFAULT 0) ')
 
     def execute(self):
         self.open_conn()
@@ -69,7 +69,7 @@ class Public(object):
         rows = self.cur.fetchall()
         if rows:
             last_date = rows[0][0]  # 上次日期
-            sql = "select c.stock_no,c.percent co,l.percent lo from " \
+            sql = "select c.stock_no,c.percent co,l.percent lo,c.stock_num_total ct,l.stock_num_total lt from " \
                   " (select * from stockholder_sum where data_date = '{current_date}') c, " \
                   " (select * from stockholder_sum where data_date = '{last_date}') l " \
                   " where c.stock_no = l.stock_no "
@@ -82,15 +82,18 @@ class Public(object):
             for row in rows:
                 current_percent = float(row[1])
                 last_percent = float(row[2])
+                current_total = float(row[3])
+                last_total = float(row[4])
+                stock_num_gap = current_total - last_total
                 if current_percent > last_percent:
                     gap = current_percent - last_percent
-                    sql = "update stockholder_sum_count set increase=increase+1, decrease = 0, de_gap_count=0, in_gap_count=IFNULL(in_gap_count,0)+{gap}, updated_date = now() where stock_no = '{stock_no}'"
-                    sql = sql.format(stock_no=row[0],gap=gap)
+                    sql = "update stockholder_sum_count set increase=increase+1, decrease = 0, de_gap_count=0, in_gap_count=IFNULL(in_gap_count,0)+{gap}, stock_num_gap = {stock_num_gap}, updated_date = now() where stock_no = '{stock_no}'"
+                    sql = sql.format(stock_no=row[0], gap=gap, stock_num_gap=stock_num_gap)
                     db.execute_sql(sql)
                 else:
                     gap = last_percent - current_percent
-                    sql = "update stockholder_sum_count set increase=0, in_gap_count=0, decrease = decrease+1, de_gap_count=IFNULL(de_gap_count,0)+{gap}, updated_date = now() where stock_no = '{stock_no}'"
-                    sql = sql.format(stock_no=row[0], gap=gap)
+                    sql = "update stockholder_sum_count set increase=0, in_gap_count=0, decrease = decrease+1, de_gap_count=IFNULL(de_gap_count,0)+{gap}, stock_num_gap = {stock_num_gap}, updated_date = now() where stock_no = '{stock_no}'"
+                    sql = sql.format(stock_no=row[0], gap=gap, stock_num_gap=stock_num_gap)
                     db.execute_sql(sql)
 
         # 完成後更新狀態
@@ -137,10 +140,18 @@ class Public(object):
         db.execute_sql(sql)
 
         # 將本次整理的資料塞進去
-        insert_sql = ('insert into stockholder_sum(data_date,stock_no,percent,stock_num,holder_num) ('
-                      ' select data_date, stock_no,sum(percent), sum(stock_num) , sum(holder_num) '
-                      ' from stockholder a where level > 11 and level < 16 '
-                      ' group by stock_no)')
+        # insert_sql = ('insert into stockholder_sum(data_date,stock_no,percent,stock_num,holder_num) ('
+        #               ' select data_date, stock_no,sum(percent), sum(stock_num) , sum(holder_num) '
+        #               ' from stockholder a where level > 11 and level < 16 '
+        #               ' group by stock_no)')
+
+        insert_sql = 'insert into stockholder_sum(data_date,stock_no,percent,stock_num,holder_num,stock_num_total) (' \
+                     'select a.data_date,a.stock_no,percent_sum,stock_num_sum,holder_num_sum, stock_num_total from (' \
+                     'select data_date, stock_no,sum(percent) percent_sum, sum(stock_num) stock_num_sum , sum(holder_num) holder_num_sum ' \
+                     'from stockholder a where level > 11 and level < 16 group by stock_no) a, ' \
+                     '(select data_date, stock_no, stock_num stock_num_total from stockholder a where level = 17) b ' \
+                     'where a.stock_no = b.stock_no'
+
 
         print(insert_sql)
 
@@ -174,10 +185,11 @@ class Robert(Public):
         'percent': 50
     }
 
+    #還需排除增資或減資所帶來的持股比例波動 , 目前stock_num_gap還沒有值，等有值時，要補上不為0才發送訊息
     def foundout(self):
         db = database()
         self.conn = db.create_connection()
-        sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,b.in_gap_count,b.de_gap_count from robert_stock_list a, stockholder_sum_count b, stockcode c " \
+        sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,b.in_gap_count,b.de_gap_count,b.stock_num_gap from robert_stock_list a, stockholder_sum_count b, stockcode c " \
               "where a.stock_no = c.stock_no and a.stock_no = b.stock_no " \
               " and (increase > 2 or decrease > 2) and (in_gap_count>3 or de_gap_count>3) "
 
