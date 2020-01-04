@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*
 import sqlite3
 from sqlite3 import Error
 import MySQLdb
@@ -7,7 +6,7 @@ class database:
 
     def execute_sql(self, sql):
         self.conn = self.create_connection()
-        self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
+        self.cur = self.conn.cursor()
         self.cur.execute(sql)
         self.conn.commit()
 

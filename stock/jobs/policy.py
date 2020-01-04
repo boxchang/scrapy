@@ -1,16 +1,17 @@
-# -*- coding: utf-8 -*
+# encoding=utf8
 #!/usr/bin/python
 import sys
-
+reload(sys)
+sys.setdefaultencoding('utf8')
 sys.path.append("..")
 
-# 檢查例外狀況
+# check exception
 # select stock_no ,count(*) from stockholder group by stock_no having count(*) <> 17
 from stock.database import database
 from stock.line import lineNotifyMessage
 
 
-#週排程
+#weekly job
 class Public(object):
     CREATE_HOLDERDATE_TABLE = ('create table if not exists stockholder_date(data_date varchar(10), flag varchar(1), '
                          'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
@@ -33,15 +34,16 @@ class Public(object):
             self.create_sum_table()
             self.create_stockholderdate_table()
 
-            if self.validate(data_date):  # JOB每天都會跑，但只有讀到新資料時才會寫入
-                self.stockholder_sum(data_date)  #  進行400張以上的大戶比例統計，抓到另一張表
-                self.save_stockholder_date(data_date)  #  加入本次統計的日期
-                self.stockholder_sum_count(data_date)  #  進行比對，把上次大戶的比例跟這次比例相比，將結果計算在另一張表
+            if self.validate(data_date):  # update only have new data
+                self.stockholder_sum(data_date)  #  count over 400 of legalperson insert to the other table
+                self.save_stockholder_date(data_date)  # insert this time data date
+                self.stockholder_sum_count(data_date)  # compare this time and last time gap，record the result to the other table
 
 
 
 
-    # 準備好要做累加的Table
+
+    # prepare count table
     def prepare_stock_list_count(self):
         sql = self.CREATE_SUM_COUNT_TABLE
         db = database()
@@ -51,24 +53,24 @@ class Public(object):
               " (select stock_no from stockcode a where not exists (select * from stockholder_sum_count b where a.stock_no = b.stock_no))"
         db.execute_sql(sql)
 
-    # 判斷連續上升或下降
+    # judge continuely up or down
     def stockholder_sum_count(self, data_date):
         db = database()
-        # 取得股票清單
+        # get stock list
         self.prepare_stock_list_count()
 
-        current_date = data_date  # 本次日期
+        current_date = data_date  # get this time date
 
         self.conn = db.create_connection()
-        self.cur = self.conn.cursor()  # 建立cursor對資料庫做操作
+        self.cur = self.conn.cursor()
 
-        #取得上一次最後日期
+        #get last date
         sql = "select * from stockholder_date where data_date < '{data_date}' order by data_date desc limit 1"
         sql = sql.format(data_date = data_date)
         self.cur.execute(sql)
         rows = self.cur.fetchall()
         if rows:
-            last_date = rows[0][0]  # 上次日期
+            last_date = rows[0][0]  # last data date
             sql = "select c.stock_no,c.percent co,l.percent lo,c.stock_num_total ct,l.stock_num_total lt from " \
                   " (select * from stockholder_sum where data_date = '{current_date}') c, " \
                   " (select * from stockholder_sum where data_date = '{last_date}') l " \
@@ -82,8 +84,14 @@ class Public(object):
             for row in rows:
                 current_percent = float(row[1])
                 last_percent = float(row[2])
-                current_total = float(row[3])
-                last_total = float(row[4])
+                current_total = 0
+                if row[3] is not None:
+                    current_total = float(row[3])
+
+                last_total = 0
+                if row[4] is not None:
+                    last_total = float(row[4])
+
                 stock_num_gap = current_total - last_total
                 if current_percent > last_percent:
                     gap = current_percent - last_percent
@@ -96,7 +104,7 @@ class Public(object):
                     sql = sql.format(stock_no=row[0], gap=gap, stock_num_gap=stock_num_gap)
                     db.execute_sql(sql)
 
-        # 完成後更新狀態
+        # update status when finish
         sql = "update stockholder_date set flag = 'Y' where data_date='{data_date}'"
         sql = sql.format(data_date=data_date)
         db.execute_sql(sql)
@@ -118,28 +126,27 @@ class Public(object):
         db.execute_sql(sql)
         print(sql)
 
-    # 將Holder Date資料塞到stockerholder_date
+    # Holder Date insert to stockerholder_date
     def save_stockholder_date(self, data_date):
         db = database()
-        # 執行前先清除Table，該次的日期去刪除，所以先前的資料都還在
+        # clear table before execute
         sql = "delete from stockholder_date where data_date = '{data_date}'"
         sql = sql.format(data_date=data_date)
         db.execute_sql(sql)
 
-        # 將本次整理的資料塞進去
+        # put this time result to table
         insert_sql = "insert into stockholder_date(data_date) values('{data_date}')"
         insert_sql = insert_sql.format(data_date=data_date)
         db.execute_sql(insert_sql)
 
-    # 將統計的結果放在sum，將大戶比例計算好塞到stockholder_sum
+    # count the result and insert to stockholder_sum
     def stockholder_sum(self, data_date):
         db = database()
-        # 執行前先清除Table，該次的日期去刪除，所以先前的資料都還在
+        # clear table before execute
         sql = "delete from stockholder_sum where data_date = str_to_date('{data_date}', '%Y-%m-%d')"
         sql = sql.format(data_date=data_date)
         db.execute_sql(sql)
 
-        # 將本次整理的資料塞進去
         # insert_sql = ('insert into stockholder_sum(data_date,stock_no,percent,stock_num,holder_num) ('
         #               ' select data_date, stock_no,sum(percent), sum(stock_num) , sum(holder_num) '
         #               ' from stockholder a where level > 11 and level < 16 '
@@ -150,7 +157,7 @@ class Public(object):
                      'select data_date, stock_no,sum(percent) percent_sum, sum(stock_num) stock_num_sum , sum(holder_num) holder_num_sum ' \
                      'from stockholder a where level > 11 and level < 16 group by stock_no) a, ' \
                      '(select data_date, stock_no, stock_num stock_num_total from stockholder a where level = 17) b ' \
-                     'where a.stock_no = b.stock_no'
+                     'where a.stock_no = b.stock_no)'
 
 
         print(insert_sql)
@@ -179,13 +186,12 @@ class Public(object):
 class Robert(Public):
     CONFIG = {
         'owner': 'robert',
-        'stock_table': 'robert_stock_list', # 股票清單
+        'stock_table': 'robert_stock_list', # stock list
         'holder_num' : 200,
         'stock_num': 1000000000,
         'percent': 50
     }
 
-    #還需排除增資或減資所帶來的持股比例波動 , 目前stock_num_gap還沒有值，等有值時，要補上不為0才發送訊息
     def foundout(self):
         db = database()
         self.conn = db.create_connection()
@@ -205,16 +211,16 @@ class Robert(Public):
             de_gap_count = row[5]
             if int(row[2]) > 0:
                 times = row[2]
-                msg = "Stock No :{stock_no}({stock_name}) Count Gap:{in_gap_count}% 出現連續向上{times}次"
+                msg = "Stock No :{stock_no}({stock_name}) Count Gap:{in_gap_count}% show up continuously {times} times"
                 msg = msg.format(stock_no=stock_no, stock_name=stock_name, in_gap_count=in_gap_count, times=times)
 
-                self.update_stock_flag(stock_no, in_gap_count)  #用大戶持股比例推算未來漲幅
+                self.update_stock_flag(stock_no, in_gap_count)  #use percent of legalholder to calculate the up and down of stock
             else:
                 times = row[3]
-                msg = "Stock No :{stock_no}({stock_name}) Count Gap:-{de_gap_count}% 出現連續向下{times}次"
+                msg = "Stock No :{stock_no}({stock_name}) Count Gap:-{de_gap_count}% show down continuously {times} times"
                 msg = msg.format(stock_no=row[0], stock_name=row[1], de_gap_count=de_gap_count, times=times)
 
-                self.close_stock_flag()   #關掉旗標日
+                self.close_stock_flag(stock_no)   #close flag date
             lineNotifyMessage(token, msg)
 
 
@@ -275,8 +281,8 @@ class Robert(Public):
         db = database()
         db.execute_sql(sql)
 
-    # 把符合條件的股票放入口袋名單
-    # stockholder只會保留當前的資料
+    # match condition stock put into the list
+    # stockholder only keep the newest data
     def put_into_list(self):
         db = database()
         self.conn = db.create_connection()
@@ -297,10 +303,10 @@ class Robert(Public):
 
 
 
-# 將大戶比例計算好塞到stockholder_sum
+# count into stockholder_sum
 public = Public()
 public.execute()
 
-# 將設定好的規則放入口袋名單內
+# filter by condition to get stock
 robert = Robert()
 robert.execute()
