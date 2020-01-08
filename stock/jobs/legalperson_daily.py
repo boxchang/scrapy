@@ -15,7 +15,7 @@ class LegalPersonDaily(object):
     CREATE_LEGALPERSON_DATE_TABLE = ('create table if not exists legalperson_date(data_date varchar(10), flag varchar(1), '
                                'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
 
-    CREATE_STOCK_FLAG_TABLE = ('CREATE TABLE if not exists stockflag (data_date VARCHAR(10) NOT NULL,stock_no VARCHAR(10) NOT NULL,stock_name VARCHAR(60) NOT NULL,stock_lprice FLOAT NOT NULL,close_index FLOAT NOT NULL,actual_price FLOAT NOT NULL,price90 FLOAT NOT NULL,price80 FLOAT NOT NULL,price70 FLOAT NOT NULL,price50 FLOAT NOT NULL,enable VARCHAR(1), created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp)')
+    CREATE_STOCK_FLAG_TABLE = ('CREATE TABLE if not exists stockflag (data_date VARCHAR(10) NOT NULL,stock_no VARCHAR(10) NOT NULL,stock_name VARCHAR(60) NOT NULL,stock_lprice FLOAT NOT NULL,close_index FLOAT NOT NULL,actual_price FLOAT,price90 FLOAT,price80 FLOAT,price70 FLOAT,price50 FLOAT,enable VARCHAR(1), created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp)')
 
     data_date = datetime.date.today().strftime('%Y%m%d')
 
@@ -36,7 +36,7 @@ class LegalPersonDaily(object):
             if self.validate(self.data_date):  #還沒跑過才執行
                 self.save_legalperson_date(self.data_date)
                 self.count_legalperson_price(self.data_date)
-            self.alarm_legalperson_monitor()
+                self.alarm_legalperson_monitor()
 
     def alarm_legalperson_monitor(self):
         db = database()
@@ -52,14 +52,14 @@ class LegalPersonDaily(object):
         for row in rows:
             stock_no = row[0]
             msg = "【Daily Monitor】\nStock No :{stock_no}({stock_name})\n累計買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%"
-            msg = msg.format(stock_no=stock_no, stock_name=row[1], in_gap_count=row[2], increase=row[3], financing=row[4])
+            msg = msg.format(stock_no=stock_no, stock_name=row[1].encode('utf-8'), in_gap_count=row[2], increase=row[3], financing=row[4])
 
             lineNotifyMessage(token, msg)
 
             #紀錄旗標日, 若已存在就不紀錄
             conn = db.create_connection()
             cur = conn.cursor()
-            sql = "SELECT batch_no FROM stockflag where stock_no ='{stock_no}' and enable is null"
+            sql = "SELECT data_date FROM stockflag where stock_no ='{stock_no}' and enable is null"
             sql = sql.format(stock_no=stock_no)
             cur.execute(sql)
 
