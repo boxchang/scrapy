@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*
 import sys
 
+from funcs.dividend import countAvgDividend, getOffer6YearDividend
+
+from funcs.stockinfo import getTodayPrice
+
 sys.path.append("..")
 import datetime
 from stock.database import database
@@ -29,6 +33,7 @@ class LegalPersonDaily(object):
         self.create_legalpersonDaily_table()
         self.create_legalpersonDate_table()
 
+        #計算旗標日
         self.open_conn()
         self.cur = self.conn.cursor()
         self.cur.execute("SELECT batch_no FROM legalperson_price where batch_no ='"+self.data_date+"'")
@@ -51,8 +56,12 @@ class LegalPersonDaily(object):
         token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
         for row in rows:
             stock_no = row[0]
-            msg = "【Daily Monitor】\nStock No :{stock_no}({stock_name})\n累計買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%"
-            msg = msg.format(stock_no=stock_no, stock_name=row[1].encode('utf-8'), in_gap_count=row[2], increase=row[3], financing=row[4])
+            dividend_avg = countAvgDividend(stock_no)
+            dividend_years = getOffer6YearDividend(stock_no)
+            today_price = getTodayPrice(self.data_date, stock_no)
+            dividend_avg_rate = round(dividend_avg/today_price,2)
+            msg = "【Daily Monitor】觸發旗標日\nStock No :{stock_no}({stock_name})\n累計買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%\n股息發放年數 : {dividend_years}\n平均股息率 : {dividend_avg_rate}"
+            msg = msg.format(stock_no=stock_no, stock_name=row[1].encode('utf-8'), in_gap_count=row[2], increase=row[3], financing=row[4], dividend_years=dividend_years ,dividend_avg_rate=dividend_avg_rate)
 
             lineNotifyMessage(token, msg)
 

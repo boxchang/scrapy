@@ -197,7 +197,7 @@ class Robert(Public):
         self.conn = db.create_connection()
         sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,b.in_gap_count,b.de_gap_count,b.stock_num_gap from robert_stock_list a, stockholder_sum_count b, stockcode c " \
               "where a.stock_no = c.stock_no and a.stock_no = b.stock_no " \
-              " and (increase > 2 or decrease > 2) and (in_gap_count>3 or de_gap_count>3) "
+              " and (increase > 2 or decrease > 2) and (in_gap_count>2 or de_gap_count>2) "
 
         self.cur = self.conn.cursor()
         self.cur.execute(sql)
