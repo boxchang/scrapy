@@ -24,13 +24,13 @@ class LegalPerson(scrapy.Spider):
     }
 
     data_date = datetime.date.today().strftime('%Y%m%d')
-    #data_date = "20191213"
+    #  data_date = "20200120"
 
     start_urls = ['http://www.tse.com.tw/fund/T86?response=csv&date='+data_date+'&selectType=ALLBUT0999']
 
     def parse(self, response):
 
-        if response.text != '':  # 有資料才跑，不然會遇到假日全都沒資料
+        if response.text != '\r\n':  # 有資料才跑，不然會遇到假日全都沒資料
             db = database()
             sql = "delete from legalperson"
             db.execute_sql(sql)
