@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*
 import sys
-
+sys.path.append("..")
 from funcs.dividend import countAvgDividend, getOffer6YearDividend
-
 from funcs.stockinfo import getTodayPrice
 
-sys.path.append("..")
 import datetime
 from stock.database import database
 from stock.line import lineNotifyMessage
