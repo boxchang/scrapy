@@ -28,12 +28,16 @@ my_params = {'ro': '0',  # 限定全職的工作，如果不限定則輸入0
 
 
 url = requests.get('https://www.104.com.tw/jobs/search/?', my_params, headers=headers).url
+
+#開啟Chrome於前端顯示
 #driver = webdriver.Chrome()
+
+#在背景執行
 chrome_options = Options()
 chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 chrome_options.add_argument('--headless')
-driver = webdriver.Chrome(chrome_options=chrome_options)
+driver = webdriver.Chrome(chrome_options=chrome_options) #若這行有問題去下載chromedriver放置/usr/local/bin
 driver.get(url)
 
 # 網頁的設計方式是滑動到下方時，會自動加載新資料，在這裡透過程式送出Java語法幫我們執行「滑到下方」的動作
@@ -80,28 +84,33 @@ while i < len(List):
         #www.104.com.tw/job/ajax/similarJobs/5cmwg
         batchNo = time.strftime("%Y%m%d%H%M%S", time.localtime())
         url = 'https://' + content.attrs['href'].strip('//')
-        jobNo = url[url.rfind("/") + 1:url.rfind("?")]
-        ajax_url = "https://www.104.com.tw/job/ajax/content/" + jobNo
-        res = requests.get(ajax_url)
-        job = json.loads(res.text)
-        item = {}
-        item['custName'] = job['data']['header']['custName']
-        item['jobNo'] = jobNo
-        item['jobName'] = job['data']['header']['jobName']
-        item['description'] = job['data']['jobDetail']['jobDescription']
-        item['jobAddrNoDesc'] = job['data']['jobDetail']['addressRegion']
-        item['jobLink'] = url
-        item['addr'] = job['data']['jobDetail']['addressDetail']
-        item['history'] = job['data']['condition']['workExp']
-        item['tool'] = ''
-        item['other'] = job['data']['condition']['other']
-        item['benefit'] = job['data']['welfare']['welfare']
-        item['update_date'] = job['data']['header']['appearDate']
-        item['batchNo'] = batchNo
-        print(item)
+        if url.find("www.104.com.tw") > 0:
+            jobNo = url[url.rfind("/") + 1:url.rfind("?")]
+            ajax_url = "https://www.104.com.tw/job/ajax/content/" + jobNo
+            res = requests.get(ajax_url)
+            job = json.loads(res.text)
+            item = {}
+            item['custName'] = job['data']['header']['custName']
+            item['jobNo'] = jobNo
+            item['jobName'] = job['data']['header']['jobName']
+            item['description'] = job['data']['jobDetail']['jobDescription']
+            item['jobAddrNoDesc'] = job['data']['jobDetail']['addressRegion']
+            item['jobLink'] = url
+            item['addr'] = job['data']['jobDetail']['addressDetail']
+            item['history'] = job['data']['condition']['workExp']
+            item['tool'] = ''
+            item['other'] = job['data']['condition']['other']
+            item['benefit'] = job['data']['welfare']['welfare']
+            item['update_date'] = job['data']['header']['appearDate']
+            item['batchNo'] = batchNo
+            print(item)
 
-        i += 1
-        print("Success and Crawl Next 目前正在爬第" + str(i) + "個職缺資訊")
+            i += 1
+            print("Success and Crawl Next 目前正在爬第" + str(i) + "個職缺資訊")
+        else:
+            i += 1
+            continue
+
         time.sleep(0.5)  # 執行完休息0.5秒，避免造成對方主機負擔
     except:
         print("Fail and Try Again!")
