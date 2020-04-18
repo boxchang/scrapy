@@ -8,22 +8,32 @@ from bs4 import BeautifulSoup
 import json
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from web104.database import database
 
 # 加入使用者資訊(如使用什麼瀏覽器、作業系統...等資訊)模擬真實瀏覽網頁的情況
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36'}
 
-# 查詢的關鍵字
-# my_params = {'ro': '1',  # 限定全職的工作，如果不限定則輸入0
-#              'keyword': '資料科學',  # 想要查詢的關鍵字
-#              'area': '6001001000',  # 限定在台北的工作
-#              'isnew': '30',  # 只要最近一個月有更新的過的職缺
-#              'mode': 'l'}  # 清單的瀏覽模式
+# 2007000000  資訊軟體系統類
+# 2001000000  經營/人資類
+# 2001002000  人力資源類人員
+
+# 6001016000	高雄市
+# 6001008000	台中市
+# 6001001000	台北市
+# 6001002000	新北市
+# 6001006000	新竹縣市
+# 6003000000    其他亞洲
+# 6002000000	大陸地區
+
+# scmin=50000 最低薪資50000
+
+# isnew=3 三日最新 isnew=0 本日最新
 
 my_params = {'ro': '0',  # 限定全職的工作，如果不限定則輸入0
              'jobcat': '2007000000',  # 想要查詢的關鍵字
-             'area': '6003000000%2C6002000000',  # 限定在台北的工作
-             'isnew': '0',  # 只要最近一個月有更新的過的職缺
+             'area': '6003000000%2C6002000000',
+             'isnew': '0',
              'mode': 'l'}  # 清單的瀏覽模式
 
 
@@ -73,8 +83,35 @@ def bind(cate):
             k.append(i.text)
     return str(k)
 
-
+db = database()
+conn = db.create_connection()
 i = 0
+
+
+def insertTable(item, conn):
+    cursor = conn.cursor()
+
+    col = ','.join(item.keys())
+    # placeholders = ','.join(len(item) * '?')
+    placeholders = ("%s," * len(item))[:-1]
+    sql = 'insert into web104({}) values({})'
+    print(sql.format(col, placeholders), tuple(item.values()))
+    cursor.execute(sql.format(col, placeholders), tuple(item.values()))
+    conn.commit()
+
+def validate(jobNo,conn):
+
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM web104 where jobNo = '" + jobNo + "'")
+
+    rows = cur.fetchall()
+
+    if len(rows) > 0:
+        return False
+    else:
+        return True
+
+
 while i < len(List):
     # print('正在處理第' + str(i) + '筆，共 ' + str(len(List)) + ' 筆資料')
     content = List[i]
@@ -105,6 +142,9 @@ while i < len(List):
             item['batchNo'] = batchNo
             print(item)
 
+            if validate(jobNo,conn):
+                insertTable(item,conn)
+
             i += 1
             print("Success and Crawl Next 目前正在爬第" + str(i) + "個職缺資訊")
         else:
@@ -114,3 +154,7 @@ while i < len(List):
         time.sleep(0.5)  # 執行完休息0.5秒，避免造成對方主機負擔
     except:
         print("Fail and Try Again!")
+
+
+conn.close()
+
