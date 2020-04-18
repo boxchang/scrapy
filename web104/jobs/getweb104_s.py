@@ -6,6 +6,7 @@ import re, time, requests
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import json
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 # 加入使用者資訊(如使用什麼瀏覽器、作業系統...等資訊)模擬真實瀏覽網頁的情況
@@ -28,7 +29,11 @@ my_params = {'ro': '0',  # 限定全職的工作，如果不限定則輸入0
 
 url = requests.get('https://www.104.com.tw/jobs/search/?', my_params, headers=headers).url
 #driver = webdriver.Chrome()
-driver = webdriver.Chrome(ChromeDriverManager().install())
+chrome_options = Options()
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
+chrome_options.add_argument('--headless')
+driver = webdriver.Chrome(chrome_options=chrome_options)
 driver.get(url)
 
 # 網頁的設計方式是滑動到下方時，會自動加載新資料，在這裡透過程式送出Java語法幫我們執行「滑到下方」的動作
