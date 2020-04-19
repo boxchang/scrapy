@@ -195,7 +195,7 @@ class Robert(Public):
     def foundout(self):
         db = database()
         self.conn = db.create_connection()
-        sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,b.in_gap_count,b.de_gap_count,b.stock_num_gap from robert_stock_list a, stockholder_sum_count b, stockcode c " \
+        sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,b.in_gap_count,b.de_gap_count,b.stock_num_gap,b.updated_date from robert_stock_list a, stockholder_sum_count b, stockcode c " \
               "where a.stock_no = c.stock_no and a.stock_no = b.stock_no " \
               " and (increase > 2 or decrease > 2) and (in_gap_count>2 or de_gap_count>2) "
 
@@ -209,16 +209,18 @@ class Robert(Public):
             stock_name = row[1]
             in_gap_count = row[4]
             de_gap_count = row[5]
+            stock_num_gap = row[6]
+            updated_date = row[7]
             if int(row[2]) > 0:
                 times = row[2]
-                msg = "Stock No :{stock_no}({stock_name}) Count Gap:{in_gap_count}% show up continuously {times} times"
-                msg = msg.format(stock_no=stock_no, stock_name=stock_name, in_gap_count=in_gap_count, times=times)
+                msg = "Stock No :{stock_no}({stock_name})\nCount Gap:{in_gap_count}%\nrise continuously {times} weeks\nStock Amount Changed Gap : {stock_num_gap}\nUpdated Date : {updated_date}"
+                msg = msg.format(stock_no=stock_no, stock_name=stock_name, in_gap_count=in_gap_count, times=times, stock_num_gap=stock_num_gap, updated_date=updated_date)
 
                 self.update_stock_flag(stock_no, in_gap_count)  #use percent of legalholder to calculate the up and down of stock
             else:
                 times = row[3]
-                msg = "Stock No :{stock_no}({stock_name}) Count Gap:-{de_gap_count}% show down continuously {times} times"
-                msg = msg.format(stock_no=row[0], stock_name=row[1], de_gap_count=de_gap_count, times=times)
+                msg = "Stock No :{stock_no}({stock_name})\nCount Gap:-{de_gap_count}%\nfall continuously {times} weeks\nStock Amount Changed Gap : {stock_num_gap}\nUpdated Date : {updated_date}"
+                msg = msg.format(stock_no=row[0], stock_name=row[1], de_gap_count=de_gap_count, times=times, stock_num_gap=stock_num_gap, updated_date=updated_date)
 
                 self.close_stock_flag(stock_no)   #close flag date
             lineNotifyMessage(token, msg)
