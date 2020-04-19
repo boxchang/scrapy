@@ -44,7 +44,7 @@ class LegalPersonDaily(object):
     def alarm_legalperson_monitor(self):
         db = database()
         self.conn = db.create_connection()
-        sql = "select a.stock_no, c.stock_name,a.in_gap_count,increase,round(b.today_borrow_stock/b.today_borrow_money*100,2) financing from legalperson_daily a, financing b, stockcode c where (a.in_gap_count > 1.5) " \
+        sql = "select a.stock_no, c.stock_name,a.in_gap_count,increase,round(b.today_borrow_stock/b.today_borrow_money*100,2) financing,a.updated_date from legalperson_daily a, financing b, stockcode c where (a.in_gap_count > 1.5) " \
               "and b.today_borrow_stock/b.today_borrow_money*100 <20 and a.stock_no = b.stock_no and a.stock_no = c.stock_no"
 
         self.cur = self.conn.cursor()
@@ -58,8 +58,9 @@ class LegalPersonDaily(object):
             dividend_years = getOffer6YearDividend(stock_no)
             today_price = getTodayPrice(self.data_date, stock_no)
             dividend_avg_rate = round(dividend_avg/today_price,2)
-            msg = "【Daily Monitor】觸發旗標日\nStock No :{stock_no}({stock_name})\n累計買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%\n股息發放年數 : {dividend_years}\n平均股息率 : {dividend_avg_rate}"
-            msg = msg.format(stock_no=stock_no, stock_name=row[1].encode('utf-8'), in_gap_count=row[2], increase=row[3], financing=row[4], dividend_years=dividend_years ,dividend_avg_rate=dividend_avg_rate)
+            updated_date = row[5]
+            msg = "【Daily Monitor】觸發旗標日\nStock No :{stock_no}({stock_name})\n累計買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%\n股息發放年數 : {dividend_years}\n平均股息率 : {dividend_avg_rate}\nUpdated Date: {updated_date}"
+            msg = msg.format(stock_no=stock_no, stock_name=row[1].encode('utf-8'), in_gap_count=row[2], increase=row[3], financing=row[4], dividend_years=dividend_years, dividend_avg_rate=dividend_avg_rate, updated_date=updated_date)
 
             lineNotifyMessage(token, msg)
 
