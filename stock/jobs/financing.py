@@ -26,7 +26,7 @@ class Financing(object):
                 rows = self.cur.fetchall()
                 token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
                 for row in rows:
-                    msg = "{data_date} Stock No : {stock_no}({stock_name}) 融券餘額{today_borrow_stock},融資餘額{today_borrow_money} 目前資券比{percent}超過80%"
+                    msg = "{data_date}\nStock No : {stock_no}({stock_name})\n融券餘額{today_borrow_stock},融資餘額{today_borrow_money}\n目前資券比{percent}超過80%"
                     msg = msg.format(stock_no=row[0], stock_name=row[1], percent=row[2], data_date=row[3], today_borrow_stock=row[4], today_borrow_money=row[5])
                     lineNotifyMessage(token, msg)
 
