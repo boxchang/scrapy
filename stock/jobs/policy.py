@@ -255,13 +255,13 @@ class Robert(Public):
         cur.execute(sql)
 
         if cur.rowcount > 0:
-            rows = self.cur.fetchall()
+            rows = cur.fetchall()
             for row in rows:
                 stock_lprice = row[0]
-                percent_price70 = stock_lprice*(1+percent)
-                percent_price50 = stock_lprice * (1 + percent50)
-                percent_price80 = stock_lprice * (1 + percent80)
-                percent_price90 = stock_lprice * (1 + percent90)
+                percent_price70 = round(stock_lprice * (1 + (percent / 100)), 1)
+                percent_price50 = round(stock_lprice * (1 + (percent50 / 100)), 1)
+                percent_price80 = round(stock_lprice * (1 + (percent80 / 100)), 1)
+                percent_price90 = round(stock_lprice * (1 + (percent90 / 100)), 1)
 
                 sql = "update stockflag set price90 ={percent_price90},price80={percent_price80},price70={percent_price70},price50={percent_price50} where stock_no ='{stock_no}' and enable is null"
                 sql = sql.format(percent_price90=percent_price90,percent_price80=percent_price80,percent_price70=percent_price70,percent_price50=percent_price50,stock_no=stock_no)
