@@ -4,6 +4,7 @@ from stock.database import database
 import MySQLdb
 from stock.line import lineNotifyMessage
 import sys
+sys.path.append("..")
 reload(sys)
 sys.setdefaultencoding("utf-8")
 #監控旗標日的股票
