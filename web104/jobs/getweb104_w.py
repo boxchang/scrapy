@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import sys
+sys.path.append("..")
 import pandas as pd
 import re, time, requests
 from selenium import webdriver
