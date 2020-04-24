@@ -55,6 +55,12 @@ class Monitor(object):
                 msg += msg_tmp.format(data_date=data_date)
                 bResult = True
 
+            self.cur.execute("SELECT * from (SELECT a.data_date,b.batch_no FROM taiex a LEFT outer JOIN stockprice b ON a.data_date = b.batch_no AND b.stock_no = '000050') a WHERE a.batch_no IS null")
+            if self.cur.rowcount > 0:
+                msg_tmp = "\n用taiex比對stockprice發現資料有少"
+                msg += msg_tmp
+                bResult = True
+
             if bResult:
                 lineNotifyMessage(token, msg)
 
