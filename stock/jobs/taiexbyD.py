@@ -105,3 +105,4 @@ else:
 
 taiex = TaiexbyDay()
 taiex.GetTaiexByDate(data_date)
+taiex.conn_close()
