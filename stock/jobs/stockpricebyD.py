@@ -92,7 +92,6 @@ class StockPriceDay(object):
             self.conn.commit()
 
 
-
 #
 # stock_days = {'201901':('20190101','20190131'),
 #               '201902':('20190201','20190228'),
@@ -100,19 +99,22 @@ class StockPriceDay(object):
 #               '201904': ('20190401', '20190430'),
 #               '201905': ('20190501', '20190531'),
 #               '201906': ('20190601', '20190630'),
-#               '201907': ('20190701', '20190722'),
-stock_days = {'201912': ('20191201', '20191216'),
-              '201911': ('20191101', '20191130'),
-              '201910': ('20191001', '20191031'),
-              '201909': ('20190901', '20190930'),
-              '201908': ('20190801', '20190831'),
-              '201908': ('20190723', '20190731'),
-              }
+#               '201907': ('20190701', '20190722')}
+# for stock_day in stock_days.values():
+#     fromDate = stock_day[0]
+#     toDate = stock_day[1]
+#     sp.GetStockPriceByPeriod(fromDate, toDate)
+
+
+if len(sys.argv) == 1:
+    data_date = datetime.date.today().strftime('%Y%m%d')
+else:
+    data_date = sys.argv[1]
 
 sp = StockPriceDay()
-#sp.GetStockPriceByDate('20190723')
-for stock_day in stock_days.values():
-    fromDate = stock_day[0]
-    toDate = stock_day[1]
-    sp.GetStockPriceByPeriod(fromDate, toDate)
+sp.GetStockPriceByDate(data_date)
+
+
+
+
 sp.conn_close()
