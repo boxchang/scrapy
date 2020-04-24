@@ -105,45 +105,45 @@ class StockPriceDay(object):
 #     toDate = stock_day[1]
 #     sp.GetStockPriceByPeriod(fromDate, toDate)
 
-stock_days = {'20191216',
-'20190801',
-'20190802',
-'20190805',
-'20190806',
-'20190807',
-'20190808',
-'20190812',
-'20190813',
-'20190814',
-'20190815',
-'20190816',
-'20190819',
-'20190820',
-'20190821',
-'20190822',
-'20190823',
-'20190826',
-'20190827',
-'20190828',
-'20190829',
-'20190830',
-'20190731',
-'20190531',
-'20190430'
-}
+# stock_days = {'20191216',
+# '20190801',
+# '20190802',
+# '20190805',
+# '20190806',
+# '20190807',
+# '20190808',
+# '20190812',
+# '20190813',
+# '20190814',
+# '20190815',
+# '20190816',
+# '20190819',
+# '20190820',
+# '20190821',
+# '20190822',
+# '20190823',
+# '20190826',
+# '20190827',
+# '20190828',
+# '20190829',
+# '20190830',
+# '20190731',
+# '20190531',
+# '20190430'
+# }
+
+# sp = StockPriceDay()
+# for stock_day in stock_days:
+#     data_date = stock_day
+#     sp.GetStockPriceByDate(data_date)
+
+if len(sys.argv) == 1:
+    data_date = datetime.date.today().strftime('%Y%m%d')
+else:
+    data_date = sys.argv[1]
 
 sp = StockPriceDay()
-for stock_day in stock_days:
-    data_date = stock_day
-    sp.GetStockPriceByDate(data_date)
-
-# if len(sys.argv) == 1:
-#     data_date = datetime.date.today().strftime('%Y%m%d')
-# else:
-#     data_date = sys.argv[1]
-#
-# sp = StockPriceDay()
-# sp.GetStockPriceByDate(data_date)
+sp.GetStockPriceByDate(data_date)
 
 
 

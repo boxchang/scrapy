@@ -79,29 +79,29 @@ class TaiexbyDay(object):
             self.conn.commit()
 
 
-stock_days = {
-'201911': ('20191101', '20191130'),
-'201910': ('20191001', '20191031'),
-'201909': ('20190901', '20190930'),
-'201908': ('20190801', '20190831'),
-'201907': ('20190701', '20190731'),
-'201906': ('20190601', '20190630'),
-'201905': ('20190501', '20190531'),
-'201904': ('20190401', '20190430'),
-'201903': ('20190301', '20190331'),
-'201902':('20190201','20190228'),
-'201901':('20190101','20190131'),}
-
-taiex = TaiexbyDay()
-for stock_day in stock_days.values():
-    endDate = stock_day[1]
-    taiex.GetTaiexByMonth(endDate)
-
-
-# if len(sys.argv) == 1:
-#     data_date = datetime.date.today().strftime('%Y%m%d')
-# else:
-#     data_date = sys.argv[1]
+# stock_days = {
+# '201911': ('20191101', '20191130'),
+# '201910': ('20191001', '20191031'),
+# '201909': ('20190901', '20190930'),
+# '201908': ('20190801', '20190831'),
+# '201907': ('20190701', '20190731'),
+# '201906': ('20190601', '20190630'),
+# '201905': ('20190501', '20190531'),
+# '201904': ('20190401', '20190430'),
+# '201903': ('20190301', '20190331'),
+# '201902':('20190201','20190228'),
+# '201901':('20190101','20190131'),}
 #
 # taiex = TaiexbyDay()
-# taiex.GetTaiexByDate(data_date)
+# for stock_day in stock_days.values():
+#     endDate = stock_day[1]
+#     taiex.GetTaiexByMonth(endDate)
+
+
+if len(sys.argv) == 1:
+    data_date = datetime.date.today().strftime('%Y%m%d')
+else:
+    data_date = sys.argv[1]
+
+taiex = TaiexbyDay()
+taiex.GetTaiexByDate(data_date)

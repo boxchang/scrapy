@@ -32,9 +32,10 @@ class FlagMonitorDaily(object):
 
     def Message(self):
         msg = ""
-
+        today = datetime.date.today().strftime('%Y%m%d')
         lists = self.getFlagStock()
         ds = DynamicStrategy()
+        ss = StaticStrategy()
 
         for list in lists:
             msg = ""
@@ -48,9 +49,6 @@ class FlagMonitorDaily(object):
             forePercent = ds.Foreign_Percent(stock_no, flagDate)
             msg = msg + "外資買超比率 :" + str(forePercent) + "\n"
 
-            #用外資買超比率計算預期股價
-            if forePercent > 0:
-                msg = msg + self.calculate_stock_price(stock_no, forePercent)
 
             #條件二
             taiexPercent = ds.Taiex_Percent(flagDate)
@@ -76,6 +74,37 @@ class FlagMonitorDaily(object):
                 result_4 = "No"
 
             msg = msg + "外資持有時間 :" + Over1M + " (" + result_4 + ")\n"
+
+            #條件五 市值<300億
+            s300 = ss.CompanyStockValue(flagDate, stock_no)
+            if s300 == "Y":
+                result_5 = "Yes，漲幅高"
+            else:
+                result_5 = "No，漲幅低"
+            msg = msg + "市值小於300億 :" + result_5 + "\n"
+
+            #超過240天最高價
+            mostPrice = ds.MostPrice(stock_no)
+            currentPrice = ds.CurrentPrice(today, stock_no)
+            msg = msg + "240天最高價 : " + str(mostPrice) + " 今日價 : " + str(currentPrice) + "\n"
+
+            #年線乖離率
+            ma240 = ss.Ma240_Flag_Gap(today, stock_no)
+            if ma240 < -20:
+                result_6 = "年線乖離率 :" + str(ma240) + "，偏離年線很大，股價剛經過一段時間急跌\n"
+            elif ma240 > -20 and ma240 < 0:
+                result_6 = "年線乖離率 :" + str(ma240) + "，等待突破年壓力線\n"
+            elif ma240 > 0 and ma240 < 20:
+                result_6 = "年線乖離率 :" + str(ma240) + "，股價具備年線支撐\n"
+            elif ma240 > 20:
+                result_6 = "年線乖離率 :" + str(ma240) + "，股價已經上漲了一段時間\n"
+            msg = msg + result_6
+
+
+            # 用外資買超比率計算預期股價
+            if forePercent > 0:
+                msg = msg + self.calculate_stock_price(stock_no, forePercent)
+
 
             token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
             lineNotifyMessage(token, msg)
@@ -103,9 +132,7 @@ class FlagMonitorDaily(object):
         percent80 = percent-5
         percent90 = percent-10
 
-        db = database()
-        conn = db.create_connection()
-        cur = conn.cursor(MySQLdb.cursors.DictCursor)
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         sql = "SELECT stock_lprice FROM stockflag where stock_no ='{stock_no}' and enable is null"
         sql = sql.format(stock_no=stock_no)
         cur.execute(sql)
@@ -138,17 +165,30 @@ class StaticStrategy(object):
 
     # 靜態因素(第二階段再做，靜態因素主要是判斷旗標觸發後何時買進，現在先用人為判斷)
     # 市值<300億
-    def CompanyStockValue(slef):
-        pass
+    def CompanyStockValue(self, data_date, stock_no):
+        result = ""
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        sql = "select * from legalperson_price a where (a.stock_price * a.stock_num)/10 < 30000000000 and batch_no = {data_date} and stock_no = {stock_no}"
+        sql = sql.format(data_date=data_date, stock_no=stock_no)
+        cur.execute(sql)
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            result = "Y"
+        else:
+            result = "N"
 
-
+        return result
 
     #年線乖離率
     #(旗標日收盤價 / 年線 -1 ) X 100%
-    #資料量不足，尚未有年線
-    def Ma240_Flag_Gap(self):
-        pass
-
+    def Ma240_Flag_Gap(self, data_date, stock_no):
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        sql = "select a.stock_name,(c.stock_eprice/b.avg_price-1)*100 result from stockflag a, stockprice_ma240 b, stockprice c " \
+              "where a.stock_no = b.stock_no and a.stock_no ={stock_no} and a.stock_no = c.stock_no and c.batch_no = {data_date}"
+        sql = sql.format(data_date=data_date, stock_no=stock_no)
+        cur.execute(sql)
+        result = round(cur.fetchone()['result'],2)
+        return result
 
     #1年最大跌幅
     #資料量不足，尚未有年資料
@@ -179,7 +219,6 @@ class DynamicStrategy(object):
     #大盤漲幅
     #大盤漲幅 = (今日加權指數 / 旗標日的加權指數 - 1) X 100%
     def Taiex_Percent(self, flagDate):
-        today = datetime.date.today().strftime('%Y%m%d')
 
         #取得旗標日加權
         sql = "select close_index from taiex a where a.data_date = {data_date}"
@@ -191,7 +230,6 @@ class DynamicStrategy(object):
 
         # 取得今日加權
         sql = "select close_index from taiex a order by data_date desc limit 0,1"
-        sql = sql.format(data_date=flagDate)
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         print(sql)
         cur.execute(sql)
@@ -243,8 +281,24 @@ class DynamicStrategy(object):
 
     #創新高價(資料不足晚點做)
     # 創1年新高 = 旗標日至今日的最高價 > 前240日最高價
-    def MostPrice(self):
-        pass
+    def MostPrice(self, stock_no):
+        sql = "select max(stock_eprice) max_price from stockprice a where a.stock_no = '{stock_no}' order by batch_no desc limit 240"
+        sql = sql.format(stock_no=stock_no)
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        print(sql)
+        cur.execute(sql)
+        result = cur.fetchone()['max_price']
+        return result
+
+
+    def CurrentPrice(self, data_date, stock_no):
+        sql = "select stock_eprice from stockprice a where a.stock_no = '{stock_no}' and a.batch_no = {data_date}"
+        sql = sql.format(stock_no=stock_no, data_date=data_date)
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        print(sql)
+        cur.execute(sql)
+        result = cur.fetchone()['stock_eprice']
+        return result
 
 
     #基本面(這部分看財報狗，關聯財報狗網址)
