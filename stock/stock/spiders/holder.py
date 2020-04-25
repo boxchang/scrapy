@@ -68,7 +68,7 @@ class Holder(scrapy.Spider):
         # conn = db.create_sqlite_connection(file)
 
         self.cur = self.conn.cursor()
-        sql = "SELECT * FROM stockholder_hist where data_date = str_to_date('{data_date}', '%Y%m%d')"
+        sql = "SELECT * FROM stockholder where data_date = str_to_date('{data_date}', '%Y%m%d')"
         sql = sql.format(data_date = data_date)
         self.cur.execute(sql)
 

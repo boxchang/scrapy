@@ -24,6 +24,7 @@ class Public(object):
         ' created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp, de_gap_count float NULL DEFAULT 0 , in_gap_count float NULL DEFAULT 0,stock_num_gap FLOAT NULL DEFAULT 0) ')
 
     def execute(self):
+        result = False
         self.open_conn()
 
         self.cur = self.conn.cursor()
@@ -38,7 +39,9 @@ class Public(object):
                 self.stockholder_sum(data_date)  #  count over 400 of legalperson insert to the other table
                 self.save_stockholder_date(data_date)  # insert this time data date
                 self.stockholder_sum_count(data_date)  # compare this time and last time gap，record the result to the other table
+                result = True
 
+        return result
 
 
 
@@ -308,8 +311,7 @@ class Robert(Public):
 
 # count into stockholder_sum
 public = Public()
-public.execute()
-
-# filter by condition to get stock
-robert = Robert()
-robert.execute()
+if public.execute():
+    # filter by condition to get stock
+    robert = Robert()
+    robert.execute()
