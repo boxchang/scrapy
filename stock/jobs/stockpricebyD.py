@@ -7,7 +7,8 @@ import MySQLdb
 import requests
 import pandas as pd
 from io import StringIO
-
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 class StockPriceDay(object):
     def conn_close(self):
@@ -62,8 +63,8 @@ class StockPriceDay(object):
         url = 'https://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='+data_date+'&type=ALL'
         res = requests.get(url)
 
+        self.DelStockPriceByDate(data_date)
         if len(res.text) > 0 and self.validate(data_date):
-            self.DelStockPriceByDate(data_date)
 
             df = pd.read_csv(StringIO(res.text.replace("=", "")),
                                            header=["證券代號" in l for l in res.text.split("\n")].index(True)-1)
