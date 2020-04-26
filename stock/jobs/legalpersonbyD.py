@@ -7,7 +7,7 @@ from stock.database import database
 import requests
 import pandas as pd
 from io import StringIO
-
+import re, time
 
 class LegalPersonDay(object):
     def conn_close(self):
@@ -86,7 +86,7 @@ class LegalPersonDay(object):
                     self.InsLegalPersonByDate(item)
 
             self.conn.commit()
-
+            time.sleep(1)
     def execute(self):
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         sql = "SELECT data_date FROM taiex order by data_date"
