@@ -33,7 +33,7 @@ headers = {
 
 my_params = {'ro': '0',  # 限定全職的工作，如果不限定則輸入0
              'jobcat': '2007000000',  # 想要查詢的關鍵字
-             'area': '6001016000%2C6001002000%2C6001001000%2C6001008000%2C6001006000',
+             'area': '6001016000,6001002000,6001001000,6001008000,6001006000',
              'isnew': '0',
              'mode': 'l'}  # 清單的瀏覽模式
 #https://www.104.com.tw/jobs/search/list?ro=0&jobcat=2007000000&isnew=0&area=6001016000%2C6001002000%2C6001001000%2C6001008000%2C6001006000&order=11&asc=0&sctp=M&scmin=50000&scstrict=1&scneg=0&page=1&mode=s&jobsource=2018indexpoc

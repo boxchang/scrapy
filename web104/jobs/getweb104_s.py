@@ -33,7 +33,7 @@ headers = {
 
 my_params = {'ro': '0',  # 限定全職的工作，如果不限定則輸入0
              'jobcat': '2007000000',  # 想要查詢的關鍵字
-             'area': '6003000000%2C6002000000',
+             'area': '6003000000,6002000000',
              'isnew': '0',
              'mode': 'l'}  # 清單的瀏覽模式
 
@@ -41,7 +41,7 @@ my_params = {'ro': '0',  # 限定全職的工作，如果不限定則輸入0
 url = requests.get('https://www.104.com.tw/jobs/search/?', my_params, headers=headers).url
 
 #開啟Chrome於前端顯示
-#driver = webdriver.Chrome()
+# driver = webdriver.Chrome()
 
 #在背景執行
 chrome_options = Options()
@@ -49,6 +49,7 @@ chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 chrome_options.add_argument('--headless')
 driver = webdriver.Chrome(chrome_options=chrome_options) #若這行有問題去下載chromedriver放置/usr/local/bin
+
 driver.get(url)
 
 # 網頁的設計方式是滑動到下方時，會自動加載新資料，在這裡透過程式送出Java語法幫我們執行「滑到下方」的動作
