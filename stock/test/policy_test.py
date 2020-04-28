@@ -160,7 +160,7 @@ class PolicyTest(object):
 
     def getRobertList(self):
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
-        sql = "select stock_no from robert_stock_list where analyze is null"
+        sql = "select stock_no from robert_stock_list where done is null"
         # print(sql)
         cur.execute(sql)
         result = cur.fetchall()
@@ -168,7 +168,7 @@ class PolicyTest(object):
 
     def updRobertList(self,stock_no):
         cur = self.conn.cursor()
-        sql = "update robert_stock_list set analyze='Y' where stock_no = '{stock_no}'"
+        sql = "update robert_stock_list set done='Y' where stock_no = '{stock_no}'"
         sql = sql.format(stock_no=stock_no)
         cur.execute(sql)
         self.conn.commit()
