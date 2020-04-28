@@ -48,6 +48,7 @@ class PolicyTest(object):
         cur = self.conn.cursor()
         sql = "SELECT * FROM {table} where stock_no = '{stock_no}' and enable is null"
         sql = sql.format(table=table, stock_no=stock_no)
+        print(sql)
         cur.execute(sql)
 
         rows = cur.fetchall()
@@ -62,6 +63,7 @@ class PolicyTest(object):
     #參數三 只盯外資或三大法人
     #總股數是取stockholder最新資料，會有點失真，但不影響整體推演
     def analyze(self, stock_no, percent, type, table):
+        self.delFlag(table,stock_no)
         price = self.getPrice(stock_no)
         price = self.build_dict(price, key="batch_no")
         stock_lprice = 0
@@ -75,6 +77,10 @@ class PolicyTest(object):
 
         rows = cur.fetchall()
 
+        count_posi = 1
+        count_negi = 1
+
+        print('Analyzie stock : '+ stock_no)
         if len(rows) > 0:
             for row in rows:
                 data_date = row['data_date']
@@ -86,15 +92,19 @@ class PolicyTest(object):
                 total = row['stock_num']
 
                 if foreign>0:
-                    count += round(foreign / total * 100,2)
+                    #count += round(foreign / total * 100,2)
+                    count_posi += foreign
+                    count_negi = 1
                 else:
-                    count = 0
+                    #count = 0
+                    count_negi += foreign
+                    count_posi = 1
 
-                if count > percent:
-                    if not self.isFlagExisted(table,stock_no):
-                        stock_lprice = price[data_date]['stock_lprice']
-                        self.insFlag(table,ikey,data_date, stock_no, stock_name, count, stock_lprice)
-                        ikey+=1
+                tmp_percent = round(count_posi/total *100,2)
+                if tmp_percent > percent:
+                    stock_lprice = price[data_date]['stock_lprice']
+                    self.insFlag(table,ikey,data_date, stock_no, stock_name, count, stock_lprice)
+                    ikey+=1
                 else:
                     if count == 0:
                         self.closeFlag(table,stock_no)
@@ -102,8 +112,15 @@ class PolicyTest(object):
                 # else:
                 #     if self.isFlagExisted(table, stock_no):
                 #         self.updFlag(table, stock_no, count, data_date, stock_lprice)
+        print('Analyzie end stock : ' + stock_no)
 
-        self.conn_close()
+    def delFlag(self, table,stock_no):
+        cur = self.conn.cursor()
+        sql = "delete from {table} where stock_no = '{stock_no}'"
+        sql = sql.format(table=table,stock_no=stock_no)
+        cur.execute(sql)
+        print(sql)
+        self.conn.commit()
 
 
     def insFlag(self, table,ikey,data_date, stock_no, stock_name,count,lprice):
@@ -141,7 +158,23 @@ class PolicyTest(object):
 
         return result
 
+    def getRobertList(self):
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        sql = "select stock_no from robert_stock_list where analyze is null"
+        # print(sql)
+        cur.execute(sql)
+        result = cur.fetchall()
+        return result
+
+    def updRobertList(self,stock_no):
+        cur = self.conn.cursor()
+        sql = "update robert_stock_list set analyze='Y' where stock_no = '{stock_no}'"
+        sql = sql.format(stock_no=stock_no)
+        cur.execute(sql)
+        self.conn.commit()
+
 class FlagPolicyTest(object):
+
     def conn_close(self):
         self.conn.close()
 
@@ -252,15 +285,19 @@ class FlagPolicyTest(object):
         self.conn_close()
 
 table = 't1p5f'
-stock_no = '002317'
+stock_no = ''
 percent = 1.5
 pt = PolicyTest(table)
-if not pt.isFlagExisted(table,stock_no):
-    pt.analyze(stock_no,percent,'f',table) #外資比例超過1.5觸發旗標
+robertList = pt.getRobertList()
 
-    fp = FlagPolicyTest()
-    fp.getFlagData(table,stock_no)
-
+for item in robertList:
+    stock_no = item['stock_no']
+    if not pt.isFlagExisted(table,stock_no):
+        pt.analyze(stock_no,percent,'f',table) #外資比例超過1.5觸發旗標
+        pt.updRobertList(stock_no)
+        #fp = FlagPolicyTest()
+        #fp.getFlagData(table,stock_no)
+pt.conn_close()
 
 # table = 't3p0f'
 # stock_no = '002345'
