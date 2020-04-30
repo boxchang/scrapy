@@ -6,9 +6,9 @@ import datetime
 from stock.database import database
 # 成交量可视化
 # 绘制K线图+移动平均线+成交量
-import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
+if sys.version[0] == '2':
+    reload(sys)
+    sys.setdefaultencoding('utf-8')
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec  # 分割子图
@@ -18,8 +18,12 @@ import mpl_finance as mpf  # 替换 import matplotlib.finance as mpf
 import MySQLdb
 import pandas as pd
 from datetime import datetime as ddt
-
-
+import matplotlib
+#解決負號'-'顯示為方塊的問題
+matplotlib.rcParams['axes.unicode_minus']=False
+plt.rcParams['font.family'] = ['Microsoft YaHei']
+plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
+#zhfont1 = matplotlib.font_manager.FontProperties(fname='C:\Windows\Fonts\msjh.ttc')
 
 class PolicyResult(object):
     def conn_close(self):
@@ -95,8 +99,14 @@ class PolicyResult(object):
         tmp_posi_tuple = []
 
         for row in rows:
-            tmp_price_tuple.append(row['stock_lprice'])
-            tmp_posi_tuple.append(df_stockload.index.get_loc(row['data_date']))
+            try:
+                tmp1 = row['stock_lprice']
+                tmp2 = df_stockload.index.get_loc(row['data_date'])
+                tmp_price_tuple.append(tmp1)
+                tmp_posi_tuple.append(tmp2)
+            except:
+                print(df_stockload.index)
+                pass
 
         data = {
             'Close': tmp_price_tuple,
@@ -152,6 +162,7 @@ class PolicyResult(object):
             label.set_fontsize(10)  # 设置标签字体
 
         #plt.show()
+        #plt.legend(prop=zhfont1)
         fig.savefig(stock_no+'.png')
 
 
