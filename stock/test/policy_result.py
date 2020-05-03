@@ -166,9 +166,13 @@ class PolicyResult(object):
         fig.savefig(stock_no+'.png')
 
 
-pr = PolicyResult()
-items = pr.getDrawList('t1p5f')
+# pr = PolicyResult()
+# items = pr.getDrawList('t1p5f')
+#
+# for item in items:
+#     stock_no = item[0][2:6]
+#     pr.draw(stock_no,item[1],'20190101','20191231')
 
-for item in items:
-    stock_no = item[0][2:6]
-    pr.draw(stock_no,item[1],'20190101','20191231')
+pr = PolicyResult()
+stock_no = "2313"
+pr.draw(stock_no,u"華通",'20190101','20191231')

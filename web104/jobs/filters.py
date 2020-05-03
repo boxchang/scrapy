@@ -1,6 +1,6 @@
 # coding: utf-8
 class ModelFilter:
-    keywords = ('big data', 'TOEIC', 'IELTS', 'MES', 'Kubenetes', 'Django', 'Scrapy', '爬蟲') # 關鍵字
+    keywords = ('big data', 'TOEIC', 'IELTS', 'Kubenetes', 'Django', 'Scrapy', '爬蟲') # 關鍵字
     companies = ('Tata',)
     years = 0 # 年資
     excludes = ('Contract',)

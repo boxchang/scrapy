@@ -1,5 +1,7 @@
 #!/usr/bin/python
 import sys
+import time
+
 sys.path.append("..")
 import sqlite3
 from sqlite3 import Error
@@ -76,7 +78,7 @@ def main():
         if job.validate():
             message = job.custName + ' --- '+ job.jobName + '\n\r' + job.addr + '\n\r' + job.jobLink
             callBoxLine(message)
-
+            time.sleep(1)
     try:
         cur.execute("UPDATE web104 SET is_read = 'Y' where is_read is null or is_read=''")
         conn.commit()

@@ -284,20 +284,20 @@ class FlagPolicyTest(object):
                             print(data_date, "   holder", round(count,2),"%  ",lprice,"    ",cprice, "   ",k, " ",percent,"%  "+isMon)
         self.conn_close()
 
-table = 't1p5f'
-stock_no = ''
-percent = 1.5
-pt = PolicyTest(table)
-robertList = pt.getRobertList()
-
-for item in robertList:
-    stock_no = item['stock_no']
-    if not pt.isFlagExisted(table,stock_no):
-        pt.analyze(stock_no,percent,'f',table) #外資比例超過1.5觸發旗標
-        pt.updRobertList(stock_no)
-        #fp = FlagPolicyTest()
-        #fp.getFlagData(table,stock_no)
-pt.conn_close()
+# table = 't1p5f'
+# stock_no = ''
+# percent = 1.5
+# pt = PolicyTest(table)
+# robertList = pt.getRobertList()
+#
+# for item in robertList:
+#     stock_no = item['stock_no']
+#     if not pt.isFlagExisted(table,stock_no):
+#         pt.analyze(stock_no,percent,'f',table) #外資比例超過1.5觸發旗標
+#         pt.updRobertList(stock_no)
+#         #fp = FlagPolicyTest()
+#         #fp.getFlagData(table,stock_no)
+# pt.conn_close()
 
 # table = 't3p0f'
 # stock_no = '002345'
@@ -308,6 +308,16 @@ pt.conn_close()
 #
 #     fp = FlagPolicyTest()
 #     fp.getFlagData(table,stock_no)
+
+table = 't1p5f'
+stock_no = '002313'
+percent = 1.5
+pt = PolicyTest(table)
+if not pt.isStockExisted(table,stock_no):
+    pt.analyze(stock_no,percent,'f',table)
+
+fp = FlagPolicyTest()
+fp.getFlagData(table,stock_no)
 
 
 # table = 't0p1f'

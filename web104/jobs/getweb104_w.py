@@ -122,28 +122,31 @@ while i < len(List):
     batchNo = time.strftime("%Y%m%d%H%M%S", time.localtime())
     url = 'https://' + content.attrs['href'].strip('//')
     if url.find("www.104.com.tw") > 0:
-        jobNo = url[url.rfind("/") + 1:url.rfind("?")]
-        ajax_url = "https://www.104.com.tw/job/ajax/content/" + jobNo
-        res = requests.get(ajax_url)
-        job = json.loads(res.text)
-        item = {}
-        item['custName'] = job['data']['header']['custName']
-        item['jobNo'] = jobNo
-        item['jobName'] = job['data']['header']['jobName']
-        item['description'] = job['data']['jobDetail']['jobDescription']
-        item['jobAddrNoDesc'] = job['data']['jobDetail']['addressRegion']
-        item['jobLink'] = url
-        item['addr'] = job['data']['jobDetail']['addressDetail']
-        item['history'] = job['data']['condition']['workExp']
-        item['tool'] = ''
-        item['other'] = job['data']['condition']['other']
-        item['benefit'] = job['data']['welfare']['welfare']
-        item['update_date'] = job['data']['header']['appearDate']
-        item['batchNo'] = batchNo
-        print(item)
+        try:
+            jobNo = url[url.rfind("/") + 1:url.rfind("?")]
+            ajax_url = "https://www.104.com.tw/job/ajax/content/" + jobNo
+            res = requests.get(ajax_url)
+            job = json.loads(res.text)
+            item = {}
+            item['custName'] = job['data']['header']['custName']
+            item['jobNo'] = jobNo
+            item['jobName'] = job['data']['header']['jobName']
+            item['description'] = job['data']['jobDetail']['jobDescription']
+            item['jobAddrNoDesc'] = job['data']['jobDetail']['addressRegion']
+            item['jobLink'] = url
+            item['addr'] = job['data']['jobDetail']['addressDetail']
+            item['history'] = job['data']['condition']['workExp']
+            item['tool'] = ''
+            item['other'] = job['data']['condition']['other']
+            item['benefit'] = job['data']['welfare']['welfare']
+            item['update_date'] = job['data']['header']['appearDate']
+            item['batchNo'] = batchNo
+            print(item)
 
-        if validate(jobNo,conn):
-            insertTable(item,conn)
+            if validate(jobNo,conn):
+                insertTable(item,conn)
+        except:
+            pass
 
         i += 1
         print("Success and Crawl Next 目前正在爬第" + str(i) + "個職缺資訊")
