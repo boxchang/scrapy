@@ -33,6 +33,8 @@ class StockList(object):
         db.execute_sql(sql)
 
     def execute(self):
+
+
         url = "http://quote.eastmoney.com/stock_list.html"
 
         res = requests.get(url)

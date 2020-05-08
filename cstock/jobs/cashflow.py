@@ -35,42 +35,55 @@ class StockCashFlow(object):
         db = database()
         db.execute_sql(sql)
 
+    def validate(self, stock_no):
+        cur = self.conn.cursor()
+        sql = "SELECT * FROM cashflow where stock_no = '{stock_no}' "
+        sql = sql.format(stock_no=stock_no)
+        cur.execute(sql)
+
+        rows = cur.fetchall()
+
+        if len(rows) > 0:
+            return False
+        else:
+            return True
 
     def execute(self):
-        #url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_CashFlow/stockid/"+self.stock_no+"/ctrl/part/displaytype/4.phtml"
-        url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_CashFlow/stockid/002916/ctrl/part/displaytype/4.phtml"
-        res = requests.get(url)
+        if self.validate(self.stock_no):
+            url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_CashFlow/stockid/"+self.stock_no+"/ctrl/part/displaytype/4.phtml"
+            #url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_CashFlow/stockid/002916/ctrl/part/displaytype/4.phtml"
+            res = requests.get(url)
 
-        if res.text.find(u'报表日期') >0:
-            self.delete_cashflow(self.stock_no)
+            if res.text.find(u'报表日期') >0:
+                self.delete_cashflow(self.stock_no)
 
-            soup = BeautifulSoup(res.text, 'html.parser')
+                soup = BeautifulSoup(res.text, 'html.parser')
 
-            print(soup)
+                print(soup)
 
-            tables = soup.findAll('table')
+                tables = soup.findAll('table')
 
-            print(tables[13])
-            tab = tables[13]
-            inx = 1
-            for tr in tab.tbody.findAll('tr')[2:]:
-                if len(tr.findAll('td')) == 6:
-                    item = {}
+                print(tables[13])
+                tab = tables[13]
+                inx = 1
+                for tr in tab.tbody.findAll('tr')[2:]:
+                    if len(tr.findAll('td')) == 6:
+                        item = {}
 
-                    value = [td.getText().encode('utf-8') for td in tr.findAll('td')]
-                    #text = td.getText().encode('cp936') + '!'
-                    print(value)
-                    item['stock_no'] = self.stock_no
-                    item['acc_name'] = value[0]
-                    item['acc_no'] = 'A'+str(inx)
-                    item['qa'] = self.clean(value[1])
-                    item['qb'] = self.clean(value[2])
-                    item['qc'] = self.clean(value[3])
-                    item['qd'] = self.clean(value[4])
-                    item['qe'] = self.clean(value[5])
-                    self.InsStockData(item)
-                inx+=1
-            self.conn.commit()
+                        value = [td.getText().encode('utf-8') for td in tr.findAll('td')]
+                        #text = td.getText().encode('cp936') + '!'
+                        print(value)
+                        item['stock_no'] = self.stock_no
+                        item['acc_name'] = value[0]
+                        item['acc_no'] = 'A'+str(inx)
+                        item['qa'] = self.clean(value[1])
+                        item['qb'] = self.clean(value[2])
+                        item['qc'] = self.clean(value[3])
+                        item['qd'] = self.clean(value[4])
+                        item['qe'] = self.clean(value[5])
+                        self.InsStockData(item)
+                    inx+=1
+                self.conn.commit()
 
     def InsStockData(self, item):
         cur = self.conn.cursor()
@@ -89,7 +102,7 @@ class Stock(object):
         self.conn = self.db.create_connection()
 
     def getAllStock(self):
-        sql = "select * from stocklist"
+        sql = "select * from stocklist where stock_no not in (select distinct stock_no from cashflow)"
 
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         cur.execute(sql)
