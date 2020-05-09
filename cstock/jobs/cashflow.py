@@ -52,6 +52,7 @@ class StockCashFlow(object):
         if self.validate(self.stock_no):
             url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_CashFlow/stockid/"+self.stock_no+"/ctrl/part/displaytype/4.phtml"
             #url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_CashFlow/stockid/002916/ctrl/part/displaytype/4.phtml"
+            print(url)
             res = requests.get(url)
 
             if res.text.find(u'报表日期') >0:
@@ -118,4 +119,4 @@ lists = sk.getAllStock()
 for stock in lists:
     scf = StockCashFlow(stock['stock_no'])
     scf.execute()
-    time.sleep(2)
+    time.sleep(10)
