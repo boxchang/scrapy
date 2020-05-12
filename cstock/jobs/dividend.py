@@ -10,7 +10,7 @@ import MySQLdb
 from database import database
 
 
-class StockCashFlow(object):
+class Dividend(object):
     stock_no = ""
 
     def clean(self,str):
@@ -29,15 +29,15 @@ class StockCashFlow(object):
         self.conn = self.db.create_connection()
         self.stock_no = stock_no
 
-    def delete_cashflow(self,stock_no):
-        sql = 'delete from cashflow where stock_no ={stock_no}'
+    def delete_dividend(self,stock_no):
+        sql = 'delete from dividend where stock_no ={stock_no}'
         sql = sql.format(stock_no=stock_no)
         db = database()
         db.execute_sql(sql)
 
     def validate(self, stock_no):
         cur = self.conn.cursor()
-        sql = "SELECT * FROM cashflow where stock_no = '{stock_no}' "
+        sql = "SELECT * FROM dividend where stock_no = '{stock_no}' "
         sql = sql.format(stock_no=stock_no)
         cur.execute(sql)
 
@@ -56,47 +56,44 @@ class StockCashFlow(object):
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
                 "Accept-Language": "zh-CN,zh;q=0.8"}
 
-            url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_CashFlow/stockid/"+self.stock_no+"/ctrl/part/displaytype/4.phtml"
-            #url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vFD_CashFlow/stockid/002916/ctrl/part/displaytype/4.phtml"
+            #url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vISSUE_ShareBonus/stockid/600019.phtml"
+            url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vISSUE_ShareBonus/stockid/"+self.stock_no+".phtml"
             print(url)
             res = requests.get(url, headers=send_headers)
 
-            if res.text.find(u'报表日期') >0:
-                self.delete_cashflow(self.stock_no)
+            if res.text.find(u'分红') >0:
+                self.delete_dividend(self.stock_no)
 
                 soup = BeautifulSoup(res.text, 'html.parser')
 
                 print(soup)
 
-                tables = soup.findAll('table')
+                dividend_table = soup.find('tbody')
 
-                print(tables[13])
-                tab = tables[13]
                 inx = 1
-                for tr in tab.tbody.findAll('tr')[2:]:
-                    if len(tr.findAll('td')) == 6:
+                for tr in dividend_table.findAll('tr'):
+                    if len(tr.findAll('td')) == 9:
                         item = {}
 
                         value = [td.getText().encode('utf-8') for td in tr.findAll('td')]
                         #text = td.getText().encode('cp936') + '!'
                         print(value)
                         item['stock_no'] = self.stock_no
-                        item['acc_name'] = value[0]
-                        item['acc_no'] = 'A'+str(inx)
-                        item['qa'] = self.clean(value[1])
-                        item['qb'] = self.clean(value[2])
-                        item['qc'] = self.clean(value[3])
-                        item['qd'] = self.clean(value[4])
-                        item['qe'] = self.clean(value[5])
-                        self.InsStockData(item)
+                        item['pdate'] = value[0]
+                        item['stockg'] = self.clean(value[1])
+                        item['stocka'] = self.clean(value[2])
+                        item['money'] = self.clean(value[3])
+                        item['gdate'] = value[5]
+                        item['sdate'] = value[6]
+                        self.InsDividendData(item)
                     inx+=1
                 self.conn.commit()
 
-    def InsStockData(self, item):
+    def InsDividendData(self, item):
         cur = self.conn.cursor()
         col = ','.join(item.keys())
         placeholders = ("%s," * len(item))[:-1]
-        sql = 'insert into cashflow({}) values({})'
+        sql = 'insert into dividend({}) values({})'
         print(sql.format(col, placeholders), tuple(item.values()))
         cur.execute(sql.format(col, placeholders), tuple(item.values()))
 
@@ -109,7 +106,7 @@ class Stock(object):
         self.conn = self.db.create_connection()
 
     def getAllStock(self):
-        sql = "select * from stocklist where stock_no not in (select distinct stock_no from cashflow)"
+        sql = "select * from stocklist where stock_no not in (select distinct stock_no from dividend)"
 
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         cur.execute(sql)
@@ -123,6 +120,6 @@ sk = Stock()
 lists = sk.getAllStock()
 
 for stock in lists:
-    scf = StockCashFlow(stock['stock_no'])
+    scf = Dividend(stock['stock_no'])
     scf.execute()
     time.sleep(10)
