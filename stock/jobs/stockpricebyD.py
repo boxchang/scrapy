@@ -7,8 +7,10 @@ import MySQLdb
 import requests
 import pandas as pd
 from io import StringIO
-reload(sys)
-sys.setdefaultencoding('utf8')
+if sys.version[0] == '2':
+    reload(sys)
+    sys.setdefaultencoding("utf-8")
+
 
 class StockPriceDay(object):
     def conn_close(self):
