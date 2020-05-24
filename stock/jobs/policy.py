@@ -200,8 +200,8 @@ class Robert(Public):
         self.conn = db.create_connection()
         sql = "select a.stock_no, c.stock_name,b.increase,b.decrease,b.in_gap_count,b.de_gap_count,b.stock_num_gap,b.updated_date from robert_stock_list a, stockholder_sum_count b, stockcode c " \
               "where a.stock_no = c.stock_no and a.stock_no = b.stock_no " \
-              " and (increase > 2 or decrease > 2) and (in_gap_count>2 or de_gap_count>2) "
-
+              " and (increase > 2 or decrease > 2) and (in_gap_count>2 or de_gap_count>2) " \
+              " and a.stock_no not in (select stock_no from (select stock_no,count(*) from stockholder e where level = 17 group by stock_no having count(*) > 1) a)"
         self.cur = self.conn.cursor()
         self.cur.execute(sql)
         rows = self.cur.fetchall()

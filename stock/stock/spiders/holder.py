@@ -39,25 +39,19 @@ class Holder(scrapy.Spider):
     def parse(self, response):
         url = 'https://smart.tdcc.com.tw/opendata/getOD.ashx?id=1-5'
         data = pd.read_csv(url)
-        # print(data['持股分級'])
-        # print(data[data['持股分級'] == 15][:17])
-        # print(data[:17])
-        check_data = data['資料日期'][:1][0]
-        print(check_data)
 
-        if self.validate(check_data):
-            self.copy2Hist()  # 跑前，將資料搬到歷史區
-            self.clearTable()  # 清除目前的要運算的表
-            # csv = data[data['資料日期'] == 15][:1]
-            for index, row in data.iterrows():
-                item = StockItem()
-                item['stock_no'] = row['證券代號'].zfill(6)
-                item['stock_num'] = row['股數']
-                item['level'] = row['持股分級']
-                item['holder_num'] = row['人數']
-                item['percent'] = row['占集保庫存數比例%']
-                item['data_date'] = row['資料日期']
-                yield item
+        self.copy2Hist()  # 跑前，將資料搬到歷史區
+        self.clearTable()  # 清除目前的要運算的表
+        # csv = data[data['資料日期'] == 15][:1]
+        for index, row in data.iterrows():
+            item = StockItem()
+            item['stock_no'] = row[u'證券代號'].zfill(6)
+            item['stock_num'] = row[u'股數']
+            item['level'] = row[u'持股分級']
+            item['holder_num'] = row[u'人數']
+            item['percent'] = row[u'占集保庫存數比例%']
+            item['data_date'] = row[0]
+            yield item
 
 
 
