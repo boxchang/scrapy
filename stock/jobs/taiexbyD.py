@@ -104,5 +104,5 @@ else:
     data_date = sys.argv[1]
 
 taiex = TaiexbyDay()
-taiex.GetTaiexByDate(data_date)
+taiex.GetTaiexByMonth(data_date)
 taiex.conn_close()
