@@ -45,12 +45,13 @@ class Holder(scrapy.Spider):
         # csv = data[data['資料日期'] == 15][:1]
         for index, row in data.iterrows():
             item = StockItem()
-            item['stock_no'] = row[u'證券代號'].zfill(6)
-            item['stock_num'] = row[u'股數']
-            item['level'] = row[u'持股分級']
-            item['holder_num'] = row[u'人數']
-            item['percent'] = row[u'占集保庫存數比例%']
-            item['data_date'] = row[0]
+            item['data_date'] = row[0] #資料日期
+            item['stock_no'] = row[1].zfill(6)  #證券代號
+            item['stock_num'] = row[4]  #持股分級
+            item['level'] = row[2]  #人數
+            item['holder_num'] = row[3]  #股數
+            item['percent'] = row[5]  #占集保庫存數比例%
+
             yield item
 
 
