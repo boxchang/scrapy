@@ -47,7 +47,8 @@ class FlagMonitorDaily(object):
 
             #條件一
             forePercent = ds.Foreign_Percent(stock_no, flagDate)
-            msg = msg + "外資買超比率 :" + str(forePercent) + "\n"
+            todayPercent = ds.Today_Foreign_Percent(stock_no)
+            msg = msg + "外資買超比率 :" + str(forePercent) + "(" + str(todayPercent) + ")\n"
 
 
             #條件二
@@ -204,6 +205,16 @@ class DynamicStrategy(object):
         self.conn = db.create_connection()
 
     #動態檢核表(何時賣出，何時加碼)
+    #今日外資買超比率
+    def Today_Foreign_Percent(self, stock_no):
+        today = datetime.date.today().strftime('%Y%m%d')
+        sql = "select percent from legalperson_price a where a.stock_no = {stock_no} and batch_no = {today}"
+        sql = sql.format(stock_no=stock_no, today=today)
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        cur.execute(sql)
+        result = cur.fetchone()['percent']
+        return result
+
     #外資買超比率
     def Foreign_Percent(self, stock_no, flagDate):
         today = datetime.date.today().strftime('%Y%m%d')

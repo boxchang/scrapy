@@ -59,10 +59,7 @@ class LegalPersonDaily(object):
             today_price = getTodayPrice(self.data_date, stock_no)
             dividend_avg_rate = round(dividend_avg/today_price,2)
             updated_date = row[5]
-            msg = "【Daily Monitor】觸發旗標日\nStock No :{stock_no}({stock_name})\n累計買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%\n股息發放年數 : {dividend_years}\n平均股息率 : {dividend_avg_rate}\nUpdated Date: {updated_date}"
-            msg = msg.format(stock_no=stock_no, stock_name=row[1].encode('utf-8'), in_gap_count=row[2], increase=row[3], financing=row[4], dividend_years=dividend_years, dividend_avg_rate=dividend_avg_rate, updated_date=updated_date)
 
-            lineNotifyMessage(token, msg)
 
             #紀錄旗標日, 若已存在就不紀錄
             conn = db.create_connection()
@@ -72,6 +69,13 @@ class LegalPersonDaily(object):
             cur.execute(sql)
 
             if cur.rowcount == 0:
+                msg = "【Daily Monitor】觸發旗標日\nStock No :{stock_no}({stock_name})\n累計買超比例超過1.5% : {in_gap_count}%\n連續買超{increase}日\n資券比小於20% : {financing}%\n股息發放年數 : {dividend_years}\n平均股息率 : {dividend_avg_rate}\nUpdated Date: {updated_date}"
+                msg = msg.format(stock_no=stock_no, stock_name=row[1].encode('utf-8'), in_gap_count=row[2],
+                                 increase=row[3], financing=row[4], dividend_years=dividend_years,
+                                 dividend_avg_rate=dividend_avg_rate, updated_date=updated_date)
+
+                lineNotifyMessage(token, msg)
+
                 self.saveFlagDate(self.data_date,stock_no)
 
     def saveFlagDate(self,data_date,stock_no):
