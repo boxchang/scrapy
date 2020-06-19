@@ -83,6 +83,9 @@ class LegalPersonDay(object):
                     item['invest_sum'] = float(self.clean(str(row['投信買賣超股數'])))
                     item['com_sum'] = float(self.clean(str(row['自營商買賣超股數'])))
                     item['legalperson'] = float(self.clean(str(row['三大法人買賣超股數'])))
+                    item['hedge_buy'] = float(self.clean(str(row['自營商買進股數(避險)'])))
+                    item['hedge_sell'] =float(self.clean(str(row['自營商賣出股數(避險)'])))
+                    item['hedge_sum'] = float(self.clean(str(row['自營商買賣超股數(避險)'])))
                     self.InsLegalPersonByDate(item)
 
             self.conn.commit()
