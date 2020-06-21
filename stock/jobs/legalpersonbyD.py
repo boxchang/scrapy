@@ -92,7 +92,7 @@ class LegalPersonDay(object):
             time.sleep(1)
     def execute(self):
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
-        sql = "SELECT data_date FROM taiex order by data_date"
+        sql = "SELECT data_date FROM taiex where data_date between 20200424 and 20200619 order by data_date"
         cur.execute(sql)
 
         rows = cur.fetchall()

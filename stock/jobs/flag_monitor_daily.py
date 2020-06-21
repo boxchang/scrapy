@@ -84,6 +84,14 @@ class FlagMonitorDaily(object):
                 result_5 = "No，漲幅低"
             msg = msg + "市值小於300億 :" + result_5 + "\n"
 
+            #資券比
+            financing = ds.Today_Financing_Percent(stock_no)
+            if financing > 20:
+                result_7 = "資券比 : " + str(financing) + "%，注意！散戶進場\n"
+            else:
+                result_7 = "資券比 : " + str(financing) + "\n"
+            msg = msg + result_7
+
             #超過240天最高價
             mostPrice = ds.MostPrice(stock_no)
             currentPrice = ds.CurrentPrice(today, stock_no)
@@ -203,6 +211,16 @@ class DynamicStrategy(object):
     def __init__(self):
         db = database()
         self.conn = db.create_connection()
+
+    #券資比
+    def Today_Financing_Percent(self, stock_no):
+        today = datetime.date.today().strftime('%Y%m%d')
+        sql = "select round((a.today_borrow_stock / a.today_borrow_money)*100,2) percent from financing a where a.stock_no = {stock_no} and a.data_date = {today}"
+        sql = sql.format(stock_no=stock_no, today=today)
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        cur.execute(sql)
+        result = cur.fetchone()['percent']
+        return result
 
     #動態檢核表(何時賣出，何時加碼)
     #今日外資買超比率

@@ -49,6 +49,8 @@ class Dividend(object):
     def get_stock_dividend(self, stock_no):
         print(stock_no)
         url = 'https://tw.stock.yahoo.com/d/s/dividend_{stock_no}.html'
+        #抓台灣證交所的更好
+        #https://www.twse.com.tw/zh/page/trading/exchange/BWIBBU_d.html
         ## url = 'https://tw.stock.yahoo.com/d/s/dividend_1504.html'
         url =url.format(stock_no=stock_no)
         df = pd.read_html(url, encoding="Big5")[3]
