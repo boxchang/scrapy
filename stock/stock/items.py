@@ -29,6 +29,9 @@ class LegalPersonItem(scrapy.Item):
     invest_buy = scrapy.Field()
     invest_sell = scrapy.Field()
     invest_sum = scrapy.Field()
+    hedge_buy = scrapy.Field()
+    hedge_sell = scrapy.Field()
+    hedge_sum = scrapy.Field()
     com_sum = scrapy.Field()
     legalperson = scrapy.Field()
 

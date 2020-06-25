@@ -100,9 +100,7 @@ class LegalPersonDay(object):
         if len(rows) > 0:
             for row in rows:
                 data_date = row['data_date']
-
-                if self.validate(data_date):
-                    self.GetLegalPersonByDate(data_date)
+                self.GetLegalPersonByDate(data_date)
 
 
 lp = LegalPersonDay()

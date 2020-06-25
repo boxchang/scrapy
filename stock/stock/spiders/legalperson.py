@@ -24,7 +24,7 @@ class LegalPerson(scrapy.Spider):
     }
 
     data_date = datetime.date.today().strftime('%Y%m%d')
-    #  data_date = "20200120"
+    data_date = "20200624"
 
     start_urls = ['http://www.tse.com.tw/fund/T86?response=csv&date='+data_date+'&selectType=ALLBUT0999']
 
@@ -55,6 +55,9 @@ class LegalPerson(scrapy.Spider):
                         item['invest_sell'] = float(clean(str(row['投信賣出股數'])))
                         item['invest_sum'] = float(clean(str(row['投信買賣超股數'])))
                         item['com_sum'] = float(clean(str(row['自營商買賣超股數'])))
+                        item['hedge_buy'] = float(clean(str(row['自營商買進股數(避險)'])))
+                        item['hedge_sell'] = float(clean(str(row['自營商賣出股數(避險)'])))
+                        item['hedge_sum'] = float(clean(str(row['自營商買賣超股數(避險)'])))
                         item['legalperson'] = float(clean(str(row['三大法人買賣超股數'])))
                         yield item
             except:
