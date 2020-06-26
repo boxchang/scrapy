@@ -8,6 +8,7 @@ import requests
 import pandas as pd
 from io import StringIO
 import re, time
+from stock.line import lineNotifyMessage
 
 class DividendNotice(object):
     DIVIDEND_NOTICE_TABLE = "CREATE TABLE if not exists dividend_notice (dividend_date VARCHAR(8) NOT NULL," \
@@ -51,6 +52,37 @@ class DividendNotice(object):
         print(sql.format(col, placeholders), tuple(item.values()))
         cur.execute(sql.format(col, placeholders), tuple(item.values()))
 
+    def getLastPriceDate(self):
+        sql = 'SELECT MAX(batch_no) FROM stockprice'
+        cur = self.conn.cursor()
+        cur.execute(sql)
+        if cur.rowcount > 0:
+            data_date = cur.fetchall()[0][0]
+        return data_date
+
+    def notice(self):
+        today = datetime.date.today().strftime('%Y%m%d')
+        aweek = (datetime.date.today() + datetime.timedelta(days=7)).strftime('%Y%m%d')
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        data_date = self.getLastPriceDate()
+        #殖息率大於6，股價小於當季eps推算便宜價，下周要除息的股票
+        sql = 'SELECT ROUND((a.money+a.stock)/c.stock_eprice*100,2) dividend,c.stock_eprice,a.*,b.* FROM dividend_notice a,stockcode b,stockprice c WHERE ' \
+              'c.batch_no={data_date} AND c.stock_no=a.stock_no AND eps*60 > c.stock_eprice AND a.stock_no = b.stock_no ' \
+              'AND c.stock_eprice>0 AND a.money/c.stock_eprice*100>6 AND dividend_date BETWEEN {today} AND {aweek}'
+        sql = sql.format(data_date=data_date,today=today,aweek=aweek)
+        cur.execute(sql)
+        rows = cur.fetchall()
+
+        msg = "殖息率大於6，股價小於當季eps推算便宜價，下周要除息的股票\n"
+        for row in rows:
+            stock_msg = "{stock_no} {stock_name}({stock_industry}) 除權息日:{dividend_date} 殖息率 :{dividend} 股價:{stock_price}\n"
+            stock_msg = stock_msg.format(stock_no=row['stock_no'], stock_name=row['stock_name'], stock_industry=row['stock_industry'], dividend_date=row['dividend_date'], dividend=row['dividend'], stock_price=row['stock_eprice'])
+            msg += stock_msg
+        print(msg)
+
+        token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
+        lineNotifyMessage(token, msg)
+
     def execute(self):
         self.create_dividendnotice_table()
 
@@ -81,4 +113,5 @@ class DividendNotice(object):
             time.sleep(1)
 
 dn = DividendNotice()
-dn.execute()
+#dn.execute()
+dn.notice()
