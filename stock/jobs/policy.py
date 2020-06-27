@@ -143,6 +143,7 @@ class Public(object):
         db.execute_sql(insert_sql)
 
     # count the result and insert to stockholder_sum
+    # 持有400張以上的比例
     def stockholder_sum(self, data_date):
         db = database()
         # clear table before execute

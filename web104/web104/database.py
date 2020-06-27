@@ -25,7 +25,7 @@ class database:
 
     def create_connection(self):
         try:
-            conn = MySQLdb.connect(host="111.185.227.34",  # your host, usually localhost
+            conn = MySQLdb.connect(host="61.70.21.140",  # your host, usually localhost
                                    user="web104",  # your username
                                    passwd="cnap*74182",  # your password
                                    db="web104",
