@@ -92,7 +92,7 @@ class LegalPersonDay(object):
             time.sleep(1)
     def execute(self):
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
-        sql = "SELECT data_date FROM taiex where data_date between 20200424 and 20200619 order by data_date"
+        sql = "SELECT data_date FROM taiex where data_date between 20200619 and 20200624 order by data_date"
         cur.execute(sql)
 
         rows = cur.fetchall()
@@ -100,9 +100,7 @@ class LegalPersonDay(object):
         if len(rows) > 0:
             for row in rows:
                 data_date = row['data_date']
-
-                if self.validate(data_date):
-                    self.GetLegalPersonByDate(data_date)
+                self.GetLegalPersonByDate(data_date)
 
 
 lp = LegalPersonDay()
