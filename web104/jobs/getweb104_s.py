@@ -41,7 +41,7 @@ my_params = {'ro': '0',  # 限定全職的工作，如果不限定則輸入0
 url = requests.get('https://www.104.com.tw/jobs/search/?', my_params, headers=headers).url
 
 #開啟Chrome於前端顯示
-# driver = webdriver.Chrome()
+#driver = webdriver.Chrome(ChromeDriverManager().install())
 
 #在背景執行
 chrome_options = Options()
