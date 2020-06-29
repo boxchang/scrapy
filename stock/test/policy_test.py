@@ -62,7 +62,7 @@ class PolicyTest(object):
     #參數二 多少買超比例觸發旗標
     #參數三 只盯外資或三大法人
     #總股數是取stockholder最新資料，會有點失真，但不影響整體推演
-    def analyze(self, stock_no, percent, type, table):
+    def analyze(self, stock_no, percent, type, table, from_date, to_date):
         self.delFlag(table,stock_no)
         price = self.getPrice(stock_no)
         price = self.build_dict(price, key="batch_no")
@@ -70,8 +70,8 @@ class PolicyTest(object):
         ikey = 1
         count = 0
         sql = "select a.data_date,a.stock_no,a.stock_name,china_sum,invest_sum,com_sum,stock_num from legalperson_hist a,stockholder b " \
-              "where a.stock_no={stock_no} and a.stock_no = b.stock_no and b.level = 17 order by data_date"
-        sql = sql.format(stock_no=stock_no)
+              "where a.stock_no={stock_no} and a.stock_no = b.stock_no and b.level = 17 and a.data_date between {from_date} and {to_date} order by data_date"
+        sql = sql.format(stock_no=stock_no, from_date=from_date, to_date=to_date)
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         cur.execute(sql)
 
@@ -160,7 +160,7 @@ class PolicyTest(object):
 
     def getRobertList(self):
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
-        sql = "select stock_no from robert_stock_list where done is null"
+        sql = "select stock_no from robert_stock_list where done is null or done = ''"
         # print(sql)
         cur.execute(sql)
         result = cur.fetchall()
@@ -284,48 +284,29 @@ class FlagPolicyTest(object):
                             print(data_date, "   holder", round(count,2),"%  ",lprice,"    ",cprice, "   ",k, " ",percent,"%  "+isMon)
         self.conn_close()
 
-# table = 't1p5f'
+# table = 't3p0f'
 # stock_no = ''
-# percent = 1.5
+# percent = 3
 # pt = PolicyTest(table)
 # robertList = pt.getRobertList()
 #
 # for item in robertList:
 #     stock_no = item['stock_no']
 #     if not pt.isFlagExisted(table,stock_no):
-#         pt.analyze(stock_no,percent,'f',table) #外資比例超過1.5觸發旗標
+#         pt.analyze(stock_no,percent,'f',table, '20200101', '20200628') #外資比例超過1.5觸發旗標
 #         pt.updRobertList(stock_no)
 #         #fp = FlagPolicyTest()
 #         #fp.getFlagData(table,stock_no)
 # pt.conn_close()
 
-# table = 't3p0f'
-# stock_no = '002345'
-# percent = 3
-# pt = PolicyTest(table)
-# if not pt.isFlagExisted(table,stock_no):
-#     pt.analyze(stock_no,percent,'f',table) #外資比例超過0.5觸發旗標
-#
-#     fp = FlagPolicyTest()
-#     fp.getFlagData(table,stock_no)
 
-table = 't1p5f'
-stock_no = '002313'
+table = 't3p0f'
+stock_no = '001434'
 percent = 1.5
 pt = PolicyTest(table)
 if not pt.isStockExisted(table,stock_no):
-    pt.analyze(stock_no,percent,'f',table)
+    pt.analyze(stock_no,percent,'f',table, '20200101', '20200628')
 
 fp = FlagPolicyTest()
 fp.getFlagData(table,stock_no)
 
-
-# table = 't0p1f'
-# stock_no = '002330'
-# percent = 0.1
-# pt = PolicyTest(table)
-# if not pt.isStockExisted(table,stock_no):
-#     pt.analyze(stock_no,percent,'f',table) #外資比例超過0.1觸發旗標
-#
-# fp = FlagPolicyTest()
-# fp.getFlagData(table,stock_no)

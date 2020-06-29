@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*
 import MySQLdb
+import collections
 import sys
 sys.path.append("..")
 import datetime
@@ -45,21 +46,23 @@ class PolicyResult(object):
         rows = cur.fetchall()
         return rows
 
-    def draw(self,stock_no,stock_name,from_date,to_date):
+    def draw(self,stock_no,stock_name, table_name,from_date,to_date):
         title = stock_no + "    " + stock_name
 
         plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
         plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 
-        df_stockload = web.DataReader(stock_no+".TW", "yahoo", datetime.datetime(2019, 1, 1), datetime.datetime(2019, 12, 31))
+        df_stockload = web.DataReader(stock_no+".TW", "yahoo", datetime.datetime(int(from_date[0:4]), int(from_date[4:6]), int(from_date[6:8])), datetime.datetime(int(to_date[0:4]), int(to_date[4:6]), int(to_date[6:8])))
         print(df_stockload.info())
 
-        fig = plt.figure(figsize=(8, 6), dpi=100, facecolor="white")  # 创建fig对象
+        fig = plt.figure(figsize=(16, 8), dpi=100, facecolor="white")  # 创建fig对象
 
-        gs = gridspec.GridSpec(2, 1, left=0.06, bottom=0.15, right=0.96, top=0.96, wspace=None, hspace=0,
-                               height_ratios=[3.5, 1])
-        graph_KAV = fig.add_subplot(gs[0, :])
-        graph_VOL = fig.add_subplot(gs[1, :])
+        #GridSpec 參數一:行，參數二:列
+        #gs = gridspec.GridSpec(2, 1, left=0.06, bottom=0.15, right=0.96, top=0.96, wspace=None, hspace=0,height_ratios=[3.5, 1])
+        gs = gridspec.GridSpec(3, 1, left=0.06, bottom=0.15, right=0.96, top=0.96, wspace=None, hspace=0)
+        graph_KAV = fig.add_subplot(gs[0, :]) #加入圖一，在0行，所有列
+        graph_VOL = fig.add_subplot(gs[1, :]) #加入圖二，在1行，所有列
+        graph_Hedge = fig.add_subplot(gs[2, :]) #加入圖三，在1行，所有列
 
         # 绘制K线图
         mpf.candlestick2_ochl(graph_KAV, df_stockload.Open, df_stockload.Close, df_stockload.High, df_stockload.Low, width=0.5,
@@ -87,10 +90,10 @@ class PolicyResult(object):
 
         # 畫買進點位
         sql = """
-        select data_date,stock_lprice from t1p5f
+        select data_date,stock_lprice from {table_name}
         where stock_no = '{stock_no}' and data_date between '{from_date}' and '{to_date}' order by data_date;
         """
-        sql = sql.format(stock_no="00"+stock_no,from_date=from_date,to_date=to_date)
+        sql = sql.format(stock_no="00"+stock_no,from_date=from_date,to_date=to_date,table_name=table_name)
         print(sql)
         cur.execute(sql)
         rows = cur.fetchall()
@@ -120,7 +123,7 @@ class PolicyResult(object):
         # 改寫成交量
         cur2 = self.conn.cursor(MySQLdb.cursors.DictCursor)
         sql = """
-        select data_date,legalperson from legalperson_hist
+        select data_date,legalperson,hedge_sum,china_sum from legalperson_hist
         where stock_no = '{stock_no}' and data_date between '{from_date}' and '{to_date}' order by data_date;
         """
         sql = sql.format(stock_no="00"+stock_no,from_date=from_date,to_date=to_date)
@@ -130,10 +133,11 @@ class PolicyResult(object):
 
         count_posi = 0
         count_negi = 0
-        tmp_dict = {}
+        tmp_dict = collections.OrderedDict()
         index_dict = {}
         index = 0
         for row in rows:
+            #連續累計
             if row['legalperson'] > 0:
                 count_posi += row['legalperson']
                 count_negi = 0
@@ -142,6 +146,14 @@ class PolicyResult(object):
                 count_negi += row['legalperson']
                 count_posi = 0
                 tmp_dict[row['data_date']] = count_negi
+
+            #驗證用
+            # if row['data_date'] == "20200317":
+            #     print(row['china_sum'])
+
+            #單日值
+            # tmp_dict[row['data_date']] = row['china_sum']
+
             index_dict[index] = row['data_date']
             index += 1
 
@@ -150,29 +162,61 @@ class PolicyResult(object):
         graph_VOL.set_ylabel(u"外資連續買超成交量")
         graph_VOL.set_xlabel(u"日期")
         graph_VOL.set_xlim(0, len(tmp_dict))  # 设置一下x轴的范围
-        graph_VOL.set_xticks(range(0, len(index_dict.keys()), 15))  # X轴刻度设定 每15天标一个日期
+        graph_VOL.set_xticks(range(0, len(index_dict.keys()), 10))  # X轴刻度设定 每15天标一个日期
         graph_VOL.set_xticklabels([index_dict[index] for index in graph_VOL.get_xticks()])  # 标签设置为日期
+        #y_ticks = np.arange(-5000000, 5000000, 500000)
+        #graph_VOL.set_yticks(y_ticks)
+
+
+        # 繪製自營商避險圖
+        hedge_dict = collections.OrderedDict()
+        for row in rows:
+            # 連續累計
+            # if row['hedge_sum'] > 0:
+            #     count_posi += row['hedge_sum']
+            #     count_negi = 0
+            #     hedge_dict[row['data_date']] = count_posi
+            # else:
+            #     count_negi += row['hedge_sum']
+            #     count_posi = 0
+            #     hedge_dict[row['data_date']] = count_negi
+
+            # 單日值
+            hedge_dict[row['data_date']] = row['hedge_sum']
+
+        # 繪製自營商避險圖
+        graph_Hedge.bar(np.arange(0, len(hedge_dict)), hedge_dict.values())
+        graph_Hedge.set_ylabel(u"自營商避險成交量")
+        graph_Hedge.set_xlabel(u"日期")
+        graph_Hedge.set_xlim(0, len(hedge_dict))  # 设置一下x轴的范围
+        graph_Hedge.set_xticks(range(0, len(index_dict.keys()), 5))  # X轴刻度设定 每15天标一个日期
+        graph_Hedge.set_xticklabels([index_dict[index] for index in graph_Hedge.get_xticks()])  # 标签设置为日期
+        #y_ticks = np.arange(-500000,500000,50000)
+        #graph_Hedge.set_yticks(y_ticks)
 
         # X-轴每个ticker标签都向右倾斜45度
         for label in graph_KAV.xaxis.get_ticklabels():
             label.set_visible(False)  # 隐藏标注 避免重叠
 
         for label in graph_VOL.xaxis.get_ticklabels():
+            label.set_visible(False)  # 隐藏标注 避免重叠
+
+        for label in graph_Hedge.xaxis.get_ticklabels():
             label.set_rotation(45)
             label.set_fontsize(10)  # 设置标签字体
 
         #plt.show()
         #plt.legend(prop=zhfont1)
-        fig.savefig(stock_no+'.png')
+        fig.savefig('pics/'+stock_no+'.png')
 
+table_name = 't3p0f'
+pr = PolicyResult()
+items = pr.getDrawList(table_name)
+
+for item in items:
+    stock_no = item[0][2:6]
+    pr.draw(stock_no,item[1],table_name,'20200101','20200628')
 
 # pr = PolicyResult()
-# items = pr.getDrawList('t1p5f')
-#
-# for item in items:
-#     stock_no = item[0][2:6]
-#     pr.draw(stock_no,item[1],'20190101','20191231')
-
-pr = PolicyResult()
-stock_no = "2313"
-pr.draw(stock_no,u"華通",'20190101','20191231')
+# stock_no = "1434"
+# pr.draw(stock_no,u"福懋",table_name,'20200101','20200624')
