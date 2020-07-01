@@ -67,8 +67,9 @@ class DividendNotice(object):
         data_date = self.getLastPriceDate()
         #殖息率大於6，股價小於當季eps推算便宜價，下周要除息的股票
         sql = 'SELECT ROUND((a.money+a.stock)/c.stock_eprice*100,2) dividend,c.stock_eprice,a.*,b.* FROM dividend_notice a,stockcode b,stockprice c WHERE ' \
-              'c.batch_no={data_date} AND c.stock_no=a.stock_no AND eps*60 > c.stock_eprice AND a.stock_no = b.stock_no ' \
-              'AND c.stock_eprice>0 AND a.money/c.stock_eprice*100>6 AND dividend_date BETWEEN {today} AND {aweek}'
+              'c.batch_no={data_date} AND c.stock_no=a.stock_no AND a.stock_no = b.stock_no ' \
+              'AND c.stock_eprice>0 AND ((eps*60 > c.stock_eprice AND a.money/c.stock_eprice*100>6) OR a.stock_no IN (SELECT stock_no FROM stockflag WHERE ENABLE IS NULL) ) ' \
+              'AND dividend_date BETWEEN {today} AND {aweek}'
         sql = sql.format(data_date=data_date,today=today,aweek=aweek)
         cur.execute(sql)
         rows = cur.fetchall()
