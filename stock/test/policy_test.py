@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*
 import MySQLdb
 import sys
+
+
 sys.path.append("..")
 import datetime
 from stock.database import database
+from policy_result import PolicyResult
 import requests
 import pandas as pd
 from io import StringIO
@@ -21,6 +24,13 @@ class PolicyTest(object):
         db = database()
         self.conn = db.create_connection()
         self.create_table(table)
+
+    def init_stock_list_status(self):
+        cur = self.conn.cursor()
+        sql = "update robert_stock_list set done=''"
+        sql = sql.format(stock_no=stock_no)
+        cur.execute(sql)
+        self.conn.commit()
 
     def build_dict(self, seq, key):
         return dict((d[key], dict(d, index=i)) for (i, d) in enumerate(seq))
@@ -284,29 +294,43 @@ class FlagPolicyTest(object):
                             print(data_date, "   holder", round(count,2),"%  ",lprice,"    ",cprice, "   ",k, " ",percent,"%  "+isMon)
         self.conn_close()
 
-# table = 't3p0f'
-# stock_no = ''
-# percent = 3
-# pt = PolicyTest(table)
+date_from = '20200101'
+date_to = '20200628'
+table_name = 't2p5f'
+stock_no = '001434'
+percent = 2.5
+pt = PolicyTest(table_name)
+
+#單支股票
+# if not pt.isStockExisted(table_name,stock_no):
+#     pt.analyze(stock_no,percent,'f',table_name, date_from, date_to)
+#
+# fp = FlagPolicyTest()
+# fp.getFlagData(table_name,stock_no)
+
+
+#跑清單
+#pt.init_stock_list_status()
 # robertList = pt.getRobertList()
 #
 # for item in robertList:
 #     stock_no = item['stock_no']
-#     if not pt.isFlagExisted(table,stock_no):
-#         pt.analyze(stock_no,percent,'f',table, '20200101', '20200628') #外資比例超過1.5觸發旗標
+#     if not pt.isFlagExisted(table_name,stock_no):
+#         pt.analyze(stock_no,percent,'f',table_name, date_from, date_to) #外資比例超過1.5觸發旗標
 #         pt.updRobertList(stock_no)
-#         #fp = FlagPolicyTest()
-#         #fp.getFlagData(table,stock_no)
+#         # 推算是否有賺錢，若只有跑圖不需執行這段
+#         # fp = FlagPolicyTest()
+#         # fp.getFlagData(table_name,stock_no)
+#
 # pt.conn_close()
 
 
-table = 't3p0f'
-stock_no = '001434'
-percent = 1.5
-pt = PolicyTest(table)
-if not pt.isStockExisted(table,stock_no):
-    pt.analyze(stock_no,percent,'f',table, '20200101', '20200628')
+pr = PolicyResult()
+items = pr.getDrawList(table_name)
 
-fp = FlagPolicyTest()
-fp.getFlagData(table,stock_no)
+for item in items:
+    stock_no = item[0][2:6]
+    pr.draw(stock_no,item[1],table_name,date_from,date_to)
+
+pr.conn_close()
 

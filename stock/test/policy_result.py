@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*
 import MySQLdb
 import collections
+import os
 import sys
 sys.path.append("..")
 import datetime
@@ -207,16 +208,8 @@ class PolicyResult(object):
 
         #plt.show()
         #plt.legend(prop=zhfont1)
-        fig.savefig('pics/'+stock_no+'.png')
+        if not os.path.isdir(os.getcwd()+'\\pics\\'+table_name):
+            os.mkdir(os.getcwd()+'\\pics\\'+table_name)
 
-table_name = 't3p0f'
-pr = PolicyResult()
-items = pr.getDrawList(table_name)
+        fig.savefig('pics/'+table_name+'/'+stock_no+'.png')
 
-for item in items:
-    stock_no = item[0][2:6]
-    pr.draw(stock_no,item[1],table_name,'20200101','20200628')
-
-# pr = PolicyResult()
-# stock_no = "1434"
-# pr.draw(stock_no,u"福懋",table_name,'20200101','20200624')
