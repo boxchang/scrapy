@@ -84,52 +84,55 @@ class Broker(object):
                 buy_table = table[0]
                 sell_table = table[1]
 
-                #買超
-                rows = buy_table.find_all('tr')
-                data = []
-                stock = []
-                for row in rows[2:]:
-                    cols = row.find_all('td')
-                    stock_no, stock_name = self.getStockInfo(cols[0])
-                    # cols[0] = stock_no
-                    # cols[1] = self.clean(cols[1].text)
-                    # cols[2] = self.clean(cols[2].text)
-                    # cols[3] = self.clean(cols[3].text)
-                    # cols.append(stock_name)
+                try:
+                    #買超
+                    rows = buy_table.find_all('tr')
+                    data = []
+                    stock = []
+                    for row in rows[2:]:
+                        cols = row.find_all('td')
+                        stock_no, stock_name = self.getStockInfo(cols[0])
+                        # cols[0] = stock_no
+                        # cols[1] = self.clean(cols[1].text)
+                        # cols[2] = self.clean(cols[2].text)
+                        # cols[3] = self.clean(cols[3].text)
+                        # cols.append(stock_name)
 
-                    item = {}
-                    item['data_date'] = data_date
-                    item['broker_no'] = broker_no
-                    item['stock_no'] = stock_no.zfill(6)
-                    item['buy'] = self.clean(cols[1].text)
-                    item['sell'] = self.clean(cols[2].text)
-                    item['diff'] = self.clean(cols[3].text)
-                    self.InsBrokerData(item)
+                        item = {}
+                        item['data_date'] = data_date
+                        item['broker_no'] = broker_no
+                        item['stock_no'] = stock_no.zfill(6)
+                        item['buy'] = self.clean(cols[1].text)
+                        item['sell'] = self.clean(cols[2].text)
+                        item['diff'] = self.clean(cols[3].text)
+                        self.InsBrokerData(item)
 
-                #賣超
-                rows = sell_table.find_all('tr')
-                data = []
-                stock = []
-                for row in rows[2:]:
-                    cols = row.find_all('td')
-                    stock_no, stock_name = self.getStockInfo(cols[0])
-                    # cols[0] = stock_no
-                    # cols[1] = self.clean(cols[1].text)
-                    # cols[2] = self.clean(cols[2].text)
-                    # cols[3] = self.clean(cols[3].text)
-                    # cols.append(stock_name)
+                    #賣超
+                    rows = sell_table.find_all('tr')
+                    data = []
+                    stock = []
+                    for row in rows[2:]:
+                        cols = row.find_all('td')
+                        stock_no, stock_name = self.getStockInfo(cols[0])
+                        # cols[0] = stock_no
+                        # cols[1] = self.clean(cols[1].text)
+                        # cols[2] = self.clean(cols[2].text)
+                        # cols[3] = self.clean(cols[3].text)
+                        # cols.append(stock_name)
 
-                    item = {}
-                    item['data_date'] = data_date
-                    item['broker_no'] = broker_no
-                    item['stock_no'] = stock_no.zfill(6)
-                    item['buy'] = self.clean(cols[1].text)
-                    item['sell'] = self.clean(cols[2].text)
-                    item['diff'] = self.clean(cols[3].text)
-                    self.InsBrokerData(item)
+                        item = {}
+                        item['data_date'] = data_date
+                        item['broker_no'] = broker_no
+                        item['stock_no'] = stock_no.zfill(6)
+                        item['buy'] = self.clean(cols[1].text)
+                        item['sell'] = self.clean(cols[2].text)
+                        item['diff'] = self.clean(cols[3].text)
+                        self.InsBrokerData(item)
 
-                    # cols = [clean(ele.text) for ele in cols]
-                    # data.append([ele for ele in cols if ele])  # Get rid of empty values
+                        # cols = [clean(ele.text) for ele in cols]
+                        # data.append([ele for ele in cols if ele])  # Get rid of empty values
+                except:
+                    pass
 
     def getStockInfo(self, col1):
         stock_no = ""
