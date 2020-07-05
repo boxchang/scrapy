@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*
+import sys
+sys.path.append("..")
 import json
 import requests
 from bs4 import BeautifulSoup
