@@ -6,6 +6,7 @@ scrapy crawl legalperson  #外資買賣超
 
 
 cd /src/scrapy/stock/jobs
+python broker_daily.py #監控券商交易量
 
 python legalperson_price.py  #整理三大法人持股及股票金額，要計算三大法人平均成本使用
 
