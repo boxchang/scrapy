@@ -16,9 +16,10 @@ class Broker(object):
     def conn_close(self):
         self.conn.close()
 
-    def __init__(self):
+    def __init__(self, data_date):
         self.db = database()
         self.conn = self.db.create_connection()
+        self.data_date = data_date
 
     def DelBrokerData(self, data_date, broker_no):
         cur = self.conn.cursor()
@@ -49,16 +50,12 @@ class Broker(object):
             return True
 
     def getBrokerData(self, broker_head, broker_no):
-        data_date = datetime.date.today().strftime('%Y%m%d')
-        now = datetime.date.today()
-        year = str(int(now.strftime('%Y')))
-        month = str(int(now.strftime('%m')))
-        day = str(int(now.strftime('%d')))
+        year = str(int(self.data_date[0:4]))
+        month = str(int(self.data_date[4:6]))
+        day = str(int(self.data_date[6:8]))
         today = year + "-" + month + "-" + day
-        today = '2020-7-3'
-        data_date = '20200703'
 
-        if self.validate(data_date,broker_no):
+        if self.validate(self.data_date,broker_no):
             #self.DelBrokerData(data_date, broker_no)
 
             # headers = {
@@ -99,7 +96,7 @@ class Broker(object):
                         # cols.append(stock_name)
 
                         item = {}
-                        item['data_date'] = data_date
+                        item['data_date'] = self.data_date
                         item['broker_no'] = broker_no
                         item['stock_no'] = stock_no.zfill(6)
                         item['buy'] = self.clean(cols[1].text)
@@ -121,7 +118,7 @@ class Broker(object):
                         # cols.append(stock_name)
 
                         item = {}
-                        item['data_date'] = data_date
+                        item['data_date'] = self.data_date
                         item['broker_no'] = broker_no
                         item['stock_no'] = stock_no.zfill(6)
                         item['buy'] = self.clean(cols[1].text)
@@ -160,23 +157,30 @@ class Broker(object):
         self.conn = db.create_connection()
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
 
-        sql = "select broker_head,broker_no,broker_name from broker_list a where enable is null"
+        sql = "select broker_head,broker_no,broker_name from broker_list a where enable is null " \
+              "and broker_no not in(select distinct broker_no from broker_data where data_date = {data_date})"
+        sql = sql.format(data_date=self.data_date)
         cur.execute(sql)
         rows = cur.fetchall()
 
         return rows
 
     def execute(self):
+        print('getBorkerList()')
         brokers = self.getBorkerList()
         for broker in brokers:
             broker_head = broker['broker_head']
             broker_no = broker['broker_no']
+            print('getBorkerList():'+broker_no)
             self.getBrokerData(broker_head,broker_no)
             self.conn.commit()
             time.sleep(5)
         self.conn_close()
 
 
-br = Broker()
+data_date = datetime.date.today().strftime('%Y%m%d')
+data_date = '20200703'
+
+br = Broker(data_date)
 br.execute()
 
