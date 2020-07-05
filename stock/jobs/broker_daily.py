@@ -36,6 +36,21 @@ class Broker(object):
         print(sql.format(col, placeholders), tuple(item.values()))
         cur.execute(sql.format(col, placeholders), tuple(item.values()))
 
+    def validate_taiex(self, data_date):
+        db = database()
+        conn = db.create_connection()
+        cur = conn.cursor()
+        sql = "SELECT * FROM taiex where data_date = '{data_date}'"
+        sql = sql.format(data_date=data_date)
+        cur.execute(sql)
+
+        rows = cur.fetchall()
+
+        if len(rows) > 0:
+            return True
+        else:
+            return False
+
     def validate(self, data_date, broker_no):
         cur = self.conn.cursor()
         sql = "SELECT * FROM broker_data where data_date = '{data_date}' and broker_no = '{broker_no}' "
@@ -55,7 +70,7 @@ class Broker(object):
         day = str(int(self.data_date[6:8]))
         today = year + "-" + month + "-" + day
 
-        if self.validate(self.data_date,broker_no):
+        if self.validate(self.data_date,broker_no) and self.validate_taiex(self.data_date):
             #self.DelBrokerData(data_date, broker_no)
 
             # headers = {
@@ -157,7 +172,7 @@ class Broker(object):
         self.conn = db.create_connection()
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
 
-        sql = "select broker_head,broker_no,broker_name from broker_list a where enable is null " \
+        sql = "select broker_head,broker_no,broker_name from broker_list a where enable ='Y' " \
               "and broker_no not in(select distinct broker_no from broker_data where data_date = {data_date})"
         sql = sql.format(data_date=self.data_date)
         cur.execute(sql)
@@ -179,7 +194,7 @@ class Broker(object):
 
 
 data_date = datetime.date.today().strftime('%Y%m%d')
-data_date = '20200703'
+#data_date = '20200703'
 
 br = Broker(data_date)
 br.execute()
