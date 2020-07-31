@@ -109,6 +109,13 @@ class FlagMonitorDaily(object):
                 result_6 = "年線乖離率 :" + str(ma240) + "，股價已經上漲了一段時間\n"
             msg = msg + result_6
 
+            #20日均線買賣訊號
+            ma20 = ss.Ma20_Flag_Gap(today, stock_no)
+            if ma20 >= 0 and ma20 <= 3:
+                result_8 = "突破20日均線，可買進\n"
+            elif ma20 < 0 and ma20 >= -3:
+                result_8 = "跌破20日均線，要賣出\n"
+            msg = msg + result_8
 
             # 用外資買超比率計算預期股價
             if forePercent > 0:
@@ -192,12 +199,23 @@ class StaticStrategy(object):
     #(旗標日收盤價 / 年線 -1 ) X 100%
     def Ma240_Flag_Gap(self, data_date, stock_no):
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
-        sql = "select a.stock_name,(c.stock_eprice/b.avg_price-1)*100 result from stockflag a, stockprice_ma240 b, stockprice c " \
+        sql = "select distinct a.stock_name,(c.stock_eprice/b.avg_price-1)*100 result from stockflag a, stockprice_ma240 b, stockprice c " \
               "where a.stock_no = b.stock_no and a.stock_no ={stock_no} and a.stock_no = c.stock_no and c.batch_no = {data_date}"
         sql = sql.format(data_date=data_date, stock_no=stock_no)
         cur.execute(sql)
         result = round(cur.fetchone()['result'],2)
         return result
+
+    #20日均線乖離率
+    def Ma20_Flag_Gap(self, data_date, stock_no):
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        sql = "select distinct a.stock_name,(c.stock_eprice/b.avg_price-1)*100 result from stockflag a, stockprice_ma20 b, stockprice c " \
+              "where a.stock_no = b.stock_no and a.stock_no ={stock_no} and a.stock_no = c.stock_no and c.batch_no = {data_date}"
+        sql = sql.format(data_date=data_date, stock_no=stock_no)
+        cur.execute(sql)
+        result = round(cur.fetchone()['result'],2)
+        return result
+
 
     #1年最大跌幅
     #資料量不足，尚未有年資料
