@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*
 import sys
+
+from funcs.stockflag import stockflag
+
 sys.path.append("..")
 import datetime
 from stock.database import database
@@ -11,7 +14,7 @@ sys.setdefaultencoding("utf-8")
 #監控旗標日的股票
 #該程式只能跑在有開市的日期
 class FlagMonitorDaily(object):
-
+    today = ""
 
     def conn_close(self):
         self.conn.close()
@@ -19,6 +22,8 @@ class FlagMonitorDaily(object):
     def __init__(self):
         db = database()
         self.conn = db.create_connection()
+        self.today = datetime.date.today().strftime('%Y%m%d')
+        #self.today = "20200731"
 
     def getFlagStock(self):
 
@@ -32,9 +37,8 @@ class FlagMonitorDaily(object):
 
     def Message(self):
         msg = ""
-        today = datetime.date.today().strftime('%Y%m%d')
         lists = self.getFlagStock()
-        ds = DynamicStrategy()
+        ds = DynamicStrategy(self.today)
         ss = StaticStrategy()
 
         for list in lists:
@@ -49,7 +53,6 @@ class FlagMonitorDaily(object):
             forePercent = ds.Foreign_Percent(stock_no, flagDate)
             todayPercent = ds.Today_Foreign_Percent(stock_no)
             msg = msg + "外資買超比率 :" + str(forePercent) + "(" + str(todayPercent) + ")\n"
-
 
             #條件二
             taiexPercent = ds.Taiex_Percent(flagDate)
@@ -94,11 +97,11 @@ class FlagMonitorDaily(object):
 
             #超過240天最高價
             mostPrice = ds.MostPrice(stock_no)
-            currentPrice = ds.CurrentPrice(today, stock_no)
+            currentPrice = ds.CurrentPrice(self.today, stock_no)
             msg = msg + "240天最高價 : " + str(mostPrice) + " 今日價 : " + str(currentPrice) + "\n"
 
             #年線乖離率
-            ma240 = ss.Ma240_Flag_Gap(today, stock_no)
+            ma240 = ss.Ma240_Flag_Gap(self.today, stock_no)
             if ma240 < -20:
                 result_6 = "年線乖離率 :" + str(ma240) + "，偏離年線很大，股價剛經過一段時間急跌\n"
             elif ma240 > -20 and ma240 < 0:
@@ -110,17 +113,25 @@ class FlagMonitorDaily(object):
             msg = msg + result_6
 
             #20日均線買賣訊號
-            ma20 = ss.Ma20_Flag_Gap(today, stock_no)
+            result_8 = ""
+            ma20 = ss.Ma20_Flag_Gap(self.today, stock_no)
             if ma20 >= 0 and ma20 <= 3:
                 result_8 = "突破20日均線，可買進\n"
             elif ma20 < 0 and ma20 >= -3:
                 result_8 = "跌破20日均線，要賣出\n"
-            msg = msg + result_8
+
+            if len(result_8) > 0 :
+                msg = msg + result_8
 
             # 用外資買超比率計算預期股價
             if forePercent > 0:
                 msg = msg + self.calculate_stock_price(stock_no, forePercent)
 
+            # 關閉旗標日
+            if forePercent <= 1 and todayPercent < 0:
+                sf = stockflag()
+                sf.delFlagDate(stock_no)
+                msg = msg + "不符合預計，該旗標日關閉\n"
 
             token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
             lineNotifyMessage(token, msg)
@@ -223,18 +234,19 @@ class StaticStrategy(object):
         pass
 
 class DynamicStrategy(object):
+    today = ""
+
     def conn_close(self):
         self.conn.close()
 
-    def __init__(self):
+    def __init__(self, today):
         db = database()
         self.conn = db.create_connection()
-
+        self.today = today
     #券資比
     def Today_Financing_Percent(self, stock_no):
-        today = datetime.date.today().strftime('%Y%m%d')
         sql = "select round((a.today_borrow_stock / a.today_borrow_money)*100,2) percent from financing a where a.stock_no = {stock_no} and a.data_date = {today}"
-        sql = sql.format(stock_no=stock_no, today=today)
+        sql = sql.format(stock_no=stock_no, today=self.today)
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         cur.execute(sql)
         result = cur.fetchone()['percent']
@@ -243,9 +255,8 @@ class DynamicStrategy(object):
     #動態檢核表(何時賣出，何時加碼)
     #今日外資買超比率
     def Today_Foreign_Percent(self, stock_no):
-        today = datetime.date.today().strftime('%Y%m%d')
         sql = "select percent from legalperson_price a where a.stock_no = {stock_no} and batch_no = {today}"
-        sql = sql.format(stock_no=stock_no, today=today)
+        sql = sql.format(stock_no=stock_no, today=self.today)
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         cur.execute(sql)
         result = cur.fetchone()['percent']
@@ -253,10 +264,8 @@ class DynamicStrategy(object):
 
     #外資買超比率
     def Foreign_Percent(self, stock_no, flagDate):
-        today = datetime.date.today().strftime('%Y%m%d')
-
         sql = "select round(sum(china_sum/stock_num*100),2) result from legalperson_price a where a.stock_no = {stock_no} and batch_no between {flagDate} and {today}"
-        sql = sql.format(stock_no=stock_no, flagDate=flagDate, today=today)
+        sql = sql.format(stock_no=stock_no, flagDate=flagDate, today=self.today)
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         print(sql)
         cur.execute(sql)
@@ -289,10 +298,8 @@ class DynamicStrategy(object):
     #投信買超比率
     #投信買超比率 = 投資張數 / 公司股票張數 X 100%
     def Invest_Percent(self, stock_no, flagDate):
-        today = datetime.date.today().strftime('%Y%m%d')
-
         sql = "select round(sum(invest_sum/stock_num*100),2) result from legalperson_price a where a.stock_no = {stock_no} and batch_no between {flagDate} and {today}"
-        sql = sql.format(stock_no=stock_no, flagDate=flagDate, today=today)
+        sql = sql.format(stock_no=stock_no, flagDate=flagDate, today=self.today)
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         print(sql)
         cur.execute(sql)

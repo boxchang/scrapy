@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*
 import sys
+
+from funcs.stockflag import stockflag
+
 sys.path.append("..")
 from funcs.dividend import countAvgDividend, getOffer6YearDividend
 from funcs.stockinfo import getTodayPrice
@@ -76,22 +79,8 @@ class LegalPersonDaily(object):
 
                 lineNotifyMessage(token, msg)
 
-                self.saveFlagDate(self.data_date,stock_no)
-
-    def saveFlagDate(self,data_date,stock_no):
-        self.create_stock_flag_table()
-        db = database()
-        sql = "insert into stockflag(data_date,stock_no,stock_name,stock_lprice,close_index) " \
-              " (select batch_no,stock_no,stock_name,stock_lprice,close_index from stockprice a, taiex b where a.stock_no = '{stock_no}' and batch_no = '{data_date}' and a.batch_no = b.data_date)"
-        sql = sql.format(stock_no=stock_no, data_date=data_date)
-        db.execute_sql(sql)
-
-
-    def create_stock_flag_table(self):
-        sql = self.CREATE_STOCK_FLAG_TABLE
-        db = database()
-        db.execute_sql(sql)
-
+                sf = stockflag()
+                sf.saveFlagDate(self.data_date,stock_no)
 
     def create_legalpersonDate_table(self):
         sql = self.CREATE_LEGALPERSON_DATE_TABLE
