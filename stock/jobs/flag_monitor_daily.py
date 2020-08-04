@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 import sys
-
+sys.path.append("..")
 from funcs.stockflag import stockflag
 
 sys.path.append("..")
