@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*
+import numpy
 import sys
 sys.path.append("..")
 from funcs.stockflag import stockflag
@@ -114,14 +115,36 @@ class FlagMonitorDaily(object):
 
             #20日均線買賣訊號
             result_8 = ""
+            MAt = ss.getMa20Value(stock_no)
             ma20 = ss.Ma20_Flag_Gap(self.today, stock_no)
+            result_8 += "20日均線為" + str(MAt)
             if ma20 >= 0 and ma20 <= 3:
-                result_8 = "突破20日均線，可買進\n"
+                result_8 += "，突破20日均線，可買進"
             elif ma20 < 0 and ma20 >= -3:
-                result_8 = "跌破20日均線，要賣出\n"
+                result_8 += "，跌破20日均線，要賣出"
 
             if len(result_8) > 0 :
-                msg = msg + result_8
+                msg = msg + result_8 + "\n"
+
+            #布林通道
+            result_9 = ""
+            SDt = self.calculate_SD(stock_no, MAt)
+            UBt = round(MAt + (SDt*2),2)
+            LBt = round(MAt - (SDt*2),2)
+            PB = round((currentPrice-LBt) / (UBt-LBt) * 100,2)
+            result_9 = "壓力線為"+str(UBt)+"，支撐線為"+str(LBt)+"，%B為"+str(PB)+"，"
+            if PB >= 80 :
+                result_9 += "多頭行情加碼"
+            elif PB < 20 :
+                result_9 += "空頭行情減碼"
+            elif PB < 0 :
+                result_9 += "可以考慮買進"
+            elif PB > 100 :
+                result_9 += "建議出脫"
+
+            if len(result_9) > 0 :
+                msg = msg + result_9 + "\n"
+
 
             # 用外資買超比率計算預期股價
             if forePercent > 0:
@@ -136,6 +159,22 @@ class FlagMonitorDaily(object):
             token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
             lineNotifyMessage(token, msg)
         ds.conn_close()
+
+    def calculate_SD(self, stock_no, MAt):
+
+        price_sum = 0
+
+        sql = "select stock_price from legalperson_price a where a.stock_no = {stock_no} order by batch_no desc limit 20"
+        sql = sql.format(stock_no=stock_no)
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        print(sql)
+        cur.execute(sql)
+        lists = cur.fetchall()
+        for item in lists:
+            price_sum += numpy.square(float(item['stock_price'])-MAt)
+        SDt = numpy.sqrt(price_sum/len(lists))
+
+        return SDt
 
     def calculate_stock_price(self,stock_no, foreign_rate):
         msg = ""
@@ -227,6 +266,14 @@ class StaticStrategy(object):
         result = round(cur.fetchone()['result'],2)
         return result
 
+    #20日均線值
+    def getMa20Value(self, stock_no):
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        sql = "select avg_price from stockprice_ma20 where stock_no = {stock_no}"
+        sql = sql.format(stock_no=stock_no)
+        cur.execute(sql)
+        result = round(cur.fetchone()['avg_price'], 2)
+        return result
 
     #1年最大跌幅
     #資料量不足，尚未有年資料
