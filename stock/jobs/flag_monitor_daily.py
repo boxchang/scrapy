@@ -133,14 +133,16 @@ class FlagMonitorDaily(object):
             LBt = round(MAt - (SDt*2),2)
             PB = round((currentPrice-LBt) / (UBt-LBt) * 100,2)
             result_9 = "壓力線為"+str(UBt)+"，支撐線為"+str(LBt)+"，%B為"+str(PB)+"，"
-            if PB >= 80 :
+
+            if PB > 100 :
+                result_9 += "建議出脫"
+            elif PB >= 80 :
                 result_9 += "多頭行情加碼"
-            elif PB < 20 :
-                result_9 += "空頭行情減碼"
             elif PB < 0 :
                 result_9 += "可以考慮買進"
-            elif PB > 100 :
-                result_9 += "建議出脫"
+            elif PB < 20 :
+                result_9 += "空頭行情減碼"
+
 
             if len(result_9) > 0 :
                 msg = msg + result_9 + "\n"
@@ -154,7 +156,7 @@ class FlagMonitorDaily(object):
             if forePercent <= 1 and todayPercent < 0:
                 sf = stockflag()
                 sf.delFlagDate(stock_no)
-                msg = msg + "不符合預計，該旗標日關閉\n"
+                msg = msg + "不符合預期，該旗標日關閉\n"
 
             token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
             lineNotifyMessage(token, msg)

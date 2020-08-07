@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*
 import sys
-
-from funcs.stockflag import stockflag
-
 sys.path.append("..")
+from funcs.stockflag import stockflag
 from funcs.dividend import countAvgDividend, getOffer6YearDividend
 from funcs.stockinfo import getTodayPrice
 
