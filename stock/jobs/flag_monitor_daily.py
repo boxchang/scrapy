@@ -24,7 +24,7 @@ class FlagMonitorDaily(object):
         db = database()
         self.conn = db.create_connection()
         self.today = datetime.date.today().strftime('%Y%m%d')
-        #self.today = "20200731"
+        self.today = "20200807"
 
     def getFlagStock(self):
 
@@ -99,7 +99,8 @@ class FlagMonitorDaily(object):
             #超過240天最高價
             mostPrice = ds.MostPrice(stock_no)
             currentPrice = ds.CurrentPrice(self.today, stock_no)
-            msg = msg + "240天最高價 : " + str(mostPrice) + " 今日價 : " + str(currentPrice) + "\n"
+            msg += "---中長期指標-----------------\n"
+            msg += "240天最高價 : " + str(mostPrice) + "\n"
 
             #年線乖離率
             ma240 = ss.Ma240_Flag_Gap(self.today, stock_no)
@@ -112,45 +113,48 @@ class FlagMonitorDaily(object):
             elif ma240 > 20:
                 result_6 = "年線乖離率 :" + str(ma240) + "，股價已經上漲了一段時間\n"
             msg = msg + result_6
+            # 用外資買超比率計算預期股價
+            if forePercent > 0:
+                msg += "外資比例推算\n"
+                msg += self.calculate_stock_price(stock_no, forePercent)
 
             #20日均線買賣訊號
             result_8 = ""
             MAt = ss.getMa20Value(stock_no)
             ma20 = ss.Ma20_Flag_Gap(self.today, stock_no)
-            result_8 += "20日均線為" + str(MAt)
+
+            # 布林通道
+            SDt = self.calculate_SD(stock_no, MAt)
+            UBt = round(MAt + (SDt * 2), 2)
+            LBt = round(MAt - (SDt * 2), 2)
+            PB = round((currentPrice - LBt) / (UBt - LBt) * 100, 2)
+
+            result_8 = "---短期指標-------------------\n"
+            result_8 += "20日均線為" + str(MAt) + "，%B為"+str(PB) + "\n"
             if ma20 >= 0 and ma20 <= 3:
-                result_8 += "，突破20日均線，可買進"
+                result_8 += "，突破20日均線，可買進\n"
             elif ma20 < 0 and ma20 >= -3:
-                result_8 += "，跌破20日均線，要賣出"
+                result_8 += "，跌破20日均線，要賣出\n"
+
+            if PB > 100 :
+                result_8 += "%B>100 建議出脫"
+            elif PB >= 80 :
+                result_8 += "%B>80 多頭行情加碼"
+            elif PB < 0 :
+                result_8 += "%B<0 可以考慮買進"
+            elif PB < 20 :
+                result_8 += "%B<20空頭行情減碼"
 
             if len(result_8) > 0 :
                 msg = msg + result_8 + "\n"
 
-            #布林通道
-            result_9 = ""
-            SDt = self.calculate_SD(stock_no, MAt)
-            UBt = round(MAt + (SDt*2),2)
-            LBt = round(MAt - (SDt*2),2)
-            PB = round((currentPrice-LBt) / (UBt-LBt) * 100,2)
-            result_9 = "壓力線為"+str(UBt)+"，支撐線為"+str(LBt)+"，%B為"+str(PB)+"，"
-
-            if PB > 100 :
-                result_9 += "建議出脫"
-            elif PB >= 80 :
-                result_9 += "多頭行情加碼"
-            elif PB < 0 :
-                result_9 += "可以考慮買進"
-            elif PB < 20 :
-                result_9 += "空頭行情減碼"
-
+            result_9 = "壓力線為" + str(UBt) + "\n"
+            result_9 += "今日價:" + str(currentPrice) + "\n"
+            result_9 += "支撐線為"+str(LBt)+"\n"
+            result_9 += "------------------------------\n"
 
             if len(result_9) > 0 :
-                msg = msg + result_9 + "\n"
-
-
-            # 用外資買超比率計算預期股價
-            if forePercent > 0:
-                msg = msg + self.calculate_stock_price(stock_no, forePercent)
+                msg = msg + result_9
 
             # 關閉旗標日
             if forePercent <= 1 and todayPercent < 0:
@@ -159,6 +163,7 @@ class FlagMonitorDaily(object):
                 msg = msg + "不符合預期，該旗標日關閉\n"
 
             token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
+            print(msg)
             lineNotifyMessage(token, msg)
         ds.conn_close()
 
