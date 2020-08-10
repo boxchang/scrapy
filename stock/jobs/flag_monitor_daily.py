@@ -3,8 +3,6 @@ import numpy
 import sys
 sys.path.append("..")
 from funcs.stockflag import stockflag
-
-sys.path.append("..")
 import datetime
 from stock.database import database
 import MySQLdb
@@ -24,7 +22,7 @@ class FlagMonitorDaily(object):
         db = database()
         self.conn = db.create_connection()
         self.today = datetime.date.today().strftime('%Y%m%d')
-        self.today = "20200807"
+        #self.today = "20200807"
 
     def getFlagStock(self):
 
