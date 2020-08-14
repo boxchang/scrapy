@@ -18,8 +18,6 @@ class LegalPersonDaily(object):
     CREATE_LEGALPERSON_DATE_TABLE = ('create table if not exists legalperson_date(data_date varchar(10), flag varchar(1), '
                                'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
 
-    CREATE_STOCK_FLAG_TABLE = ('CREATE TABLE if not exists stockflag (data_date VARCHAR(10) NOT NULL,stock_no VARCHAR(10) NOT NULL,stock_name VARCHAR(60) NOT NULL,stock_lprice FLOAT NOT NULL,close_index FLOAT NOT NULL,actual_price FLOAT,price90 FLOAT,price80 FLOAT,price70 FLOAT,price50 FLOAT,enable VARCHAR(1), created_date TimeStamp DEFAULT CURRENT_TIMESTAMP, updated_date TimeStamp)')
-
     data_date = datetime.date.today().strftime('%Y%m%d')
 
     #data_date = '20200120'
