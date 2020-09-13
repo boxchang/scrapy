@@ -81,8 +81,9 @@ class DividendNotice(object):
             msg += stock_msg
         print(msg)
 
-        token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
-        lineNotifyMessage(token, msg)
+        if len(rows) > 0:
+            token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
+            lineNotifyMessage(token, msg)
 
     def execute(self):
         self.create_dividendnotice_table()
