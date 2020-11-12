@@ -9,6 +9,9 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from io import StringIO
 
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 class stock_info(object):
     data_date = ""
 
@@ -152,10 +155,16 @@ class dividend_predict(object):
         #soup.select('#divDetail > table > tr > td:nth-child(1) > nobr > b')[0].text
 
         #tr:nth-child(1) 第一列
-        year = soup.select('#divDetail > table > tr:nth-child(2) > td:nth-child(1)')[0].text
-        money = float(soup.select('#divDetail > table > tr:nth-child(2) > td:nth-child(22)')[0].text)
-        stock = float(soup.select('#divDetail > table > tr:nth-child(2) > td:nth-child(23)')[0].text)
-        rate = float(soup.select('#divDetail > table > tr:nth-child(2) > td:nth-child(24)')[0].text)
+        year = 0
+        row_index = 2
+        while year == 0:
+            if soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(22)')[0].text != "-":
+                year = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(1)')[0].text
+                money = float(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(22)')[0].text)
+                stock = float(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(23)')[0].text)
+                rate = float(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(24)')[0].text)
+            else:
+                row_index += 1
 
         return year, money, stock, rate
 
@@ -166,6 +175,9 @@ class dividend_predict(object):
     #目前股價配息率
     def getPreDividendRate(self):
         pass
+
+# dp = dividend_predict("2063")
+# year, money, stock, rate = dp.getLastYearDividendRate()
 
 
 if sys.argv[1] > "":
