@@ -134,6 +134,12 @@ class dividend_predict(object):
     def getThisYearEPS(self, session):
         pass
 
+    def validate(self, value):
+        result = False
+        if value != "-" and value != "0":
+            result = True
+        return result
+
     #去年配息率
     def getLastYearDividendRate(self):
         url = 'https://goodinfo.tw/StockInfo/StockDividendPolicy.asp?STOCK_ID={stock_no}'
@@ -158,7 +164,7 @@ class dividend_predict(object):
         year = 0
         row_index = 2
         while year == 0:
-            if soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(22)')[0].text != "-":
+            if self.validate(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(24)')[0].text):
                 year = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(1)')[0].text
                 money = float(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(4)')[0].text)
                 stock = float(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(7)')[0].text)
@@ -176,7 +182,7 @@ class dividend_predict(object):
     def getPreDividendRate(self):
         pass
 
-# dp = dividend_predict("2063")
+# dp = dividend_predict("2301")
 # year, money, stock, rate = dp.getLastYearDividendRate()
 
 
@@ -203,11 +209,12 @@ if sys.argv[1] > "":
         print("stock count:" + str(len(stockprice)))
 
         for stock_no in stockprice:
-            #if i <= 2: # 先觀察幾筆
+            #if i >= 245: # 先觀察幾筆
+                print("第" + str(i) + "筆")
                 dp = dividend_predict(stock_no[2:])
                 session, pre_eps, count = dp.getPredictEPS()
                 if count == 4 and pre_eps > 0:
-                    print("第" + str(i) + "筆")
+
                     stock_name = stockprice[stock_no][0]
                     stock_price = stockprice[stock_no][1]
                     print("stock_name:" + stock_name)
@@ -217,8 +224,10 @@ if sys.argv[1] > "":
 
                     writer.writerow([stock_no[2:], stock_name, stock_price, session, pre_eps, year ,money, stock, rate, pre_dividend, price_rate])
                     print(price_rate)
-                    i += 1
-                    time.sleep(15)
+                i += 1
+                time.sleep(15)
+            else:
+                i += 1
 
         csvfile.close()
 
