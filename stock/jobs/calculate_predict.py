@@ -123,7 +123,7 @@ class dividend_predict(object):
             session = "Q1"
             count += 1
 
-        count_4Q = sum(eps_list)
+        count_4Q = round(sum(eps_list),2)
 
         return session, count_4Q, count
 
