@@ -188,7 +188,7 @@ if sys.argv[1] > "":
     data_date = sys.argv[1]
     i = 1
 
-    header = ['公司', '股價', '預估EPS', '配息年份', '去年配息', '去年配股', '去年配息比例', '預估今年配息', '目前股價配息率']
+    header = ['代碼', '公司', '股價', '季', '預估EPS', '配息年份', '去年配息', '去年配股', '去年配息比例', '預估今年配息', '目前股價配息率']
 
     with open('predict/dividend_' + data_date + '.csv', 'w') as csvfile:
         # 建立 CSV 檔寫入器
@@ -215,7 +215,7 @@ if sys.argv[1] > "":
                     pre_dividend = round(pre_eps * rate / 100,2)
                     price_rate = round((pre_dividend / stock_price)*100, 2)
 
-                    writer.writerow([stock_name, stock_price, pre_eps, year ,money, stock, rate, pre_dividend, price_rate])
+                    writer.writerow([stock_no[2:], stock_name, stock_price, session, pre_eps, year ,money, stock, rate, pre_dividend, price_rate])
                     print(price_rate)
                     i += 1
                     time.sleep(15)
