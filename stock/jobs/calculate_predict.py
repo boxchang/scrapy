@@ -205,7 +205,7 @@ if sys.argv[1] > "":
         for stock_no in stockprice:
             dp = dividend_predict(stock_no[2:])
             session, pre_eps, count = dp.getPredictEPS()
-            if count == 4 and pre_eps > 0 and i <= 50:  # 先觀察幾筆
+            if count == 4 and pre_eps > 0 and i <= 5:  # 先觀察幾筆
                 stock_name = stockprice[stock_no][0]
                 stock_price = stockprice[stock_no][1]
                 print("stock_name:" + stock_name)
@@ -217,6 +217,8 @@ if sys.argv[1] > "":
                 print(price_rate)
                 i += 1
                 time.sleep(15)
+
+        csvfile.close()
 
 
 
