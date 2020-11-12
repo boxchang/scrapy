@@ -184,7 +184,7 @@ if sys.argv[1] > "":
 
     print("stock count:" + str(len(stockprice)))
 
-    with open('predict/dividend_' + data_date + '.csv', 'w', encoding='utf-8') as csvfile:
+    with open('predict/dividend_' + data_date + '.csv', 'w', newline='') as csvfile:
         # 建立 CSV 檔寫入器
         writer = csv.writer(csvfile)
         # 寫入一列資料
