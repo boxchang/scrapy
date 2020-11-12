@@ -186,7 +186,7 @@ if sys.argv[1] > "":
 
     stockprice = {}
     data_date = sys.argv[1]
-    i = 0
+    i = 1
 
     header = ['公司', '股價', '預估EPS', '配息年份', '去年配息', '去年配股', '去年配息比例', '預估今年配息', '目前股價配息率']
 
@@ -204,6 +204,7 @@ if sys.argv[1] > "":
 
         for stock_no in stockprice:
             if i <= 2: # 先觀察幾筆
+                print("第"+str(i)+"筆")
                 dp = dividend_predict(stock_no[2:])
                 session, pre_eps, count = dp.getPredictEPS()
                 if count == 4 and pre_eps > 0:
