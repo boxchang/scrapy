@@ -186,8 +186,8 @@ if sys.argv[1] > "":
 
         si = stock_info(data_date)
         si.setStockPrice1(stockprice)
+        print("上市公司筆數:" + str(len(stockprice)))
         si.setStockPrice2(stockprice)
-
         print("stock count:" + str(len(stockprice)))
 
         for stock_no in stockprice:
