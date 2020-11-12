@@ -203,20 +203,21 @@ if sys.argv[1] > "":
         print("stock count:" + str(len(stockprice)))
 
         for stock_no in stockprice:
-            dp = dividend_predict(stock_no[2:])
-            session, pre_eps, count = dp.getPredictEPS()
-            if count == 4 and pre_eps > 0 and i <= 5:  # 先觀察幾筆
-                stock_name = stockprice[stock_no][0]
-                stock_price = stockprice[stock_no][1]
-                print("stock_name:" + stock_name)
-                year, money, stock, rate = dp.getLastYearDividendRate()
-                pre_dividend = round(pre_eps * rate / 100,2)
-                price_rate = round((pre_dividend / stock_price)*100, 2)
+            if i <= 2: # 先觀察幾筆
+                dp = dividend_predict(stock_no[2:])
+                session, pre_eps, count = dp.getPredictEPS()
+                if count == 4 and pre_eps > 0:
+                    stock_name = stockprice[stock_no][0]
+                    stock_price = stockprice[stock_no][1]
+                    print("stock_name:" + stock_name)
+                    year, money, stock, rate = dp.getLastYearDividendRate()
+                    pre_dividend = round(pre_eps * rate / 100,2)
+                    price_rate = round((pre_dividend / stock_price)*100, 2)
 
-                writer.writerow([stock_name, stock_price, pre_eps, year ,money, stock, rate, pre_dividend, price_rate])
-                print(price_rate)
-                i += 1
-                time.sleep(15)
+                    writer.writerow([stock_name, stock_price, pre_eps, year ,money, stock, rate, pre_dividend, price_rate])
+                    print(price_rate)
+                    i += 1
+                    time.sleep(15)
 
         csvfile.close()
 
