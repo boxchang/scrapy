@@ -41,14 +41,14 @@ my_params = {'ro': '0',  # 限定全職的工作，如果不限定則輸入0
 url = requests.get('https://www.104.com.tw/jobs/search/?', my_params, headers=headers).url
 
 #開啟Chrome於前端顯示
-#driver = webdriver.Chrome(ChromeDriverManager().install())
+driver = webdriver.Chrome(ChromeDriverManager().install())
 
 #在背景執行
-chrome_options = Options()
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--disable-dev-shm-usage')
-chrome_options.add_argument('--headless')
-driver = webdriver.Chrome(chrome_options=chrome_options) #若這行有問題去下載chromedriver放置/usr/local/bin
+# chrome_options = Options()
+# chrome_options.add_argument('--no-sandbox')
+# chrome_options.add_argument('--disable-dev-shm-usage')
+# chrome_options.add_argument('--headless')
+# driver = webdriver.Chrome(chrome_options=chrome_options) #若這行有問題去下載chromedriver放置/usr/local/bin
 
 driver.get(url)
 
@@ -125,7 +125,8 @@ while i < len(List):
     url = 'https://' + content.attrs['href'].strip('//')
     if url.find("www.104.com.tw") > 0:
         jobNo = url[url.rfind("/") + 1:url.rfind("?")]
-        ajax_url = "https://www.104.com.tw/job/ajax/content/" + jobNo
+        #ajax_url = "https://www.104.com.tw/job/ajax/content/" + jobNo
+        ajax_url = "https://www.104.com.tw/job/" + jobNo
         res = requests.get(ajax_url)
         job = json.loads(res.text)
         item = {}
