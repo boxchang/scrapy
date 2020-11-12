@@ -178,9 +178,9 @@ if sys.argv[1] > "":
 
     header = ['公司', '股價', '預估EPS', '配息年份', '去年配息', '去年配股', '去年配息比例', '預估今年配息', '目前股價配息率']
 
-    #si = stock_info(data_date)
-    #si.setStockPrice1(stockprice)
-    #si.setStockPrice2(stockprice)
+    si = stock_info(data_date)
+    si.setStockPrice1(stockprice)
+    si.setStockPrice2(stockprice)
 
     print("stock count:" + str(len(stockprice)))
 
