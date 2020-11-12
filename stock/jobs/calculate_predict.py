@@ -187,9 +187,6 @@ class dividend_predict(object):
 
 
 if sys.argv[1] > "":
-    if not os.path.isdir(os.getcwd()+'\\predict'):
-        os.mkdir(os.getcwd()+'\\predict')
-
     stockprice = {}
     data_date = sys.argv[1]
     i = 1
@@ -226,8 +223,8 @@ if sys.argv[1] > "":
                     print(price_rate)
                 i += 1
                 time.sleep(15)
-            else:
-                i += 1
+            # else:
+            #     i += 1
 
         csvfile.close()
 
