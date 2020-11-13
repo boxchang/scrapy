@@ -167,12 +167,12 @@ class dividend_predict(object):
         money = 0
         stock = 0
         while year == 0 and row_index <= 5:
-            rate = soup.select('.tb-outline > table > tr:nth-child('+row_index+') > tr > td:nth-child(9)')[0].text.replace('%', '')
+            rate = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(9)')[0].text.replace('%', '')
             if self.validate(rate):
-                year = soup.select('.tb-outline > table > tr:nth-child('+row_index+') > tr > td:nth-child(1)')[0].text
-                last_eps = soup.select('.tb-outline > table > tr:nth-child('+row_index+') > tr > td:nth-child(8)')[0].text
-                money = float(soup.select('.tb-outline > table > tr:nth-child('+row_index+') > tr > td:nth-child(7)')[0].text)
-                stock = float(soup.select('.tb-outline > table > tr:nth-child('+row_index+') > tr > td:nth-child(6)')[0].text)
+                year = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(1)')[0].text
+                last_eps = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text
+                money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
+                stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
                 rate = float(rate)
             else:
                 row_index += 1
@@ -238,8 +238,8 @@ if sys.argv[1] > "":
     file_name = data_date + '_' + time.strftime("%H%M%S")
     header = ['代碼', '公司', '股價', '季', '配息年份', '去年EPS', '去年配息', '去年配股', '去年配息比例', '預估EPS', '預估今年配息', '目前股價配息率']
 
-    with open('predict/dividend_' + file_name + '.csv', 'w') as csvfile:
-    #with open('predict/dividend_' + file_name + '.csv', 'w', newline='', encoding="utf-8") as csvfile:
+    #with open('predict/dividend_' + file_name + '.csv', 'w') as csvfile:
+    with open('predict/dividend_' + file_name + '.csv', 'w', newline='', encoding="utf-8") as csvfile:
         # 建立 CSV 檔寫入器
         writer = csv.writer(csvfile)
         # 寫入一列資料
