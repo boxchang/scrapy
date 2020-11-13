@@ -198,8 +198,8 @@ if sys.argv[1] > "":
     file_name = data_date + '_' + time.strftime("%H%M%S")
     header = ['代碼', '公司', '股價', '季', '配息年份', '去年EPS', '去年配息', '去年配股', '去年配息比例', '預估EPS', '預估今年配息', '目前股價配息率']
 
-    #with open('predict/dividend_' + file_name + '.csv', 'w') as csvfile:
-    with open('predict/dividend_' + file_name + '.csv', 'w', newline='', encoding="utf-8") as csvfile:
+    with open('predict/dividend_' + file_name + '.csv', 'w') as csvfile:
+    #with open('predict/dividend_' + file_name + '.csv', 'w', newline='', encoding="utf-8") as csvfile:
         # 建立 CSV 檔寫入器
         writer = csv.writer(csvfile)
         # 寫入一列資料
@@ -212,7 +212,7 @@ if sys.argv[1] > "":
         print("stock count:" + str(len(stockprice)))
 
         for stock_no in stockprice:
-            if i >= 76: # 先觀察幾筆
+            if i >= 339: # 先觀察幾筆
                 print("第" + str(i) + "筆")
                 dp = dividend_predict(stock_no[2:])
 
@@ -229,7 +229,7 @@ if sys.argv[1] > "":
                         writer.writerow([stock_no[2:], stock_name, stock_price, session, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
                         print(price_rate)
                 i += 1
-                time.sleep(15)
+                time.sleep(20)
             else:
                 i += 1
 
