@@ -163,13 +163,17 @@ class dividend_predict(object):
         #tr:nth-child(1) 第一列
         year = 0
         row_index = 2
-        while year == 0:
-            if self.validate(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(24)')[0].text):
+        last_eps= 0
+        money = 0
+        stock = 0
+        while year == 0 and row_index <= 5:
+            rate = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(24)')[0].text
+            if self.validate(rate):
                 year = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(1)')[0].text
                 last_eps = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(21)')[0].text
                 money = float(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(4)')[0].text)
                 stock = float(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(7)')[0].text)
-                rate = float(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(24)')[0].text)
+                rate = float(rate)
             else:
                 row_index += 1
 
@@ -194,7 +198,8 @@ if sys.argv[1] > "":
     file_name = data_date + '_' + time.strftime("%H%M%S")
     header = ['代碼', '公司', '股價', '季', '配息年份', '去年EPS', '去年配息', '去年配股', '去年配息比例', '預估EPS', '預估今年配息', '目前股價配息率']
 
-    with open('predict/dividend_' + file_name + '.csv', 'w') as csvfile:
+    #with open('predict/dividend_' + file_name + '.csv', 'w') as csvfile:
+    with open('predict/dividend_' + file_name + '.csv', 'w', newline='', encoding="utf-8") as csvfile:
         # 建立 CSV 檔寫入器
         writer = csv.writer(csvfile)
         # 寫入一列資料
@@ -207,25 +212,26 @@ if sys.argv[1] > "":
         print("stock count:" + str(len(stockprice)))
 
         for stock_no in stockprice:
-            #if i >= 245: # 先觀察幾筆
+            if i >= 76: # 先觀察幾筆
                 print("第" + str(i) + "筆")
                 dp = dividend_predict(stock_no[2:])
-                session, pre_eps, count = dp.getPredictEPS()
-                if count == 4 and pre_eps > 0:
 
-                    stock_name = stockprice[stock_no][0]
-                    stock_price = stockprice[stock_no][1]
-                    print("stock_name:" + stock_name)
-                    year, last_eps, money, stock, rate = dp.getLastYearDividendRate()
-                    pre_dividend = round(pre_eps * rate / 100,2)
-                    price_rate = round((pre_dividend / stock_price)*100, 2)
+                stock_name = stockprice[stock_no][0]
+                stock_price = stockprice[stock_no][1]
+                print("stock_name:" + stock_name)
+                year, last_eps, money, stock, rate = dp.getLastYearDividendRate()
 
-                    writer.writerow([stock_no[2:], stock_name, stock_price, session, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
-                    print(price_rate)
+                if float(rate) > 0: #分配率大於0的才收集
+                    session, pre_eps, count = dp.getPredictEPS()
+                    if count == 4 and pre_eps > 0:
+                        pre_dividend = round(pre_eps * rate / 100,2)
+                        price_rate = round((pre_dividend / stock_price)*100, 2)
+                        writer.writerow([stock_no[2:], stock_name, stock_price, session, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
+                        print(price_rate)
                 i += 1
                 time.sleep(15)
-            # else:
-            #     i += 1
+            else:
+                i += 1
 
         csvfile.close()
 
