@@ -256,7 +256,7 @@ if sys.argv[1] > "":
         print("stock count:" + str(len(stockprice)))
 
         for stock_no in stockprice:
-            if i >= 345: # 先觀察幾筆
+            if i >= 353: # 先觀察幾筆
                 print("第" + str(i) + "筆")
                 dp = dividend_predict(stock_no[2:])
 
