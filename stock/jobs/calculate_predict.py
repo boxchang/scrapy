@@ -140,6 +140,46 @@ class dividend_predict(object):
             result = True
         return result
 
+    # 去年配息率
+    def getLastYearDividendRate2(self):
+        url = 'https://histock.tw/stock/{stock_no}/除權除息'
+        url = url.format(stock_no=self.stock_no)
+
+        headers = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36'}
+
+        resp = requests.get(url, headers=headers)
+
+        # 設定編碼為 utf-8 避免中文亂碼問題
+        resp.encoding = 'utf-8'
+
+        # 根據 HTTP header 的編碼解碼後的內容資料（ex. UTF-8），若該網站沒設定可能會有中文亂碼問題。所以通常會使用 resp.encoding 設定
+        raw_html = resp.text
+
+        # 將 HTML 轉成 BeautifulSoup 物件
+        soup = BeautifulSoup(raw_html, 'html.parser')
+        # soup.select('#divDetail > table > tr > td:nth-child(1) > nobr > b')[0].text
+
+        # tr:nth-child(1) 第一列
+        year = 0
+        row_index = 2
+        last_eps = 0
+        money = 0
+        stock = 0
+        while year == 0 and row_index <= 5:
+            rate = soup.select('.tb-outline > table > tr:nth-child('+row_index+') > tr > td:nth-child(9)')[0].text.replace('%', '')
+            if self.validate(rate):
+                year = soup.select('.tb-outline > table > tr:nth-child('+row_index+') > tr > td:nth-child(1)')[0].text
+                last_eps = soup.select('.tb-outline > table > tr:nth-child('+row_index+') > tr > td:nth-child(8)')[0].text
+                money = float(soup.select('.tb-outline > table > tr:nth-child('+row_index+') > tr > td:nth-child(7)')[0].text)
+                stock = float(soup.select('.tb-outline > table > tr:nth-child('+row_index+') > tr > td:nth-child(6)')[0].text)
+                rate = float(rate)
+            else:
+                row_index += 1
+
+        return year, last_eps, money, stock, rate
+
+
     #去年配息率
     def getLastYearDividendRate(self):
         url = 'https://goodinfo.tw/StockInfo/StockDividendPolicy.asp?STOCK_ID={stock_no}'
@@ -187,8 +227,8 @@ class dividend_predict(object):
     def getPreDividendRate(self):
         pass
 
-# dp = dividend_predict("2301")
-# year, money, stock, rate = dp.getLastYearDividendRate()
+dp = dividend_predict("2206")
+year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
 
 
 if sys.argv[1] > "":
@@ -219,7 +259,7 @@ if sys.argv[1] > "":
                 stock_name = stockprice[stock_no][0]
                 stock_price = stockprice[stock_no][1]
                 print("stock info:" + stock_no + " " + stock_name)
-                year, last_eps, money, stock, rate = dp.getLastYearDividendRate()
+                year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
 
                 if float(rate) > 0: #分配率大於0的才收集
                     session, pre_eps, count = dp.getPredictEPS()
