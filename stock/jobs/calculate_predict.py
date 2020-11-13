@@ -8,9 +8,9 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from io import StringIO
-
-reload(sys)
-sys.setdefaultencoding('utf8')
+if sys.version[0] == '2':
+    reload(sys)
+    sys.setdefaultencoding('utf8')
 
 class stock_info(object):
     data_date = ""
@@ -191,10 +191,10 @@ if sys.argv[1] > "":
     stockprice = {}
     data_date = sys.argv[1]
     i = 1
-
+    file_name = data_date + '_' + time.strftime("%H%M%S")
     header = ['代碼', '公司', '股價', '季', '配息年份', '去年EPS', '去年配息', '去年配股', '去年配息比例', '預估EPS', '預估今年配息', '目前股價配息率']
 
-    with open('predict/dividend_' + data_date + '.csv', 'w') as csvfile:
+    with open('predict/dividend_' + file_name + '.csv', 'w') as csvfile:
         # 建立 CSV 檔寫入器
         writer = csv.writer(csvfile)
         # 寫入一列資料
