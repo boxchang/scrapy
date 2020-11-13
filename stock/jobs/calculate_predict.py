@@ -227,8 +227,8 @@ class dividend_predict(object):
     def getPreDividendRate(self):
         pass
 
-dp = dividend_predict("2206")
-year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
+# dp = dividend_predict("2206")
+# year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
 
 
 if sys.argv[1] > "":
