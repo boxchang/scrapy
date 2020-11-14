@@ -8,9 +8,9 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from io import StringIO
-if sys.version[0] == '2':
+if sys.version_info < (3, 0):
     reload(sys)
-    sys.setdefaultencoding('utf8')
+    sys.setdefaultencoding('utf-8')
 
 class stock_info(object):
     data_date = ""
