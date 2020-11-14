@@ -263,7 +263,7 @@ if sys.argv[1] > "":
                 stock_name = stockprice[stock_no][0]
                 stock_price = stockprice[stock_no][1]
                 print("stock info:" + stock_no + " " + stock_name)
-                year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
+                year, last_eps, money, stock, rate = dp.getLastYearDividendRate()
 
                 if float(rate) > 0: #分配率大於0的才收集
                     session, pre_eps, count = dp.getPredictEPS()
@@ -273,7 +273,7 @@ if sys.argv[1] > "":
                         writer.writerow([stock_no[2:], stock_name, stock_price, session, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
                         print(price_rate)
                 i += 1
-                time.sleep(20)
+                time.sleep(60)
             # else:
             #     i += 1
 
