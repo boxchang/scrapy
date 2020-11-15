@@ -211,13 +211,13 @@ class dividend_predict(object):
         money = 0
         stock = 0
         while year == 0 and row_index <= 2:
-            rate = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(24)')[0].text
-            if self.validate(rate):
+            rate_tmp = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(24)')[0].text
+            if self.validate(rate_tmp):
                 year = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(1)')[0].text
                 last_eps = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(21)')[0].text
                 money = float(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(4)')[0].text)
                 stock = float(soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(7)')[0].text)
-                rate = float(rate)
+                rate = float(rate_tmp)
             else:
                 row_index += 1
 
@@ -260,7 +260,7 @@ if sys.argv[1] > "":
             # if stock_no != "6649":
             #     continue
 
-            if i >= 147: # 先觀察幾筆
+            if i >= 284: # 先觀察幾筆
                 print("第" + str(i) + "筆")
                 dp = dividend_predict(stock_no[2:])
 
@@ -277,7 +277,7 @@ if sys.argv[1] > "":
                         writer.writerow([stock_no[2:], stock_name, stock_price, session, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
                         print(price_rate)
                 i += 1
-                time.sleep(90)
+                time.sleep(60)
             else:
                 i += 1
 
