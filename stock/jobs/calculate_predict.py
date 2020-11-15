@@ -273,7 +273,7 @@ if sys.argv[1] > "":
                         writer.writerow([stock_no[2:], stock_name, stock_price, session, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
                         print(price_rate)
                 i += 1
-                time.sleep(60)
+                time.sleep(90)
             else:
                 i += 1
 
