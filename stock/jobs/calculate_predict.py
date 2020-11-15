@@ -210,7 +210,7 @@ class dividend_predict(object):
         last_eps= 0
         money = 0
         stock = 0
-        while year == 0 and row_index <= 5:
+        while year == 0 and row_index <= 2:
             rate = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(24)')[0].text
             if self.validate(rate):
                 year = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(1)')[0].text
@@ -256,7 +256,11 @@ if sys.argv[1] > "":
         print("stock count:" + str(len(stockprice)))
 
         for stock_no in stockprice:
-            if i >= 147: # 先觀察幾筆
+
+            # if stock_no != "6649":
+            #     continue
+
+            # if i >= 147: # 先觀察幾筆
                 print("第" + str(i) + "筆")
                 dp = dividend_predict(stock_no[2:])
 
@@ -274,8 +278,8 @@ if sys.argv[1] > "":
                         print(price_rate)
                 i += 1
                 time.sleep(90)
-            else:
-                i += 1
+            # else:
+            #     i += 1
 
         csvfile.close()
 
