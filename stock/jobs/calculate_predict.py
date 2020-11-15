@@ -261,7 +261,7 @@ if sys.argv[1] > "":
             # if stock_no != "6649":
             #     continue
 
-            if i >= 284: # 先觀察幾筆
+            if i >= 320: # 先觀察幾筆
                 print("第" + str(i) + "筆")
                 dp = dividend_predict(stock_no[2:])
 
