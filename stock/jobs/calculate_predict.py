@@ -260,7 +260,7 @@ if sys.argv[1] > "":
             # if stock_no != "6649":
             #     continue
 
-            # if i >= 147: # 先觀察幾筆
+            if i >= 147: # 先觀察幾筆
                 print("第" + str(i) + "筆")
                 dp = dividend_predict(stock_no[2:])
 
@@ -278,8 +278,8 @@ if sys.argv[1] > "":
                         print(price_rate)
                 i += 1
                 time.sleep(90)
-            # else:
-            #     i += 1
+            else:
+                i += 1
 
         csvfile.close()
 
