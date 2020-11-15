@@ -259,8 +259,8 @@ if sys.argv[1] > "":
 
         for stock_no in stockprice:
 
-            if stock_no != "003029":
-                continue
+            # if stock_no != "003029":
+            #     continue
 
             if i >= 320: # 先觀察幾筆
                 print("第" + str(i) + "筆")
