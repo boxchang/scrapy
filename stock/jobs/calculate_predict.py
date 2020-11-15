@@ -212,6 +212,7 @@ class dividend_predict(object):
         stock = 0
         rate = 0
         while year == 0 and row_index <= 2:
+            print(soup.select('#divDetail > table > tr:nth-child(2) > td:nth-child(24)'))
             rate_tmp = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(24)')[0].text
             if self.validate(rate_tmp):
                 year = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(1)')[0].text
@@ -258,8 +259,8 @@ if sys.argv[1] > "":
 
         for stock_no in stockprice:
 
-            # if stock_no != "6649":
-            #     continue
+            if stock_no != "003029":
+                continue
 
             if i >= 320: # 先觀察幾筆
                 print("第" + str(i) + "筆")
