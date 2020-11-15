@@ -212,6 +212,9 @@ class dividend_predict(object):
         stock = 0
         rate = 0
         while year == 0 and row_index <= 2:
+            if soup.find('異常') > 0:
+                print('您的瀏覽量異常, 已影響網站速度, 目前暫時關閉服務, 請稍後再重新使用, 若您是使用程式大量下載本網站資料, 請適當調降程式查詢頻率, 以維護一般使用者的權益')
+
             rate_tmp = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(24)')[0].text
             if self.validate(rate_tmp):
                 year = soup.select('#divDetail > table > tr:nth-child('+str(row_index)+') > td:nth-child(1)')[0].text
