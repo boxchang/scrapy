@@ -271,7 +271,7 @@ if sys.argv[1] > "":
                 stock_name = stockprice[stock_no][0]
                 stock_price = stockprice[stock_no][1]
                 print("stock info:" + stock_no + " " + stock_name)
-                year, last_eps, money, stock, rate = dp.getLastYearDividendRate()
+                year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
 
                 if float(rate) > 0: #分配率大於0的才收集
                     session, pre_eps, count = dp.getPredictEPS()
