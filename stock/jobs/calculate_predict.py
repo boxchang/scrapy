@@ -3,7 +3,7 @@ import csv
 import os
 import sys
 import time
-
+sys.path.append("..")
 import MySQLdb
 import requests
 from bs4 import BeautifulSoup
