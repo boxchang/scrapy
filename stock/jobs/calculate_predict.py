@@ -151,6 +151,10 @@ class dividend_predict(object):
         eps_list = []
         count = 0
         season = ""
+        cur_eps = 0
+        cpr_eps = 0
+        cpr_rate = 0
+
         cQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child(10)')[0].text
         if cQ4 != "-" and count < 4:
             eps_list.append(float(cQ4))
