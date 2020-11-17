@@ -381,6 +381,9 @@ if sys.argv[1] > "":
                 item['near_eps'] = near_eps
                 item['pre_div'] = pre_dividend
                 item['pre_rate'] = price_rate
+                item['cur_eps'] = cur_eps
+                item['cpr_eps'] = cpr_eps
+                item['cpr_rate'] = cpr_rate
 
         if si.chkDataExisted(stock_no):
             si.updateData(item)
