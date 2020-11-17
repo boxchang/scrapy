@@ -67,7 +67,7 @@ class StockPriceDay(object):
         url = 'https://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='+data_date+'&type=ALL'
         res = requests.get(url)
 
-        self.DelStockPriceByDate(data_date)
+        self.DelStockPriceByDate(data_date, 1)
         if len(res.text) > 0 and self.validate(data_date, 1):
 
             df = pd.read_csv(StringIO(res.text.replace("=", "")),
