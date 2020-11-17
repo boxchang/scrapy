@@ -4,19 +4,41 @@ import os
 import sys
 import time
 
+import MySQLdb
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from io import StringIO
+
+from stock.database import database
+
 if sys.version_info < (3, 0):
     reload(sys)
     sys.setdefaultencoding('utf-8')
+
+class PreDividend(object):
+    stock_no = ""
+    stock_name = ""
+    price = 0
+    season = ""
+    cur_eps = 0
+    cpr_eps = 0
+    year = ""
+    last_eps = 0
+    last_moeny = 0
+    last_stock = 0
+    last_rate = 0
+    near_eps = 0
+    pre_div = 0
+    pre_rate = 0
 
 class stock_info(object):
     data_date = ""
 
     def __init__(self, data_date):
         self.data_date = data_date
+        self.db = database()
+        self.conn = self.db.create_connection()
 
     def clean(self, str):
         result = "0"
@@ -59,6 +81,45 @@ class stock_info(object):
                         stockprice[self.clean(row['代號']).zfill(6)] = (row[1], float(row[2]))
 
         return stockprice
+
+    def getStockPrice(self):
+        stockprice = {}
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        sql = """SELECT * FROM (
+                SELECT a.stock_no,a.stock_name,a.stock_eprice,b.season xx FROM 
+                (SELECT * FROM stockprice a WHERE a.batch_no = {data_date}) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
+                WHERE xx IS null"""
+        sql = sql.format(data_date=self.data_date)
+        cur.execute(sql)
+        rows = cur.fetchall()
+        for row in rows:
+            stockprice[row["stock_no"]] = (row["stock_name"], float(row["stock_eprice"]))
+
+        return stockprice
+
+    def chkDataExisted(self, stock_no):
+        result = False
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        sql = """select * from predividend where stock_no='{stock_no}'"""
+        sql = sql.format(stock_no=stock_no)
+        cur.execute(sql)
+        rows = cur.fetchall()
+        if len(rows) > 0:
+            result = True
+
+        return result
+
+    def updateData(self, item):
+        pass
+
+    def insertData(self, item):
+        cur = self.conn.cursor()
+        col = ','.join(item.keys())
+        placeholders = ("%s," * len(item))[:-1]
+        sql = 'insert into predividend({}) values({})'
+        print(sql.format(col, placeholders), tuple(item.values()))
+        cur.execute(sql.format(col, placeholders), tuple(item.values()))
+
 
 
 class dividend_predict(object):
@@ -240,52 +301,65 @@ class dividend_predict(object):
 
 
 if sys.argv[1] > "":
-    stockprice = {}
+
     data_date = sys.argv[1]
-    i = 1
     file_name = data_date + '_' + time.strftime("%H%M%S")
     header = ['代碼', '公司', '股價', '季', '配息年份', '去年EPS', '去年配息', '去年配股', '去年配息比例', '預估EPS', '預估今年配息', '目前股價配息率']
 
-    with open('predict/dividend_' + file_name + '.csv', 'w') as csvfile:
-    #with open('predict/dividend_' + file_name + '.csv', 'w', newline='', encoding="utf-8") as csvfile:
-        # 建立 CSV 檔寫入器
-        writer = csv.writer(csvfile)
-        # 寫入一列資料
-        writer.writerow(header)
+    #with open('predict/dividend_' + file_name + '.csv', 'w') as csvfile:
+    # with open('predict/dividend_' + file_name + '.csv', 'w', newline='', encoding="utf-8") as csvfile:
+    #     # 建立 CSV 檔寫入器
+    #     writer = csv.writer(csvfile)
+    #     # 寫入一列資料
+    #     writer.writerow(header)
 
-        si = stock_info(data_date)
-        si.setStockPrice1(stockprice)
-        print("上市公司筆數:" + str(len(stockprice)))
-        si.setStockPrice2(stockprice)
-        print("stock count:" + str(len(stockprice)))
+    si = stock_info(data_date)
+    # si.setStockPrice1(stockprice)
+    # print("上市公司筆數:" + str(len(stockprice)))
+    # si.setStockPrice2(stockprice)
+    # print("stock count:" + str(len(stockprice)))
+    stockprice = si.getStockPrice()
 
-        for stock_no in stockprice:
+    for stock_no in stockprice:
+        item = {}
+        prediv = PreDividend()
+        # if stock_no != "001477":
+        #     continue
+        dp = dividend_predict(stock_no[2:])
+        stock_name = stockprice[stock_no][0]
+        stock_price = stockprice[stock_no][1]
+        print("stock info:" + stock_no + " " + stock_name)
+        year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
 
-            # if stock_no != "003029":
-            #     continue
+        item['stock_no'] = stock_no
+        item['stock_name'] = stock_name
+        item['price'] = stock_price
+        item['year'] = year
+        item['last_eps'] = last_eps
+        item['last_money'] = money
+        item['last_stock'] = stock
+        item['last_rate'] = rate
 
-            if i >= 340: # 先觀察幾筆
-                print("第" + str(i) + "筆")
-                dp = dividend_predict(stock_no[2:])
+        if float(rate) > 0: #分配率大於0的才收集
+            season, near_eps, count = dp.getPredictEPS()
+            if count == 4 and near_eps > 0:
+                pre_dividend = round(near_eps * rate / 100,2)
+                price_rate = round((pre_dividend / stock_price)*100, 2)
+                #writer.writerow([stock_no[2:], stock_name, stock_price, session, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
+                print(price_rate)
+                item['season'] = season
+                item['near_eps'] = near_eps
+                item['pre_div'] = pre_dividend
+                item['pre_rate'] = price_rate
 
-                stock_name = stockprice[stock_no][0]
-                stock_price = stockprice[stock_no][1]
-                print("stock info:" + stock_no + " " + stock_name)
-                year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
+        if si.chkDataExisted(stock_no):
+            si.updateData(item)
+        else:
+            si.insertData(item)
 
-                if float(rate) > 0: #分配率大於0的才收集
-                    session, pre_eps, count = dp.getPredictEPS()
-                    if count == 4 and pre_eps > 0:
-                        pre_dividend = round(pre_eps * rate / 100,2)
-                        price_rate = round((pre_dividend / stock_price)*100, 2)
-                        writer.writerow([stock_no[2:], stock_name, stock_price, session, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
-                        print(price_rate)
-                i += 1
-                time.sleep(90)
-            else:
-                i += 1
+        time.sleep(60)
 
-        csvfile.close()
+        # csvfile.close()
 
 
 
