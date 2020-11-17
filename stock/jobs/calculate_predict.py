@@ -155,42 +155,48 @@ class dividend_predict(object):
         cpr_eps = 0
         cpr_rate = 0
 
-        cQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child(10)')[0].text
+        index = 10
+        l_index = 9
+        while(soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child('+str(index)+')')[0].text == "-"):
+            index-=1
+            l_index-=1
+
+        cQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child('+str(index)+')')[0].text
         if cQ4 != "-" and count < 4:
             eps_list.append(float(cQ4))
             season = "Q1"
             count += 1
-        cQ3 = soup.select('.tb-outline > table > tr:nth-child(4) > td:nth-child(10)')[0].text
+        cQ3 = soup.select('.tb-outline > table > tr:nth-child(4) > td:nth-child('+str(index)+')')[0].text
         if cQ3 != "-" and count < 4:
             eps_list.append(float(cQ3))
             season = "Q2"
             count += 1
-        cQ2 = soup.select('.tb-outline > table > tr:nth-child(3) > td:nth-child(10)')[0].text
+        cQ2 = soup.select('.tb-outline > table > tr:nth-child(3) > td:nth-child('+str(index)+')')[0].text
         if cQ2 != "-" and count < 4:
             eps_list.append(float(cQ2))
             season = "Q3"
             count += 1
-        cQ1 = soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child(10)')[0].text
+        cQ1 = soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child('+str(index)+')')[0].text
         if cQ1 != "-" and count < 4:
             eps_list.append(float(cQ1))
             season = "Q4"
             count += 1
-        lQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child(9)')[0].text
+        lQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child('+str(l_index)+')')[0].text
         if lQ4 != "-" and count < 4:
             eps_list.append(float(lQ4))
             season = "Q3"
             count += 1
-        lQ3 = soup.select('.tb-outline > table > tr:nth-child(4) > td:nth-child(9)')[0].text
+        lQ3 = soup.select('.tb-outline > table > tr:nth-child(4) > td:nth-child('+str(l_index)+')')[0].text
         if lQ3 != "-" and count < 4:
             eps_list.append(float(lQ3))
             season = "Q2"
             count += 1
-        lQ2 = soup.select('.tb-outline > table > tr:nth-child(3) > td:nth-child(9)')[0].text
+        lQ2 = soup.select('.tb-outline > table > tr:nth-child(3) > td:nth-child('+str(l_index)+')')[0].text
         if lQ2 != "-" and count < 4:
             eps_list.append(float(lQ2))
             season = "Q1"
             count += 1
-        lQ1 = soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child(9)')[0].text
+        lQ1 = soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child('+str(l_index)+')')[0].text
         if lQ1 != "-" and count < 4:
             eps_list.append(float(lQ1))
             season = "Q4"
@@ -352,8 +358,8 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "001101":
-        #     continue
+        if stock_no != "006655":
+            continue
 
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
