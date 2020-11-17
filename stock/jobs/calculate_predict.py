@@ -348,8 +348,8 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        if stock_no != "001101":
-            continue
+        # if stock_no != "001101":
+        #     continue
 
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
@@ -383,7 +383,7 @@ if sys.argv[1] > "":
         else:
             si.insertData(item)
 
-        time.sleep(5)
+        time.sleep(60)
 
         # csvfile.close()
 
