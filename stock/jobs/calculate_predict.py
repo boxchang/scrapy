@@ -150,49 +150,72 @@ class dividend_predict(object):
 
         eps_list = []
         count = 0
-        session = ""
+        season = ""
         cQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child(10)')[0].text
         if cQ4 != "-" and count < 4:
             eps_list.append(float(cQ4))
-            session = "Q1"
+            season = "Q1"
             count += 1
         cQ3 = soup.select('.tb-outline > table > tr:nth-child(4) > td:nth-child(10)')[0].text
         if cQ3 != "-" and count < 4:
             eps_list.append(float(cQ3))
-            session = "Q2"
+            season = "Q2"
             count += 1
         cQ2 = soup.select('.tb-outline > table > tr:nth-child(3) > td:nth-child(10)')[0].text
         if cQ2 != "-" and count < 4:
             eps_list.append(float(cQ2))
-            session = "Q3"
+            season = "Q3"
             count += 1
         cQ1 = soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child(10)')[0].text
         if cQ1 != "-" and count < 4:
             eps_list.append(float(cQ1))
-            session = "Q4"
+            season = "Q4"
             count += 1
         lQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child(9)')[0].text
         if lQ4 != "-" and count < 4:
             eps_list.append(float(lQ4))
-            session = "Q3"
+            season = "Q3"
             count += 1
         lQ3 = soup.select('.tb-outline > table > tr:nth-child(4) > td:nth-child(9)')[0].text
         if lQ3 != "-" and count < 4:
             eps_list.append(float(lQ3))
-            session = "Q2"
+            season = "Q2"
             count += 1
         lQ2 = soup.select('.tb-outline > table > tr:nth-child(3) > td:nth-child(9)')[0].text
         if lQ2 != "-" and count < 4:
             eps_list.append(float(lQ2))
-            session = "Q1"
+            season = "Q1"
             count += 1
+        lQ1 = soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child(9)')[0].text
+        if lQ1 != "-" and count < 4:
+            eps_list.append(float(lQ1))
+            season = "Q4"
+            count += 1
+
+        if season == "Q1":
+            cpr_eps = round(float(lQ1), 2)
+            cur_eps = round(float(cQ1), 2)
+            cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
+        if season == "Q2":
+            cpr_eps = round(float(lQ1)+float(lQ2), 2)
+            cur_eps = round(float(cQ1)+float(cQ2), 2)
+            cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
+        if season == "Q3":
+            cpr_eps = round(float(lQ1)+float(lQ2)+float(lQ3), 2)
+            cur_eps = round(float(cQ1)+float(cQ2)+float(cQ3), 2)
+            cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
+        if season == "Q4":
+            cpr_eps = round(float(lQ1)+float(lQ2)+float(lQ3)+float(lQ4), 2)
+            cur_eps = round(float(cQ1)+float(cQ2)+float(cQ3)+float(cQ4), 2)
+            cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
+
 
         count_4Q = round(sum(eps_list),2)
 
-        return session, count_4Q, count
+        return season, count_4Q, count, cur_eps, cpr_eps, cpr_rate
 
     #今年累計EPS
-    def getThisYearEPS(self, session):
+    def getThisYearEPS(self, season):
         pass
 
     def validate(self, value):
@@ -323,8 +346,11 @@ if sys.argv[1] > "":
     for stock_no in stockprice:
         item = {}
         prediv = PreDividend()
-        # if stock_no != "001477":
-        #     continue
+
+
+        if stock_no != "001101":
+            continue
+
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
         stock_price = stockprice[stock_no][1]
@@ -341,11 +367,11 @@ if sys.argv[1] > "":
         item['last_rate'] = rate
 
         if float(rate) > 0: #分配率大於0的才收集
-            season, near_eps, count = dp.getPredictEPS()
+            season, near_eps, count, cur_eps, cpr_eps, cpr_rate = dp.getPredictEPS()
             if count == 4 and near_eps > 0:
                 pre_dividend = round(near_eps * rate / 100,2)
                 price_rate = round((pre_dividend / stock_price)*100, 2)
-                #writer.writerow([stock_no[2:], stock_name, stock_price, session, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
+                #writer.writerow([stock_no[2:], stock_name, stock_price, season, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
                 print(price_rate)
                 item['season'] = season
                 item['near_eps'] = near_eps
@@ -357,7 +383,7 @@ if sys.argv[1] > "":
         else:
             si.insertData(item)
 
-        time.sleep(60)
+        time.sleep(5)
 
         # csvfile.close()
 
