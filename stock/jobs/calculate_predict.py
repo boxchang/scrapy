@@ -154,73 +154,77 @@ class dividend_predict(object):
         cur_eps = 0
         cpr_eps = 0
         cpr_rate = 0
+        count_4Q = 0
 
-        index = 10
-        l_index = 9
-        while(soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child('+str(index)+')')[0].text == "-"):
-            index-=1
-            l_index-=1
+        try:
+            index = 10
+            l_index = 9
+            while(soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child('+str(index)+')')[0].text == "-"):
+                index-=1
+                l_index-=1
 
-        cQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child('+str(index)+')')[0].text
-        if cQ4 != "-" and count < 4:
-            eps_list.append(float(cQ4))
-            season = "Q1"
-            count += 1
-        cQ3 = soup.select('.tb-outline > table > tr:nth-child(4) > td:nth-child('+str(index)+')')[0].text
-        if cQ3 != "-" and count < 4:
-            eps_list.append(float(cQ3))
-            season = "Q2"
-            count += 1
-        cQ2 = soup.select('.tb-outline > table > tr:nth-child(3) > td:nth-child('+str(index)+')')[0].text
-        if cQ2 != "-" and count < 4:
-            eps_list.append(float(cQ2))
-            season = "Q3"
-            count += 1
-        cQ1 = soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child('+str(index)+')')[0].text
-        if cQ1 != "-" and count < 4:
-            eps_list.append(float(cQ1))
-            season = "Q4"
-            count += 1
-        lQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child('+str(l_index)+')')[0].text
-        if lQ4 != "-" and count < 4:
-            eps_list.append(float(lQ4))
-            season = "Q3"
-            count += 1
-        lQ3 = soup.select('.tb-outline > table > tr:nth-child(4) > td:nth-child('+str(l_index)+')')[0].text
-        if lQ3 != "-" and count < 4:
-            eps_list.append(float(lQ3))
-            season = "Q2"
-            count += 1
-        lQ2 = soup.select('.tb-outline > table > tr:nth-child(3) > td:nth-child('+str(l_index)+')')[0].text
-        if lQ2 != "-" and count < 4:
-            eps_list.append(float(lQ2))
-            season = "Q1"
-            count += 1
-        lQ1 = soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child('+str(l_index)+')')[0].text
-        if lQ1 != "-" and count < 4:
-            eps_list.append(float(lQ1))
-            season = "Q4"
-            count += 1
+            cQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child('+str(index)+')')[0].text
+            if cQ4 != "-" and count < 4:
+                eps_list.append(float(cQ4))
+                season = "Q1"
+                count += 1
+            cQ3 = soup.select('.tb-outline > table > tr:nth-child(4) > td:nth-child('+str(index)+')')[0].text
+            if cQ3 != "-" and count < 4:
+                eps_list.append(float(cQ3))
+                season = "Q2"
+                count += 1
+            cQ2 = soup.select('.tb-outline > table > tr:nth-child(3) > td:nth-child('+str(index)+')')[0].text
+            if cQ2 != "-" and count < 4:
+                eps_list.append(float(cQ2))
+                season = "Q3"
+                count += 1
+            cQ1 = soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child('+str(index)+')')[0].text
+            if cQ1 != "-" and count < 4:
+                eps_list.append(float(cQ1))
+                season = "Q4"
+                count += 1
+            lQ4 = soup.select('.tb-outline > table > tr:nth-child(5) > td:nth-child('+str(l_index)+')')[0].text
+            if lQ4 != "-" and count < 4:
+                eps_list.append(float(lQ4))
+                season = "Q3"
+                count += 1
+            lQ3 = soup.select('.tb-outline > table > tr:nth-child(4) > td:nth-child('+str(l_index)+')')[0].text
+            if lQ3 != "-" and count < 4:
+                eps_list.append(float(lQ3))
+                season = "Q2"
+                count += 1
+            lQ2 = soup.select('.tb-outline > table > tr:nth-child(3) > td:nth-child('+str(l_index)+')')[0].text
+            if lQ2 != "-" and count < 4:
+                eps_list.append(float(lQ2))
+                season = "Q1"
+                count += 1
+            lQ1 = soup.select('.tb-outline > table > tr:nth-child(2) > td:nth-child('+str(l_index)+')')[0].text
+            if lQ1 != "-" and count < 4:
+                eps_list.append(float(lQ1))
+                season = "Q4"
+                count += 1
 
-        if season == "Q1":
-            cpr_eps = round(float(lQ1), 2)
-            cur_eps = round(float(cQ1), 2)
-            cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
-        if season == "Q2":
-            cpr_eps = round(float(lQ1)+float(lQ2), 2)
-            cur_eps = round(float(cQ1)+float(cQ2), 2)
-            cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
-        if season == "Q3":
-            cpr_eps = round(float(lQ1)+float(lQ2)+float(lQ3), 2)
-            cur_eps = round(float(cQ1)+float(cQ2)+float(cQ3), 2)
-            cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
-        if season == "Q4":
-            cpr_eps = round(float(lQ1)+float(lQ2)+float(lQ3)+float(lQ4), 2)
-            cur_eps = round(float(cQ1)+float(cQ2)+float(cQ3)+float(cQ4), 2)
-            cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
+            if season == "Q1":
+                cpr_eps = round(float(lQ1), 2)
+                cur_eps = round(float(cQ1), 2)
+                cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
+            if season == "Q2":
+                cpr_eps = round(float(lQ1)+float(lQ2), 2)
+                cur_eps = round(float(cQ1)+float(cQ2), 2)
+                cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
+            if season == "Q3":
+                cpr_eps = round(float(lQ1)+float(lQ2)+float(lQ3), 2)
+                cur_eps = round(float(cQ1)+float(cQ2)+float(cQ3), 2)
+                cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
+            if season == "Q4":
+                cpr_eps = round(float(lQ1)+float(lQ2)+float(lQ3)+float(lQ4), 2)
+                cur_eps = round(float(cQ1)+float(cQ2)+float(cQ3)+float(cQ4), 2)
+                cpr_rate = round(((cur_eps/cpr_eps)-1)*100, 2)
 
 
-        count_4Q = round(sum(eps_list),2)
+            count_4Q = round(sum(eps_list),2)
+        except:
+            pass
 
         return season, count_4Q, count, cur_eps, cpr_eps, cpr_rate
 
