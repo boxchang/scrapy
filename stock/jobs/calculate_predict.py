@@ -86,7 +86,7 @@ class stock_info(object):
         stockprice = {}
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         sql = """SELECT * FROM (
-                SELECT a.stock_no,a.stock_name,a.stock_eprice,b.season xx FROM 
+                SELECT a.stock_no,a.stock_name,a.stock_eprice,b.price xx FROM 
                 (SELECT * FROM stockprice a WHERE a.batch_no = {data_date}) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
                 WHERE xx IS null"""
         sql = sql.format(data_date=self.data_date)
