@@ -119,7 +119,7 @@ class stock_info(object):
         sql = 'insert into predividend({}) values({})'
         print(sql.format(col, placeholders), tuple(item.values()))
         cur.execute(sql.format(col, placeholders), tuple(item.values()))
-
+        self.conn.commit()
 
 
 class dividend_predict(object):
