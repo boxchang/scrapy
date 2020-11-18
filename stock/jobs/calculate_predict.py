@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*
 import csv
+import datetime
 import os
 import sys
 import time
@@ -250,30 +251,33 @@ class dividend_predict(object):
             '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(1)')[
             0].text
         print(year)
-        rate_tmp = soup.select(
-            '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(9)')[
-            0].text.replace('%', '')
-        total = float(rate_tmp)
 
-        while (True):
-            row_index += 1
-            nyear = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
-                row_index) + ') > td:nth-child(1)')[0].text
-            nrate_tmp = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
-                row_index) + ') > td:nth-child(9)')[0].text.replace('%', '')
+        last_year = str(int(datetime.datetime.now().strftime('%Y'))-1)
+        if year.find(last_year) >= 0:
+            rate_tmp = soup.select(
+                '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(9)')[
+                0].text.replace('%', '')
+            total = float(rate_tmp)
 
-            if year == nyear:
-                total += float(nrate_tmp)
-            else:
-                data.append(total)
-                year = nyear
-                total = float(nrate_tmp)
-                if len(data) == 3:
-                    break
-        # except:
-        #     pass
+            while (True):
+                row_index += 1
+                nyear = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                    row_index) + ') > td:nth-child(1)')[0].text
+                nrate_tmp = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                    row_index) + ') > td:nth-child(9)')[0].text.replace('%', '')
 
-        rate = round(sum(data) / len(data), 2)
+                if year == nyear:
+                    total += float(nrate_tmp)
+                else:
+                    data.append(total)
+                    year = nyear
+                    total = float(nrate_tmp)
+                    if len(data) == 3:
+                        break
+            # except:
+            #     pass
+
+            rate = round(sum(data) / len(data), 2)
 
         return rate
 
@@ -400,7 +404,7 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "008921":
+        # if stock_no != "002330":
         #     continue
 
         dp = dividend_predict(stock_no[2:])
