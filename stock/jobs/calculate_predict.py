@@ -271,9 +271,12 @@ class dividend_predict(object):
                 else:
                     data.append(total)
                     year = nyear
-                    total = float(nrate_tmp)
+
                     if len(data) == 3:
                         break
+
+                    total = float(nrate_tmp)
+
             # except:
             #     pass
 
@@ -403,7 +406,7 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "004413":
+        # if stock_no != "006590":
         #     continue
 
         dp = dividend_predict(stock_no[2:])
