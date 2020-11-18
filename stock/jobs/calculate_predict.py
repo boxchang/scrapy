@@ -308,14 +308,12 @@ class dividend_predict(object):
         while year == 0 and row_index <= 5:
             rate_tmp = self.getAveDividendRate(soup)
             #rate_tmp = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(9)')[0].text.replace('%', '')
-            if self.validate(rate_tmp):
-                year = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(1)')[0].text
-                last_eps = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text
-                money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
-                stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
-                rate = float(rate_tmp)
-            else:
-                row_index += 1
+            year = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(1)')[0].text
+            last_eps = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text
+            money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
+            stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
+            rate = float(rate_tmp)
+
 
 
         return year, last_eps, money, stock, rate
@@ -402,8 +400,8 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        if stock_no != "008921":
-            continue
+        # if stock_no != "008921":
+        #     continue
 
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
