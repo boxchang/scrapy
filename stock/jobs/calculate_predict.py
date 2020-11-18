@@ -238,6 +238,45 @@ class dividend_predict(object):
             result = True
         return result
 
+    # 取得三年平均配息率
+    def getAveDividendRate(self, soup):
+        row_index = 1
+        rate = 0
+        data = []
+        total = 0
+
+        # try:
+        year = soup.select(
+            '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(1)')[
+            0].text
+        print(year)
+        rate_tmp = soup.select(
+            '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(9)')[
+            0].text.replace('%', '')
+        total = float(rate_tmp)
+
+        while (True):
+            row_index += 1
+            nyear = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                row_index) + ') > td:nth-child(1)')[0].text
+            nrate_tmp = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                row_index) + ') > td:nth-child(9)')[0].text.replace('%', '')
+
+            if year == nyear:
+                total += float(nrate_tmp)
+            else:
+                data.append(total)
+                year = nyear
+                total = float(nrate_tmp)
+                if len(data) == 3:
+                    break
+        # except:
+        #     pass
+
+        rate = round(sum(data) / len(data), 2)
+
+        return rate
+
     # 去年配息率
     def getLastYearDividendRate2(self):
         url = 'https://histock.tw/stock/{stock_no}/除權除息'
@@ -265,21 +304,22 @@ class dividend_predict(object):
         money = 0
         stock = 0
         rate = 0
-        try:
-            while year == 0 and row_index <= 5:
-                rate_tmp = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(9)')[0].text.replace('%', '')
-                if self.validate(rate_tmp):
-                    year = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(1)')[0].text
-                    last_eps = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text
-                    money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
-                    stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
-                    rate = float(rate_tmp)
-                else:
-                    row_index += 1
-        except:
-            pass
+
+        while year == 0 and row_index <= 5:
+            rate_tmp = self.getAveDividendRate(soup)
+            #rate_tmp = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(9)')[0].text.replace('%', '')
+            if self.validate(rate_tmp):
+                year = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(1)')[0].text
+                last_eps = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text
+                money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
+                stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
+                rate = float(rate_tmp)
+            else:
+                row_index += 1
+
 
         return year, last_eps, money, stock, rate
+
 
 
     #去年配息率
@@ -362,8 +402,8 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "006655":
-        #     continue
+        if stock_no != "008921":
+            continue
 
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
@@ -380,7 +420,7 @@ if sys.argv[1] > "":
         item['last_stock'] = stock
         item['last_rate'] = rate
 
-        if float(rate) > 0: #分配率大於0的才收集
+        if float(rate) > 0 and stock_price > 0: #分配率大於0的才收集
             season, near_eps, count, cur_eps, cpr_eps, cpr_rate = dp.getPredictEPS()
             if count == 4 and near_eps > 0:
                 pre_dividend = round(near_eps * rate / 100,2)
