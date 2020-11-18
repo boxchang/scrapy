@@ -309,16 +309,15 @@ class dividend_predict(object):
         stock = 0
         rate = 0
 
-        while year == 0 and row_index <= 5:
-            rate_tmp = self.getAveDividendRate(soup)
-            #rate_tmp = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(9)')[0].text.replace('%', '')
-            year = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(1)')[0].text
-            last_eps = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text
-            money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
-            stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
-            rate = float(rate_tmp)
-
-
+        if resp.text.find("無配發現金股利與股票股利資料") == -1:
+            while year == 0 and row_index <= 5:
+                rate_tmp = self.getAveDividendRate(soup)
+                #rate_tmp = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(9)')[0].text.replace('%', '')
+                year = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(1)')[0].text
+                last_eps = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text
+                money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
+                stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
+                rate = float(rate_tmp)
 
         return year, last_eps, money, stock, rate
 
@@ -404,7 +403,7 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "002330":
+        # if stock_no != "004413":
         #     continue
 
         dp = dividend_predict(stock_no[2:])
