@@ -126,6 +126,13 @@ class stock_info(object):
 class dividend_predict(object):
     stock_no = ""
 
+    def clean(self, str):
+        result = "0"
+        try:
+            result = str.replace(",", "").replace("-", "0").replace("--", "0")
+        except:
+            pass
+        return result
 
     def __init__(self, stock_no):
         self.stock_no = stock_no
@@ -321,7 +328,7 @@ class dividend_predict(object):
                 rate_tmp = self.getAveDividendRate(soup)
                 #rate_tmp = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(9)')[0].text.replace('%', '')
                 year = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(1)')[0].text
-                last_eps = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text
+                last_eps = self.clean(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text)
                 money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
                 stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
                 rate = float(rate_tmp)
@@ -410,8 +417,8 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "006616":
-        #     continue
+        if stock_no != "005906":
+            continue
 
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
