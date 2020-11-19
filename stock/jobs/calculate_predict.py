@@ -465,8 +465,8 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        if stock_no != "003188":
-            continue
+        # if stock_no != "003188":
+        #     continue
 
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
@@ -474,36 +474,40 @@ if sys.argv[1] > "":
         print("stock info:" + stock_no + " " + stock_name)
         year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
 
-        item['stock_no'] = stock_no
-        item['stock_name'] = stock_name
-        item['price'] = stock_price
-        item['year'] = year
-        item['last_eps'] = last_eps
-        item['last_money'] = money
-        item['last_stock'] = stock
-        item['last_rate'] = rate
+        #只看今年有配息的，太久沒配息的就不看了
+        last_year = str(int(datetime.datetime.now().strftime('%Y')) - 1)
+        if year.find(last_year) >= 0:
 
-        if float(rate) > 0 and stock_price > 0: #分配率大於0的才收集
-            season, near_eps, count, cur_eps, cpr_eps, cpr_rate = dp.getPredictEPS()
-            if count == 4 and near_eps > 0:
-                pre_dividend = round(near_eps * rate / 100,2)
-                price_rate = round((pre_dividend / stock_price)*100, 2)
-                #writer.writerow([stock_no[2:], stock_name, stock_price, season, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
-                print(price_rate)
-                item['season'] = season
-                item['near_eps'] = near_eps
-                item['pre_div'] = pre_dividend
-                item['pre_rate'] = price_rate
-                item['cur_eps'] = cur_eps
-                item['cpr_eps'] = cpr_eps
-                item['cpr_rate'] = cpr_rate
+            item['stock_no'] = stock_no
+            item['stock_name'] = stock_name
+            item['price'] = stock_price
+            item['year'] = year
+            item['last_eps'] = last_eps
+            item['last_money'] = money
+            item['last_stock'] = stock
+            item['last_rate'] = rate
 
-        if si.chkDataExisted(stock_no):
-            si.updateData(item)
-        else:
-            si.insertData(item)
+            if float(rate) > 0 and stock_price > 0: #分配率大於0的才收集
+                season, near_eps, count, cur_eps, cpr_eps, cpr_rate = dp.getPredictEPS()
+                if count == 4 and near_eps > 0:
+                    pre_dividend = round(near_eps * rate / 100,2)
+                    price_rate = round((pre_dividend / stock_price)*100, 2)
+                    #writer.writerow([stock_no[2:], stock_name, stock_price, season, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
+                    print(price_rate)
+                    item['season'] = season
+                    item['near_eps'] = near_eps
+                    item['pre_div'] = pre_dividend
+                    item['pre_rate'] = price_rate
+                    item['cur_eps'] = cur_eps
+                    item['cpr_eps'] = cpr_eps
+                    item['cpr_rate'] = cpr_rate
 
-        time.sleep(60)
+            if si.chkDataExisted(stock_no):
+                si.updateData(item)
+            else:
+                si.insertData(item)
+
+        time.sleep(30)
 
         # csvfile.close()
 
