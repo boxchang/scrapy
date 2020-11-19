@@ -295,6 +295,47 @@ class dividend_predict(object):
 
         return rate
 
+    # 取得去年配息
+    def getLastDividend(self, soup):
+        row_index = 1
+
+        # try:
+        year = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(1)')[0].text
+
+        last_year = str(int(datetime.datetime.now().strftime('%Y')) - 1)
+        if year.find(last_year) >= 0:
+            ndiv_stock = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                row_index) + ') > td:nth-child(6)')[0].text.replace('%', '')
+            ndiv_money = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                row_index) + ') > td:nth-child(7)')[0].text.replace('%', '')
+
+            stock_total = float(ndiv_stock)
+            money_total = float(ndiv_money)
+
+            while (True):
+                row_index += 1
+                try:
+                    nyear = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                        row_index) + ') > td:nth-child(1)')[0].text
+                    ndiv_stock = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                        row_index) + ') > td:nth-child(6)')[0].text.replace('%', '')
+                    ndiv_money = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                        row_index) + ') > td:nth-child(7)')[0].text.replace('%', '')
+
+                except:
+                    nyear = 0
+
+                if year == nyear:
+                    money_total += float(ndiv_money)
+                    stock_total += float(ndiv_stock)
+                else:
+                    break
+
+            # except:
+            #     pass
+        return money_total, stock_total
+
+
     # 去年配息率
     def getLastYearDividendRate2(self):
         url = 'https://histock.tw/stock/{stock_no}/除權除息'
@@ -329,8 +370,9 @@ class dividend_predict(object):
                 #rate_tmp = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(9)')[0].text.replace('%', '')
                 year = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(1)')[0].text
                 last_eps = self.clean(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text)
-                money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
-                stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
+                #money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
+                #stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
+                money, stock = self.getLastDividend(soup)
                 rate = float(rate_tmp)
 
         return year, last_eps, money, stock, rate
@@ -417,7 +459,7 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "005906":
+        # if stock_no != "008070":
         #     continue
 
         dp = dividend_predict(stock_no[2:])
