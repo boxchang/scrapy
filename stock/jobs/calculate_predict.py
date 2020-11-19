@@ -289,7 +289,10 @@ class dividend_predict(object):
                     if len(data) == 3:
                         break
 
-                    total = float(nrate_tmp)
+                    if nrate_tmp == "-":
+                        break
+                    else:
+                        total = float(nrate_tmp)
 
             # except:
             #     pass
@@ -462,8 +465,8 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "006111":
-        #     continue
+        if stock_no != "003188":
+            continue
 
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
