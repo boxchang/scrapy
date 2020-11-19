@@ -304,7 +304,8 @@ class dividend_predict(object):
     # 取得去年配息
     def getLastDividend(self, soup):
         row_index = 1
-
+        stock_total = 0
+        money_total = 0
         # try:
         year = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(1)')[0].text
 
@@ -465,7 +466,7 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "003188":
+        # if stock_no != "005703":
         #     continue
 
         dp = dividend_predict(stock_no[2:])
