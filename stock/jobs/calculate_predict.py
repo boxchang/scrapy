@@ -87,7 +87,7 @@ class stock_info(object):
         stockprice = {}
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         sql = """SELECT * FROM (
-                SELECT a.stock_no,a.stock_name,a.stock_eprice,b.cur_eps xx FROM 
+                SELECT a.stock_no,a.stock_name,a.stock_eprice,b.price xx FROM 
                 (SELECT * FROM stockprice a WHERE a.batch_no = {data_date}) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
                 WHERE xx IS null"""
         sql = sql.format(data_date=self.data_date)
@@ -111,20 +111,7 @@ class stock_info(object):
         return result
 
     def updateData(self, item):
-        cur = self.conn.cursor()
-        sql = """update predividend set data_date='{data_date}',price={price},season='{season}',
-                 cur_eps={cur_eps},cpr_eps={cpr_eps},cpr_rate={cpr_rate},year='{year}',
-                 last_eps={last_eps},last_money={last_money},last_stock={last_stock}, 
-                 last_rate={last_rate},near_eps={near_eps},
-                 pre_div={pre_div},pre_rate={pre_rate} where stock_no = '{stock_no}'"""
-        sql = sql.format(data_date=item['data_date'], price=item['price'], season=item['season'], cur_eps=item['cur_eps'],
-                         cpr_eps=item['cpr_eps'], cpr_rate=item['cpr_rate'], year=item['year'],
-                         last_eps=item['last_eps'], last_money=item['last_money'], last_stock=item['last_stock'],
-                         last_rate=item['last_rate'], near_eps=item['near_eps'], pre_div=item['pre_div'],
-                         pre_rate=item['pre_rate'], stock_no=item['stock_no'])
-        print(sql)
-        cur.execute(sql)
-        self.conn.commit()
+        pass
 
     def insertData(self, item):
         cur = self.conn.cursor()
@@ -139,6 +126,13 @@ class stock_info(object):
 class dividend_predict(object):
     stock_no = ""
 
+    def clean(self, str):
+        result = "0"
+        try:
+            result = str.replace(",", "").replace("-", "0").replace("--", "0")
+        except:
+            pass
+        return result
 
     def __init__(self, stock_no):
         self.stock_no = stock_no
@@ -265,30 +259,42 @@ class dividend_predict(object):
             0].text
         print(year)
 
+        rate_tmp = soup.select(
+            '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(9)')[
+            0].text.replace('%', '')
+
+
         last_year = str(int(datetime.datetime.now().strftime('%Y'))-1)
-        if year.find(last_year) >= 0:
-            rate_tmp = soup.select(
-                '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(9)')[
-                0].text.replace('%', '')
+        if year.find(last_year) >= 0 and rate_tmp != "-":
             total = float(rate_tmp)
 
             while (True):
                 row_index += 1
-                nyear = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
-                    row_index) + ') > td:nth-child(1)')[0].text
-                nrate_tmp = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
-                    row_index) + ') > td:nth-child(9)')[0].text.replace('%', '')
+                try:
+                    nyear = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                        row_index) + ') > td:nth-child(1)')[0].text
+                    nrate_tmp = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                        row_index) + ') > td:nth-child(9)')[0].text.replace('%', '')
+                except:
+                    nyear = 0
+                    nrate_tmp = 0
 
                 if year == nyear:
                     total += float(nrate_tmp)
                 else:
                     data.append(total)
-                    year = nyear
+                    if nyear == 0:
+                        break
+                    else:
+                        year = nyear
 
                     if len(data) == 3:
                         break
 
-                    total = float(nrate_tmp)
+                    if nrate_tmp == "-":
+                        break
+                    else:
+                        total = float(nrate_tmp)
 
             # except:
             #     pass
@@ -296,6 +302,48 @@ class dividend_predict(object):
             rate = round(sum(data) / len(data), 2)
 
         return rate
+
+    # 取得去年配息
+    def getLastDividend(self, soup):
+        row_index = 1
+        stock_total = 0
+        money_total = 0
+        # try:
+        year = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(1)')[0].text
+
+        last_year = str(int(datetime.datetime.now().strftime('%Y')) - 1)
+        if year.find(last_year) >= 0:
+            ndiv_stock = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                row_index) + ') > td:nth-child(6)')[0].text.replace('%', '')
+            ndiv_money = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                row_index) + ') > td:nth-child(7)')[0].text.replace('%', '')
+
+            stock_total = float(ndiv_stock)
+            money_total = float(ndiv_money)
+
+            while (True):
+                row_index += 1
+                try:
+                    nyear = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                        row_index) + ') > td:nth-child(1)')[0].text
+                    ndiv_stock = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                        row_index) + ') > td:nth-child(6)')[0].text.replace('%', '')
+                    ndiv_money = soup.select('.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(
+                        row_index) + ') > td:nth-child(7)')[0].text.replace('%', '')
+
+                except:
+                    nyear = 0
+
+                if year == nyear:
+                    money_total += float(ndiv_money)
+                    stock_total += float(ndiv_stock)
+                else:
+                    break
+
+            # except:
+            #     pass
+        return money_total, stock_total
+
 
     # 去年配息率
     def getLastYearDividendRate2(self):
@@ -330,9 +378,10 @@ class dividend_predict(object):
                 rate_tmp = self.getAveDividendRate(soup)
                 #rate_tmp = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(9)')[0].text.replace('%', '')
                 year = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(1)')[0].text
-                last_eps = soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text
-                money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
-                stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
+                last_eps = self.clean(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(8)')[0].text)
+                #money = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(7)')[0].text)
+                #stock = float(soup.select('.tb-outline > table > tr:nth-child('+str(row_index)+') > tr > td:nth-child(6)')[0].text)
+                money, stock = self.getLastDividend(soup)
                 rate = float(rate_tmp)
 
         return year, last_eps, money, stock, rate
@@ -382,6 +431,13 @@ class dividend_predict(object):
 
         return year, last_eps, money, stock, rate
 
+    #預估今年配息
+    def getPredictDividend(self):
+        pass
+
+    #目前股價配息率
+    def getPreDividendRate(self):
+        pass
 
 # dp = dividend_predict("2206")
 # year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
@@ -409,18 +465,10 @@ if sys.argv[1] > "":
 
     for stock_no in stockprice:
         item = {}
-        item['season'] = ""
-        item['near_eps'] = 0
-        item['pre_div'] = 0
-        item['pre_rate'] = 0
-        item['cur_eps'] = 0
-        item['cpr_eps'] = 0
-        item['cpr_rate'] = 0
-
         prediv = PreDividend()
 
 
-        # if stock_no != "006590":
+        # if stock_no != "009105":
         #     continue
 
         dp = dividend_predict(stock_no[2:])
@@ -428,7 +476,11 @@ if sys.argv[1] > "":
         stock_price = stockprice[stock_no][1]
         print("stock info:" + stock_no + " " + stock_name)
         year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
-        item['data_date'] = data_date
+
+        #只看今年有配息的，太久沒配息的就不看了
+        # last_year = str(int(datetime.datetime.now().strftime('%Y')) - 1)
+        # if year.find(last_year) >= 0:
+
         item['stock_no'] = stock_no
         item['stock_name'] = stock_name
         item['price'] = stock_price
@@ -458,7 +510,7 @@ if sys.argv[1] > "":
         else:
             si.insertData(item)
 
-        time.sleep(60)
+        time.sleep(30)
 
         # csvfile.close()
 
