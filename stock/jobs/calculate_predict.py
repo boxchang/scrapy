@@ -259,11 +259,13 @@ class dividend_predict(object):
             0].text
         print(year)
 
+        rate_tmp = soup.select(
+            '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(9)')[
+            0].text.replace('%', '')
+
+
         last_year = str(int(datetime.datetime.now().strftime('%Y'))-1)
-        if year.find(last_year) >= 0:
-            rate_tmp = soup.select(
-                '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(9)')[
-                0].text.replace('%', '')
+        if year.find(last_year) >= 0 and rate_tmp != "-":
             total = float(rate_tmp)
 
             while (True):
@@ -466,7 +468,7 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "005703":
+        # if stock_no != "009105":
         #     continue
 
         dp = dividend_predict(stock_no[2:])
