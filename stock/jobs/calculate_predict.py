@@ -87,7 +87,7 @@ class stock_info(object):
         stockprice = {}
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         sql = """SELECT * FROM (
-                SELECT a.stock_no,a.stock_name,a.stock_eprice,b.price xx FROM 
+                SELECT a.stock_no,a.stock_name,a.stock_eprice,b.cur_eps xx FROM 
                 (SELECT * FROM stockprice a WHERE a.batch_no = {data_date}) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
                 WHERE xx IS null"""
         sql = sql.format(data_date=self.data_date)
@@ -111,7 +111,20 @@ class stock_info(object):
         return result
 
     def updateData(self, item):
-        pass
+        cur = self.conn.cursor()
+        sql = """update predividend set data_date='{data_date}',price={price},season='{season}',
+                 cur_eps={cur_eps},cpr_eps={cpr_eps},cpr_rate={cpr_rate},year='{year}',
+                 last_eps={last_eps},last_money={last_money},last_stock={last_stock}, 
+                 last_rate={last_rate},near_eps={near_eps},
+                 pre_div={pre_div},pre_rate={pre_rate} where stock_no = '{stock_no}'"""
+        sql = sql.format(data_date=item['data_date'], price=item['price'], season=item['season'], cur_eps=item['cur_eps'],
+                         cpr_eps=item['cpr_eps'], cpr_rate=item['cpr_rate'], year=item['year'],
+                         last_eps=item['last_eps'], last_money=item['last_money'], last_stock=item['last_stock'],
+                         last_rate=item['last_rate'], near_eps=item['near_eps'], pre_div=item['pre_div'],
+                         pre_rate=item['pre_rate'], stock_no=item['stock_no'])
+        print(sql)
+        cur.execute(sql)
+        self.conn.commit()
 
     def insertData(self, item):
         cur = self.conn.cursor()
@@ -369,13 +382,6 @@ class dividend_predict(object):
 
         return year, last_eps, money, stock, rate
 
-    #預估今年配息
-    def getPredictDividend(self):
-        pass
-
-    #目前股價配息率
-    def getPreDividendRate(self):
-        pass
 
 # dp = dividend_predict("2206")
 # year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
@@ -403,6 +409,14 @@ if sys.argv[1] > "":
 
     for stock_no in stockprice:
         item = {}
+        item['season'] = ""
+        item['near_eps'] = 0
+        item['pre_div'] = 0
+        item['pre_rate'] = 0
+        item['cur_eps'] = 0
+        item['cpr_eps'] = 0
+        item['cpr_rate'] = 0
+
         prediv = PreDividend()
 
 
@@ -414,7 +428,7 @@ if sys.argv[1] > "":
         stock_price = stockprice[stock_no][1]
         print("stock info:" + stock_no + " " + stock_name)
         year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
-
+        item['data_date'] = data_date
         item['stock_no'] = stock_no
         item['stock_name'] = stock_name
         item['price'] = stock_price
