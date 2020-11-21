@@ -89,7 +89,7 @@ class stock_info(object):
         sql = """SELECT * FROM (
                 SELECT a.stock_no,a.stock_name,a.stock_eprice,b.cur_eps xx FROM 
                 (SELECT * FROM stockprice a WHERE a.batch_no = {data_date}) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
-                WHERE xx IS null"""
+                WHERE xx =0"""
         sql = sql.format(data_date=self.data_date)
         cur.execute(sql)
         rows = cur.fetchall()
@@ -482,8 +482,8 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "009105":
-        #     continue
+        if stock_no != "002338":
+            continue
 
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
@@ -504,7 +504,7 @@ if sys.argv[1] > "":
         item['last_stock'] = stock
         item['last_rate'] = rate
 
-        if float(rate) > 0 and stock_price > 0: #分配率大於0的才收集
+        if stock_price > 0: #分配率大於0的才收集
             season, near_eps, count, cur_eps, cpr_eps, cpr_rate = dp.getPredictEPS()
             if count == 4 and near_eps > 0:
                 pre_dividend = round(near_eps * rate / 100,2)
