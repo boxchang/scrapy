@@ -482,8 +482,8 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        if stock_no != "002338":
-            continue
+        # if stock_no != "002338":
+        #     continue
 
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
