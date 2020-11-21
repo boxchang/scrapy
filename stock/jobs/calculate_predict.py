@@ -89,7 +89,7 @@ class stock_info(object):
         sql = """SELECT * FROM (
                 SELECT a.stock_no,a.stock_name,a.stock_eprice,b.cur_eps xx FROM 
                 (SELECT * FROM stockprice a WHERE a.batch_no = {data_date}) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
-                WHERE xx =0"""
+                WHERE xx =0 or xx is Null"""
         sql = sql.format(data_date=self.data_date)
         cur.execute(sql)
         rows = cur.fetchall()
