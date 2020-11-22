@@ -89,7 +89,8 @@ class stock_info(object):
         sql = """SELECT * FROM (
                 SELECT a.stock_no,a.stock_name,a.stock_eprice,b.cur_eps xx FROM 
                 (SELECT * FROM stockprice a WHERE a.batch_no = {data_date}) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
-                WHERE xx =0 or xx is Null"""
+                WHERE xx =0 or xx is Null 
+                and stock_no not in ('000050','000051','000052','000053','000054','000055','000056','000057','000061')"""
         sql = sql.format(data_date=self.data_date)
         cur.execute(sql)
         rows = cur.fetchall()
@@ -482,8 +483,8 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "002505":
-        #     continue
+        if stock_no != "002743":
+            continue
 
         dp = dividend_predict(stock_no[2:])
         stock_name = stockprice[stock_no][0]
@@ -506,7 +507,7 @@ if sys.argv[1] > "":
 
         if stock_price > 0: #分配率大於0的才收集
             season, near_eps, count, cur_eps, cpr_eps, cpr_rate = dp.getPredictEPS()
-            if count == 4 and near_eps > 0:
+            if count == 4:
                 pre_dividend = round(near_eps * rate / 100,2)
                 price_rate = round((pre_dividend / stock_price)*100, 2)
                 #writer.writerow([stock_no[2:], stock_name, stock_price, season, year, last_eps, money, stock, rate, pre_eps, pre_dividend, price_rate])
