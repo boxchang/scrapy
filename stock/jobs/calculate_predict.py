@@ -88,7 +88,7 @@ class stock_info(object):
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         sql = """SELECT * FROM (
                 SELECT a.stock_no,a.stock_name,a.stock_eprice,b.cur_eps xx FROM 
-                (SELECT * FROM stockprice a WHERE a.batch_no = {data_date}) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
+                (SELECT * FROM stockprice a WHERE a.batch_no = {data_date} and stock_eprice > 0) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
                 WHERE xx =0 or xx is Null 
                 and stock_no not in ('000050','000051','000052','000053','000054','000055','000056','000057','000061')"""
         sql = sql.format(data_date=self.data_date)
@@ -117,7 +117,7 @@ class stock_info(object):
                          cur_eps={cur_eps},cpr_eps={cpr_eps},cpr_rate={cpr_rate},year='{year}',
                          last_eps={last_eps},last_money={last_money},last_stock={last_stock}, 
                          last_rate={last_rate},near_eps={near_eps},
-                         pre_div={pre_div},pre_rate={pre_rate} where stock_no = '{stock_no}'"""
+                         pre_div={pre_div},pre_rate={pre_rate},updated_date=Now() where stock_no = '{stock_no}'"""
         sql = sql.format(data_date=item['data_date'], price=item['price'], season=item['season'],
                          cur_eps=item['cur_eps'],
                          cpr_eps=item['cpr_eps'], cpr_rate=item['cpr_rate'], year=item['year'],
@@ -483,7 +483,7 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "002743":
+        # if stock_no != "004429":
         #     continue
 
         dp = dividend_predict(stock_no[2:])
