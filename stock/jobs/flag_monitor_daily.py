@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*
 import sys
-
-from jobs.app_lib.strategy import DynamicStrategy, StaticStrategy
-
 sys.path.append("..")
+from jobs.app_lib.strategy import DynamicStrategy, StaticStrategy
 from funcs.stockflag import stockflag
 import datetime
 from stock.database import database
