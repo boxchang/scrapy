@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*
 import numpy
 import sys
-sys.path.append("..")
+sys.path.append("../../")
 from jobs.app_lib.strategy import StaticStrategy
 import datetime
 from stock.database import database
