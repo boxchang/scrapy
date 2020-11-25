@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*
 import numpy
 import sys
-
-from jobs.app_lib.strategy import StaticStrategy
-
 sys.path.append("..")
-from funcs.stockflag import stockflag
+from jobs.app_lib.strategy import StaticStrategy
 import datetime
 from stock.database import database
 import MySQLdb
