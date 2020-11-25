@@ -13,3 +13,6 @@ python legalperson_price.py  #整理三大法人持股及股票金額，要計�
 python legalperson_daily.py  #監控每日三大法人是否有大量買進情況
 
 python flag_monitor_daily.py #監控旗標股票加碼或減碼
+
+cd /src/scrapy/stock/jobs/predict
+python q3q4_monitor.py
