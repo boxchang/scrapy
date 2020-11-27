@@ -20,10 +20,10 @@ class FlagMonitorDaily(object):
     def conn_close(self):
         self.conn.close()
 
-    def __init__(self):
+    def __init__(self, data_date):
         db = database()
         self.conn = db.create_connection()
-        self.today = datetime.date.today().strftime('%Y%m%d')
+        self.today = data_date
         #self.today = "20200807"
 
     def getFlagStock(self):
@@ -213,6 +213,11 @@ class FlagMonitorDaily(object):
         return msg
 
 
-fmd = FlagMonitorDaily()
+if len(sys.argv) > 1:
+    data_date = sys.argv[1]
+else:
+    data_date = datetime.date.today().strftime('%Y%m%d')
+
+fmd = FlagMonitorDaily(data_date)
 fmd.Message()
 
