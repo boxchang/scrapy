@@ -6,6 +6,9 @@ sys.path.append("..")
 from stock.database import database
 from stock.line import lineNotifyMessage
 
+if sys.version_info < (3, 0):
+    reload(sys)
+    sys.setdefaultencoding('utf8')
 
 #日排程
 #跑所有的股票資料
