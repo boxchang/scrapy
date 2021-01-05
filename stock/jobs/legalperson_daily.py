@@ -118,7 +118,7 @@ class LegalPersonDaily(object):
 
         for row in rows:
             percent = float(row[1])
-            if percent > 0:
+            if percent > -0.01: #若賣超不多，則不中斷連續計算
                 sql = "update legalperson_daily set increase=increase+1, decrease = 0, de_gap_count=0, in_gap_count=IFNULL(in_gap_count,0)+{percent}, updated_date = now() where stock_no = '{stock_no}'"
                 sql = sql.format(stock_no=row[0], percent=percent)
                 db.execute_sql(sql)
