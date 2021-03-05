@@ -87,10 +87,9 @@ class stock_info(object):
         stockprice = {}
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         sql = """SELECT * FROM (
-                SELECT a.stock_no,a.stock_name,a.stock_eprice,b.cur_eps xx FROM 
+                SELECT a.stock_no,a.stock_name,a.stock_eprice,b.cur_eps xx,b.season FROM 
                 (SELECT * FROM stockprice a WHERE a.batch_no = {data_date} and stock_eprice > 0) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
-                WHERE xx =0 or xx is Null 
-                and stock_no not in ('000050','000051','000052','000053','000054','000055','000056','000057','000061')"""
+                WHERE season <> 'Q4' and stock_no not in ('000050','000051','000052','000053','000054','000055','000056','000057','000061')"""
         sql = sql.format(data_date=self.data_date)
         cur.execute(sql)
         rows = cur.fetchall()
@@ -140,6 +139,7 @@ class stock_info(object):
 
 class dividend_predict(object):
     stock_no = ""
+    eps_year = ""
 
     def clean(self, str):
         result = "0"
@@ -149,8 +149,9 @@ class dividend_predict(object):
             pass
         return result
 
-    def __init__(self, stock_no):
+    def __init__(self, stock_no, eps_year):
         self.stock_no = stock_no
+        self.eps_year = eps_year
 
     #去年同期EPS
     def getPredictEPS(self):
@@ -272,14 +273,15 @@ class dividend_predict(object):
         year = soup.select(
             '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(1)')[
             0].text
-        print(year)
+        print('dividend year: ' + year)
 
         rate_tmp = soup.select(
             '.tb-outline > table > tr:nth-child(2) > tr:nth-child(' + str(row_index) + ') > td:nth-child(9)')[
             0].text.replace('%', '')
 
-
-        last_year = str(int(datetime.datetime.now().strftime('%Y'))-1)
+        #原先的取法是用今年去取前一年的股利，但在年初時去年股利得不到，故改成帶參數方式
+        #last_year = str(int(datetime.datetime.now().strftime('%Y'))-1)
+        last_year = str(int(self.eps_year)-1)
         if year.find(last_year) >= 0 and rate_tmp != "-":
             total = float(rate_tmp)
 
@@ -449,25 +451,22 @@ class dividend_predict(object):
 # dp = dividend_predict("2206")
 # year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
 
-
-if sys.argv[1] > "":
+#參數一 : 取哪一天股價
+#參數二 : 股利所屬年度
+#參數三 : 哪一季
+if sys.argv[1] != "" and sys.argv[2] != "":
 
     data_date = sys.argv[1]
+    if data_date == "today":
+        data_date = datetime.date.today().strftime('%Y%m%d')
+
+    eps_year = sys.argv[2]
+    cur_session = sys.argv[3]
     file_name = data_date + '_' + time.strftime("%H%M%S")
     header = ['代碼', '公司', '股價', '季', '配息年份', '去年EPS', '去年配息', '去年配股', '去年配息比例', '預估EPS', '預估今年配息', '目前股價配息率']
 
-    #with open('predict/dividend_' + file_name + '.csv', 'w') as csvfile:
-    # with open('predict/dividend_' + file_name + '.csv', 'w', newline='', encoding="utf-8") as csvfile:
-    #     # 建立 CSV 檔寫入器
-    #     writer = csv.writer(csvfile)
-    #     # 寫入一列資料
-    #     writer.writerow(header)
-
     si = stock_info(data_date)
-    # si.setStockPrice1(stockprice)
-    # print("上市公司筆數:" + str(len(stockprice)))
-    # si.setStockPrice2(stockprice)
-    # print("stock count:" + str(len(stockprice)))
+
     stockprice = si.getStockPrice()
 
     for stock_no in stockprice:
@@ -483,14 +482,14 @@ if sys.argv[1] > "":
         prediv = PreDividend()
 
 
-        # if stock_no != "004429":
+        # if stock_no != "008039":
         #     continue
 
-        dp = dividend_predict(stock_no[2:])
+        dp = dividend_predict(stock_no[2:], eps_year)
         stock_name = stockprice[stock_no][0]
         stock_price = stockprice[stock_no][1]
         print("stock info:" + stock_no + " " + stock_name)
-        year, last_eps, money, stock, rate = dp.getLastYearDividendRate2()
+        year, last_eps, money, stock, rate = dp.getLastYearDividendRate2() #取得前一年的股利率
 
         #只看今年有配息的，太久沒配息的就不看了
         # last_year = str(int(datetime.datetime.now().strftime('%Y')) - 1)
@@ -507,6 +506,9 @@ if sys.argv[1] > "":
 
         if stock_price > 0: #分配率大於0的才收集
             season, near_eps, count, cur_eps, cpr_eps, cpr_rate = dp.getPredictEPS()
+            if season != cur_session:
+                continue
+
             if count == 4:
                 pre_dividend = round(near_eps * rate / 100,2)
                 price_rate = round((pre_dividend / stock_price)*100, 2)

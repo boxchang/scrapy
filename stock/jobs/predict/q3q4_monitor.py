@@ -8,6 +8,10 @@ from stock.database import database
 import MySQLdb
 from stock.line import lineNotifyMessage
 
+if sys.version_info < (3, 0):
+    reload(sys)
+    sys.setdefaultencoding('utf8')
+
 #  q3q4_predict.py 要先跑完才能跑這支monitor
 
 
@@ -100,6 +104,23 @@ class q3q4Monitor(object):
             token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
             lineNotifyMessage(token, result)
 
+    #  盯緊Q4 EPS公佈的公司
+    def chkQ4EPSList(self):
+        result = "Q4EPS推算殖息率>9%的股票\n"
+        cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
+        sql = """select stock_no,stock_name,pre_rate,price,updated_date 
+                 from predividend a where a.season = 'Q4' and last_rate < 100 and pre_rate > 9"""
+        cur.execute(sql)
+        lists = cur.fetchall()
+
+        for data in lists:
+            tmp = "{stock_name}({stock_no}) 今日股價:{price} 殖息率:{pre_rate} ({updated_date})\n"
+            updated_date = data['updated_date'].strftime('%Y/%m/%d')
+            result += tmp.format(stock_name=data['stock_name'], stock_no=data['stock_no'], price=data['price'], pre_rate=data['pre_rate'], updated_date=updated_date)
+
+        if len(lists) > 0:
+            token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
+            lineNotifyMessage(token, result)
 
 if len(sys.argv) > 1:
     data_date = sys.argv[1]
@@ -109,3 +130,4 @@ else:
 qm = q3q4Monitor(data_date)
 qm.updatePreDividend()
 qm.getStockList()
+qm.chkQ4EPSList()
