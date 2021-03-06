@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*
-import csv
 import datetime
-import os
 import sys
+sys.path.append("../../")
 import time
-sys.path.append("..")
 import MySQLdb
 import requests
 from bs4 import BeautifulSoup
