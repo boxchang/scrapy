@@ -86,7 +86,8 @@ class stock_info(object):
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         sql = """SELECT * FROM (
                 SELECT a.stock_no,a.stock_name,a.stock_eprice,b.cur_eps xx,b.season FROM 
-                (SELECT * FROM stockprice a WHERE a.batch_no = {data_date} and stock_eprice > 0) a LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no ) aa
+                (SELECT * FROM stockprice a WHERE a.batch_no = {data_date} and stock_eprice > 0) a 
+                LEFT OUTER JOIN predividend b ON a.stock_no = b.stock_no AND b.updated_date < CURDATE()) aa
                 WHERE season <> 'Q4' and stock_no not in ('000050','000051','000052','000053','000054','000055','000056','000057','000061')"""
         sql = sql.format(data_date=self.data_date)
         cur.execute(sql)
@@ -480,7 +481,7 @@ if sys.argv[1] != "" and sys.argv[2] != "":
         prediv = PreDividend()
 
 
-        # if stock_no != "008039":
+        # if stock_no != "002413":
         #     continue
 
         dp = dividend_predict(stock_no[2:], eps_year)
