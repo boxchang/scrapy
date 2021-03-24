@@ -24,7 +24,7 @@ class FlagMonitorDaily(object):
         db = database()
         self.conn = db.create_connection()
         self.today = data_date
-        #self.today = "20200807"
+        self.today = "20210323"
 
     def getFlagStock(self):
 
@@ -103,10 +103,11 @@ class FlagMonitorDaily(object):
             msg += "240天最高價 : " + str(mostPrice) + "\n"
 
             #年線乖離率
+            result_6 = ""
             ma240 = ss.Ma240_Flag_Gap(self.today, stock_no)
             if ma240 < -20:
                 result_6 = "年線乖離率 :" + str(ma240) + "，偏離年線很大，股價剛經過一段時間急跌\n"
-            elif ma240 > -20 and ma240 < 0:
+            elif ma240 > -20 and ma240 <= 0:
                 result_6 = "年線乖離率 :" + str(ma240) + "，等待突破年壓力線\n"
             elif ma240 > 0 and ma240 < 20:
                 result_6 = "年線乖離率 :" + str(ma240) + "，股價具備年線支撐\n"
