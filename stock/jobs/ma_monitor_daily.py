@@ -48,13 +48,12 @@ class MaMonitorDaily(object):
         cur.execute(sql)
         rows = cur.fetchall()
 
-        msg = "均線糾結，單日成交量大於500張，外資連續買進\n"
+        msg = "均線糾結，單日成交量大於500張，融資比小於10%，外資連續買進\n"
         for row in rows:
-            temp = "{stock_name}({stock_no}) 今日股價{stock_price}"
-            temp = temp.format(stock_name=row["stock_name"], stock_no=row["stock_no"], stock_price=row["stock_eprice"])
+            print(row)
+            temp = "{stock_name}({stock_no}) 今日股價{stock_price} 融資比{borrow}"
+            temp = temp.format(stock_name=row["stock_name"], stock_no=row["stock_no"], stock_price=row["stock_eprice"], borrow=round(row["xx"],2))
             msg += temp
-
-            print(msg)
             lineNotifyMessage(self.token, msg)
 
 
