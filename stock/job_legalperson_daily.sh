@@ -14,3 +14,5 @@ python legalperson_daily.py  #監控每日三大法人是否有大量買進情�
 
 python flag_monitor_daily.py #監控旗標股票加碼或減碼
 
+python ma_monitor_daily.py #均線糾結
+
