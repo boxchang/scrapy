@@ -51,6 +51,7 @@ class MaMonitorDaily(object):
         msg = "均線糾結，單日成交量大於500張，融資比小於10%，外資連續買進\n"
         for row in rows:
             print(row)
+            msg = ""
             temp = "{stock_name}({stock_no}) 今日股價{stock_price} 融資比{borrow}"
             temp = temp.format(stock_name=row["stock_name"], stock_no=row["stock_no"], stock_price=row["stock_eprice"], borrow=round(row["xx"],2))
             msg += temp
