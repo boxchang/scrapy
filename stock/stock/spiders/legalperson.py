@@ -24,7 +24,7 @@ class LegalPerson(scrapy.Spider):
     }
 
     data_date = datetime.date.today().strftime('%Y%m%d')
-    #data_date = "20211213"
+    #data_date = "20220112"
 
     start_urls = ['http://www.twse.com.tw/fund/T86?response=csv&date='+data_date+'&selectType=ALLBUT0999']
 

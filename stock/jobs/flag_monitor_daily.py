@@ -12,6 +12,28 @@ if sys.version_info < (3, 0):
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
+
+class Stock(object):
+    stock_no = ""
+    percent_price90 = 0
+    percent_price80 = 0
+    percent_price70 = 0
+    percent_price50 = 0
+    stock_no = ""
+    stock_name = ""
+    flagDate = ""
+    forePercent = 0 # 外資累積買超比例
+    todayPercent = 0 # 外資今日買超比例
+    taiexPercent = 0 #大盤漲幅
+    investPercent = 0 # 投信買超比例
+    mostPrice = 0 # 240天內最高價
+    currentPrice = 0 # 目前價格
+
+    def __init__(self, stock_no, stock_name, flagDate):
+        self.stock_no =stock_no
+        self.stock_name = stock_name
+        self.flagDate = flagDate
+
 #監控旗標日的股票
 #該程式只能跑在有開市的日期
 class FlagMonitorDaily(object):
@@ -24,7 +46,7 @@ class FlagMonitorDaily(object):
         db = database()
         self.conn = db.create_connection()
         self.today = data_date
-        #self.today = "20210323"
+        self.today = "20220113"
 
     def getFlagStock(self):
 
@@ -47,29 +69,30 @@ class FlagMonitorDaily(object):
             stock_no = list['stock_no']
             stock_name = list['stock_name']
             flagDate = list['data_date']
+            stock = Stock(stock_no, stock_name, flagDate)
 
             msg = msg + "Stock No : " + stock_no + "(" + stock_name +")\n"
 
             #條件一
-            forePercent = ds.Foreign_Percent(stock_no, flagDate)
-            todayPercent = ds.Today_Foreign_Percent(stock_no)
-            msg = msg + "外資買超比率 :" + str(forePercent) + "(" + str(todayPercent) + ")\n"
+            stock.forePercent = ds.Foreign_Percent(stock_no, flagDate)
+            stock.todayPercent = ds.Today_Foreign_Percent(stock_no)
+            msg = msg + "外資買超比率 :" + str(stock.forePercent) + "(" + str(stock.todayPercent) + ")\n"
 
             #條件二
-            taiexPercent = ds.Taiex_Percent(flagDate)
-            if taiexPercent >= 5:
+            stock.taiexPercent = ds.Taiex_Percent(flagDate)
+            if stock.taiexPercent >= 5:
                 result_2 = "Yes"
             else:
                 result_2 = "No"
-            msg = msg + "大盤漲幅>=5% :" + str(taiexPercent) + " ("+result_2+")\n"
+            msg = msg + "大盤漲幅>=5% :" + str(stock.taiexPercent) + " ("+result_2+")\n"
 
             #條件三
-            investPercent = ds.Invest_Percent(stock_no, flagDate)
-            if investPercent >= 0.1:
+            stock.investPercent = ds.Invest_Percent(stock_no, flagDate)
+            if stock.investPercent >= 0.1:
                 result_3 = "Yes"
             else:
                 result_3 = "No"
-            msg = msg + "投信買超比率 >= 0.1% :" + str(investPercent) + " ("+result_3+")\n"
+            msg = msg + "投信買超比率 >= 0.1% :" + str(stock.investPercent) + " ("+result_3+")\n"
 
             #條件四
             Over1M = ds.Foreign_Day_Over1M(stock_no, flagDate)
@@ -97,10 +120,10 @@ class FlagMonitorDaily(object):
             msg = msg + result_7
 
             #超過240天最高價
-            mostPrice = ds.MostPrice(stock_no)
-            currentPrice = ds.CurrentPrice(self.today, stock_no)
+            stock.mostPrice = ds.MostPrice(stock_no)
+            stock.currentPrice = ds.CurrentPrice(self.today, stock_no)
             msg += "---中長期指標-----------------\n"
-            msg += "240天最高價 : " + str(mostPrice) + "\n"
+            msg += "240天最高價 : " + str(stock.mostPrice) + "\n"
 
             #年線乖離率
             result_6 = ""
@@ -115,9 +138,14 @@ class FlagMonitorDaily(object):
                 result_6 = "年線乖離率 :" + str(ma240) + "，股價已經上漲了一段時間\n"
             msg = msg + result_6
             # 用外資買超比率計算預期股價
-            if forePercent > 0:
+            if stock.forePercent > 0:
+                stock = self.calculate_stock_price(stock)
+
                 msg += "外資比例推算\n"
-                msg += self.calculate_stock_price(stock_no, forePercent)
+                msg += "機率值90% : " + str(stock.percent_price90) + "\n"
+                msg += "機率值80% : " + str(stock.percent_price80) + "\n"
+                msg += "機率值70% : " + str(stock.percent_price70) + "\n"
+                msg += "機率值50% : " + str(stock.percent_price50) + "\n"
 
             #20日均線買賣訊號
             result_8 = ""
@@ -128,7 +156,7 @@ class FlagMonitorDaily(object):
             SDt = ss.calculate_SD(stock_no, MAt)
             UBt = round(MAt + (SDt * 2), 2)
             LBt = round(MAt - (SDt * 2), 2)
-            PB = round((currentPrice - LBt) / (UBt - LBt) * 100, 2)
+            PB = round((stock.currentPrice - LBt) / (UBt - LBt) * 100, 2)
 
             result_8 = "---短期指標-------------------\n"
             result_8 += "20日均線為" + str(MAt) + "，%B為"+str(PB) + "\n"
@@ -150,7 +178,7 @@ class FlagMonitorDaily(object):
                 msg = msg + result_8 + "\n"
 
             result_9 = "壓力線為" + str(UBt) + "\n"
-            result_9 += "今日價:" + str(currentPrice) + "\n"
+            result_9 += "今日價:" + str(stock.currentPrice) + "\n"
             result_9 += "支撐線為"+str(LBt)+"\n"
             result_9 += "------------------------------\n"
 
@@ -158,19 +186,22 @@ class FlagMonitorDaily(object):
                 msg = msg + result_9
 
             # 關閉旗標日
-            if forePercent <= 1 and todayPercent < 0:
-                sf = stockflag()
-                sf.delFlagDate(stock_no)
+            if stock.forePercent <= 1 and stock.todayPercent < 0:
                 msg = msg + "不符合預期，該旗標日關閉\n"
+                self.close_flag(stock_no)
+            elif stock.currentPrice > stock.percent_price70:
+                msg = msg + "已經沒有漲幅空間，該旗標日關閉\n"
+                self.close_flag(stock_no)
 
-            token = "zoQSmKALUqpEt9E7Yod14K9MmozBC4dvrW1sRCRUMOU"
             print(msg)
+            from bases.setting import token
             lineNotifyMessage(token, msg)
         ds.conn_close()
 
-    def calculate_stock_price(self,stock_no, foreign_rate):
+    def calculate_stock_price(self,stock):
         msg = ""
         times = 0
+        foreign_rate = stock.forePercent
         if foreign_rate <=1 :
             times = 15
         elif foreign_rate > 1 and foreign_rate <= 3:
@@ -192,26 +223,26 @@ class FlagMonitorDaily(object):
 
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
         sql = "SELECT stock_lprice FROM stockflag where stock_no ='{stock_no}' and enable is null"
-        sql = sql.format(stock_no=stock_no)
+        sql = sql.format(stock_no=stock.stock_no)
         cur.execute(sql)
 
         if cur.rowcount > 0:
             row = cur.fetchone()
             stock_lprice = row['stock_lprice']
-            percent_price70 = round(stock_lprice*(1+(percent/100)),1)
-            percent_price50 = round(stock_lprice * (1 + (percent50/100)),1)
-            percent_price80 = round(stock_lprice * (1 + (percent80/100)),1)
-            percent_price90 = round(stock_lprice * (1 + (percent90/100)),1)
+            stock.percent_price70 = round(stock_lprice*(1+(percent/100)),1)
+            stock.percent_price50 = round(stock_lprice * (1 + (percent50/100)),1)
+            stock.percent_price80 = round(stock_lprice * (1 + (percent80/100)),1)
+            stock.percent_price90 = round(stock_lprice * (1 + (percent90/100)),1)
 
             # sql = "update stockflag set price90 ={percent_price90},price80={percent_price80},price70={percent_price70},price50={percent_price50} where stock_no ='{stock_no}' and enable is null"
             # sql = sql.format(percent_price90=percent_price90,percent_price80=percent_price80,percent_price70=percent_price70,percent_price50=percent_price50,stock_no=stock_no)
             # db.execute_sql(sql)
-            msg += "機率值90% : " + str(percent_price90) + "\n"
-            msg += "機率值80% : " + str(percent_price80) + "\n"
-            msg += "機率值70% : " + str(percent_price70) + "\n"
-            msg += "機率值50% : " + str(percent_price50) + "\n"
+        return stock
 
-        return msg
+
+    def close_flag(self, stock_no):
+        sf = stockflag()
+        sf.delFlagDate(stock_no)
 
 
 if len(sys.argv) > 1:

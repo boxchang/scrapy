@@ -20,7 +20,7 @@ class LegalPersonDaily(object):
 
     data_date = datetime.date.today().strftime('%Y%m%d')
 
-    #data_date = '20211213'
+    #data_date = '20220112'
 
     def open_conn(self):
         db = database()
