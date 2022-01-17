@@ -24,7 +24,7 @@ class StockCodeSpider(scrapy.Spider):
 
 
     data_date = datetime.date.today().strftime('%Y%m%d')
-    #data_date = "20191223"
+    #data_date = "20220113"
     url = 'https://www.twse.com.tw/exchangeReport/MI_MARGN?response=csv&date='+data_date+'&selectType=ALL'
     start_urls = [url]
                   #https://www.twse.com.tw/exchangeReport/MI_MARGN?response=csv&date=20191218&selectType=ALL

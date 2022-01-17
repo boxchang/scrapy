@@ -46,7 +46,7 @@ class FlagMonitorDaily(object):
         db = database()
         self.conn = db.create_connection()
         self.today = data_date
-        self.today = "20220113"
+        #self.today = "20220113"
 
     def getFlagStock(self):
 
