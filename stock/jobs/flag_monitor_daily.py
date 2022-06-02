@@ -7,6 +7,7 @@ import datetime
 from stock.database import database
 import MySQLdb
 from stock.line import lineNotifyMessage
+from bases.setting import token
 
 if sys.version_info < (3, 0):
     reload(sys)
@@ -189,13 +190,11 @@ class FlagMonitorDaily(object):
             if stock.forePercent <= 1 and stock.todayPercent < 0:
                 msg = msg + "不符合預期，該旗標日關閉\n"
                 self.close_flag(stock_no)
-            elif stock.currentPrice > stock.percent_price70:
-                msg = msg + "已經沒有漲幅空間，該旗標日關閉\n"
-                self.close_flag(stock_no)
-
-            print(msg)
-            from bases.setting import token
-            lineNotifyMessage(token, msg)
+                print(msg)
+                lineNotifyMessage(token, msg)
+            elif stock.currentPrice < stock.percent_price70 and result_4 == "Yes":
+                print(msg)
+                lineNotifyMessage(token, msg)
         ds.conn_close()
 
     def calculate_stock_price(self,stock):
