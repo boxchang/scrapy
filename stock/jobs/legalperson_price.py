@@ -14,7 +14,7 @@ class LegalPerson(object):
 
     def execute(self):
         data_date = datetime.date.today().strftime('%Y%m%d')
-        #data_date = "20211213"
+        #data_date = "20220113"
         self.open_conn()
         self.create_legalpersonPrice_table()
         self.delete_legalperson_price(data_date)
