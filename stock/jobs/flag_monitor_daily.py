@@ -192,7 +192,7 @@ class FlagMonitorDaily(object):
                 self.close_flag(stock_no)
                 print(msg)
                 lineNotifyMessage(token, msg)
-            elif stock.currentPrice < stock.percent_price70 and result_4 == "Yes":
+            elif stock.currentPrice < stock.percent_price70 and result_4 == "Yes" and result_3 == "Yes":
                 print(msg)
                 lineNotifyMessage(token, msg)
         ds.conn_close()
