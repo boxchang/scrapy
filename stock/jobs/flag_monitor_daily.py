@@ -73,6 +73,7 @@ class FlagMonitorDaily(object):
             stock = Stock(stock_no, stock_name, flagDate)
 
             msg = msg + "Stock No : " + stock_no + "(" + stock_name +")\n"
+            msg = msg + "旗標日：" + flagDate + "\n"
 
             #條件一
             stock.forePercent = ds.Foreign_Percent(stock_no, flagDate)
@@ -111,6 +112,10 @@ class FlagMonitorDaily(object):
             else:
                 result_5 = "No，漲幅低"
             msg = msg + "市值小於300億 :" + result_5 + "\n"
+
+            #外資加權平均收盤價
+            avg_price = ds.Foreign_Avg_Price(stock_no, flagDate)
+            msg = msg + "外資平均加權價格 :" + avg_price + "\n"
 
             #資券比
             financing = ds.Today_Financing_Percent(stock_no)
