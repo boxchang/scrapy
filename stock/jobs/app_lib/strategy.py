@@ -213,7 +213,7 @@ class DynamicStrategy(object):
 
     def Foreign_Avg_Price(self, stock_no, flagDate):
         cur = self.conn.cursor(MySQLdb.cursors.DictCursor)
-        sql = """SELECT sum(china_buy),sum(china_buy*stock_price)/sum(china_buy) result 
+        sql = """SELECT sum(china_buy),round(sum(china_buy*stock_price)/sum(china_buy),2) result 
                  from legalperson_price a 
                  where a.stock_no = '{stock_no}' and batch_no BETWEEN '{flagDate}' and '{today}'"""
         sql = sql.format(stock_no=stock_no, flagDate=flagDate, today=self.today)

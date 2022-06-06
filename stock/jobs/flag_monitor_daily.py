@@ -113,10 +113,6 @@ class FlagMonitorDaily(object):
                 result_5 = "No，漲幅低"
             msg = msg + "市值小於300億 :" + result_5 + "\n"
 
-            #外資加權平均收盤價
-            avg_price = ds.Foreign_Avg_Price(stock_no, flagDate)
-            msg = msg + "外資平均加權價格 :" + avg_price + "\n"
-
             #資券比
             financing = ds.Today_Financing_Percent(stock_no)
             if financing > 20:
@@ -190,6 +186,10 @@ class FlagMonitorDaily(object):
 
             if len(result_9) > 0 :
                 msg = msg + result_9
+
+            # 外資加權平均收盤價
+            avg_price = ds.Foreign_Avg_Price(stock_no, flagDate)
+            msg = msg + "外資平均加權價格 :" + str(avg_price) + "\n"
 
             # 關閉旗標日
             if stock.forePercent <= 1 and stock.todayPercent < 0:
