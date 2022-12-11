@@ -6,9 +6,9 @@ while [ $j -le 20221112 ] ;do
 
     cd /src/scrapy/stock
 
-    scrapy crawl legalperson $j  #外資買賣超
+    scrapy crawl legalperson -a opt_date=$j  #外資買賣超
 
-    scrapy crawl financing $j  #融資融券
+    scrapy crawl financing -a opt_date=$j  #融資融券
 
     cd /src/scrapy/stock/jobs
 
