@@ -107,31 +107,33 @@ class StockPriceDay(object):
 
         self.DelStockPriceByDate(data_date, 2)
         if len(res.text) > 0 and self.validate(data_date, 2):
+            try:
+                df = pd.read_csv(StringIO(res.text), header=2)
+                #df = pd.read_csv(StringIO(res.text.replace("=", "")), header=["代號" in l for l in res.text.split("\n")].index(True)-1)
+                for index, row in df.iterrows():
+                    if len(self.clean(row['代號'])) == 4:
+                        item = {}
+                        item['stock_type'] = 2
+                        item['batch_no'] = data_date
+                        item['stock_no'] = self.clean(row['代號']).zfill(6)
+                        item['stock_name'] = self.clean(row['名稱'])
+                        item['stock_eprice'] = self.clean(row['收盤 '])
+                        item['stock_status'] = self.clean(row['漲跌'])
+                        item['stock_sprice'] = self.clean(row['開盤 '])
+                        item['stock_hprice'] = self.clean(row['最高 '])
+                        item['stock_lprice'] = self.clean(row['最低'])
+                        item['stock_buy'] = self.clean(row['成交股數  '])
+                        item['stock_amount'] = self.clean(row['成交金額(元)'])
+                        item['stock_num'] = self.clean(row['成交筆數 '])
+                        item['stock_last_buy'] = self.clean(row['最後買價'])
+                        item['stock_last_bnum'] = self.clean(row['最後買量(千股)'])
+                        item['stock_last_sell'] = self.clean(row['最後賣價'])
+                        item['stock_last_snum'] = self.clean(row['最後賣量(千股)'])
+                        self.InsStockPriceByDate(item)
 
-            df = pd.read_csv(StringIO(res.text), header=2)
-            #df = pd.read_csv(StringIO(res.text.replace("=", "")), header=["代號" in l for l in res.text.split("\n")].index(True)-1)
-            for index, row in df.iterrows():
-                if len(self.clean(row['代號'])) == 4:
-                    item = {}
-                    item['stock_type'] = 2
-                    item['batch_no'] = data_date
-                    item['stock_no'] = self.clean(row['代號']).zfill(6)
-                    item['stock_name'] = self.clean(row['名稱'])
-                    item['stock_eprice'] = self.clean(row['收盤 '])
-                    item['stock_status'] = self.clean(row['漲跌'])
-                    item['stock_sprice'] = self.clean(row['開盤 '])
-                    item['stock_hprice'] = self.clean(row['最高 '])
-                    item['stock_lprice'] = self.clean(row['最低'])
-                    item['stock_buy'] = self.clean(row['成交股數  '])
-                    item['stock_amount'] = self.clean(row['成交金額(元)'])
-                    item['stock_num'] = self.clean(row['成交筆數 '])
-                    item['stock_last_buy'] = self.clean(row['最後買價'])
-                    item['stock_last_bnum'] = self.clean(row['最後買量(千股)'])
-                    item['stock_last_sell'] = self.clean(row['最後賣價'])
-                    item['stock_last_snum'] = self.clean(row['最後賣量(千股)'])
-                    self.InsStockPriceByDate(item)
-
-            self.conn.commit()
+                self.conn.commit()
+            except:
+                pass
 
 
 #
