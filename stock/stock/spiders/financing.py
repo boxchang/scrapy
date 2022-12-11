@@ -21,11 +21,13 @@ class StockCodeSpider(scrapy.Spider):
         }
     }
 
+    data_date = None
     def __init__(self, opt_date=None):
         if not opt_date:
             opt_date = datetime.date.today().strftime('%Y%m%d')
         print("Financing Scrapy Start on" + opt_date)
         self.start_urls = ['https://www.twse.com.tw/exchangeReport/MI_MARGN?response=csv&date='+opt_date+'&selectType=ALL']
+        self.data_date = opt_date
 
 
     def parse(self, response):
