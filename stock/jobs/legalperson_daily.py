@@ -18,9 +18,14 @@ class LegalPersonDaily(object):
     CREATE_LEGALPERSON_DATE_TABLE = ('create table if not exists legalperson_date(data_date varchar(10), flag varchar(1), '
                                'created_date TimeStamp DEFAULT CURRENT_TIMESTAMP)')
 
-    data_date = datetime.date.today().strftime('%Y%m%d')
+    data_date = None
 
-    #data_date = '20220113'
+    def __init__(self, opt_date):
+        if opt_date:
+            self.data_date = opt_date
+        else:
+            self.data_date = datetime.date.today().strftime('%Y%m%d')
+        print("Legalperson_daily Job Start on" + self.data_date)
 
     def open_conn(self):
         db = database()
@@ -76,7 +81,7 @@ class LegalPersonDaily(object):
                 lineNotifyMessage(token, msg)
 
                 sf = stockflag()
-                sf.saveFlagDate(self.data_date,stock_no)
+                sf.saveFlagDate(self.data_date, stock_no)
 
     def create_legalpersonDate_table(self):
         sql = self.CREATE_LEGALPERSON_DATE_TABLE
@@ -160,5 +165,11 @@ class LegalPersonDaily(object):
         else:
             return True
 
-legal_daily = LegalPersonDaily()
+
+if len(sys.argv) > 1:
+    param1 = sys.argv[1]
+else:
+    param1 = ""
+
+legal_daily = LegalPersonDaily(param1)
 legal_daily.execute()

@@ -23,10 +23,12 @@ class LegalPerson(scrapy.Spider):
         }
     }
 
-    data_date = datetime.date.today().strftime('%Y%m%d')
-    #data_date = "20220113"
 
-    start_urls = ['http://www.twse.com.tw/fund/T86?response=csv&date='+data_date+'&selectType=ALLBUT0999']
+    def __init__(self, opt_date=None):
+        if not opt_date:
+            opt_date = datetime.date.today().strftime('%Y%m%d')
+        print("Legalperson Scrapy Start on"+opt_date)
+        self.start_urls = ['http://www.twse.com.tw/fund/T86?response=csv&date=' + opt_date + '&selectType=ALLBUT0999']
 
     def parse(self, response):
 

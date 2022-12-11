@@ -12,13 +12,20 @@ import datetime
 class LegalPerson(object):
     LEGALPERSON_PRICE_TABLE = ('CREATE TABLE if not exists legalperson_price (batch_no varchar(10), stock_no varchar(10) NOT NULL, stock_name varchar(60) NOT NULL,china_buy double NULL,china_sell double NULL,china_sum double NULL, foreign_buy double NULL,foreign_sell double NULL,foreign_sum double NULL,invest_buy double NULL,invest_sell double NULL,invest_sum double NULL,com_sum double NULL,legalperson double NULL,stock_price float,created_date TimeStamp DEFAULT CURRENT_TIMESTAMP,stock_num double NULL,percent float NULL)')
 
+    data_date = None
+
+    def __init__(self, opt_date):
+        if opt_date:
+            self.data_date = opt_date
+        else:
+            self.data_date = datetime.date.today().strftime('%Y%m%d')
+        print("Legalperson_price Job Start on" + self.data_date)
+
     def execute(self):
-        data_date = datetime.date.today().strftime('%Y%m%d')
-        #data_date = "20220113"
         self.open_conn()
         self.create_legalpersonPrice_table()
-        self.delete_legalperson_price(data_date)
-        self.combine_legalperson_price(data_date)
+        self.delete_legalperson_price(self.data_date)
+        self.combine_legalperson_price(self.data_date)
 
 
     def open_conn(self):
@@ -47,6 +54,10 @@ class LegalPerson(object):
         sql = sql.format(data_date=data_date)
         db.execute_sql(sql)
 
+if len(sys.argv) > 1:
+    param1 = sys.argv[1]
+else:
+    param1 = ""
 
-legal_person = LegalPerson()
+legal_person = LegalPerson(param1)
 legal_person.execute()

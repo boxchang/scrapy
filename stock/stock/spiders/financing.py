@@ -21,13 +21,13 @@ class StockCodeSpider(scrapy.Spider):
         }
     }
 
+    def __init__(self, opt_date=None):
+        if not opt_date:
+            opt_date = datetime.date.today().strftime('%Y%m%d')
+        print("Financing Scrapy Start on" + opt_date)
+        self.start_urls = ['https://www.twse.com.tw/exchangeReport/MI_MARGN?response=csv&date='+opt_date+'&selectType=ALL']
 
 
-    data_date = datetime.date.today().strftime('%Y%m%d')
-    #data_date = "20220113"
-    url = 'https://www.twse.com.tw/exchangeReport/MI_MARGN?response=csv&date='+data_date+'&selectType=ALL'
-    start_urls = [url]
-                  #https://www.twse.com.tw/exchangeReport/MI_MARGN?response=csv&date=20191218&selectType=ALL
     def parse(self, response):
         if response.text != '':  # 有資料才跑，不然會遇到假日全都沒資料
             df = pd.read_csv(StringIO(response.text), header=7).dropna(how='all', axis=1).dropna(how='any')

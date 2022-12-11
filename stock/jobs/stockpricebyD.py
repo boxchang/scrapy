@@ -183,6 +183,7 @@ if len(sys.argv) == 1:
     data_date = datetime.date.today().strftime('%Y%m%d')
 else:
     data_date = sys.argv[1]
+print("stockpricebyD start on:"+data_date)
 
 sp = StockPriceDay()
 sp.GetStockPriceByDate(data_date)
