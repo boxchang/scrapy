@@ -55,7 +55,7 @@ class TaiexbyDay(object):
 
     def GetTaiexByMonth(self, data_date):
 
-        #data_date = '20200422'
+        #data_date = '20221208'
         url = 'https://www.twse.com.tw/indicesReport/MI_5MINS_HIST?response=json&date='+data_date
         res = requests.get(url)
 
