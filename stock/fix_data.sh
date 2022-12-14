@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-j=20221114
-while [ $j -le 20221209 ] ;do
+j=20221212
+while [ $j -le 20221214 ] ;do
     echo $j
 
     cd /src/scrapy/stock
